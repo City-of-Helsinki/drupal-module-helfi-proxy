@@ -8,3 +8,10 @@ services:
     class: Drupal\helfi_proxy\SessionConfiguration
     decorates: session_configuration
     arguments: ['%session.storage.options%']
+
+  helfi_proxy.path_processor:
+    class: Drupal\helfi_proxy\PathProcessor\SitenamePathProcessor
+    arguments: ['@language_manager', '@config.factory']
+    tags:
+      - { name: path_processor_inbound, priority: 200 }
+      - { name: path_processor_outbound, priority: -900 }

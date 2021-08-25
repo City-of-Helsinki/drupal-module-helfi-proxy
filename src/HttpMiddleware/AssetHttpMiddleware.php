@@ -42,11 +42,17 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) {
     $response = $this->httpKernel->handle($request, $tag, $catch);
 
+    $html = $response->getContent();
+
+    if (!is_string($html)) {
+      return $response;
+    }
     $dom = new \DOMDocument();
-    $dom->loadHTML($response->getContent());
+    $dom->loadHTML($html);
 
     foreach (
       [
+        'source' => 'srcset',
         'img' => 'src',
         'link' => 'href',
         'script' => 'src',
@@ -54,10 +60,10 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       foreach ($dom->getElementsByTagName($tag) as $row) {
         $value = $row->getAttribute($attribute);
 
-        if (substr($value, 0, 4) === 'http') {
+        if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
           continue;
         }
-        $value = sprintf('%s%s', $this->getHostname(), $value);
+        $value = sprintf('//%s%s', $this->getHostname(), $value);
         $row->setAttribute($attribute, $value);
       }
 
