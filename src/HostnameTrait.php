@@ -20,6 +20,7 @@ trait HostnameTrait {
       'HOSTNAME',
       'DRUPAL_REVERSE_PROXY_ADDRESS',
       'DRUPAL_ROUTES',
+      'SIMPLETEST_BASE_URL',
     ];
 
     foreach ($variables as $variable) {
@@ -29,6 +30,18 @@ trait HostnameTrait {
     }
 
     throw new \LogicException('Proxy: Invalid hostname.');
+  }
+
+  /**
+   * Gets the clean hostname.
+   *
+   * @return string
+   *   The clean host name.
+   */
+  protected function getCleanHostname() : string {
+    $host = str_replace(['https://', 'http://'], '', $this->getHostname());
+
+    return preg_replace('/[^a-z0-9_]/', '_', $host);
   }
 
   /**

@@ -1,6 +1,7 @@
 services:
   helfi_proxy.http_middleware:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
+    arguments: ['@logger.factory']
     tags:
       - { name: http_middleware, priority: 500 }
 

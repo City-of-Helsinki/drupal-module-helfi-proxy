@@ -1,0 +1,17 @@
+{
+    "name": "drupal/helfi_proxy",
+    "description": "Provides various fixes so we can serve multiple Drupal instances in one domain.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "require": {
+      "league/uri": "^6.0",
+        "ext-libxml": "*",
+        "ext-dom": "*"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+        "drupal/coder": "^8.3",
+        "phpspec/prophecy-phpunit": "^2"
+    }
+}
