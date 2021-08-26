@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
-use DOMDocument;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\HostnameTrait;
@@ -55,9 +54,9 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @return \DOMDocument
    *   The dom document.
    */
-  private function getDocument(string $html) : DOMDocument {
+  private function getDocument(string $html) : \DOMDocument {
     libxml_use_internal_errors(TRUE);
-    $dom = new DOMDocument();
+    $dom = new \DOMDocument();
 
     if (!$dom->loadHTML($html)) {
       foreach (libxml_get_errors() as $error) {
@@ -79,7 +78,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @return $this
    *   The self.
    */
-  private function convertAttributes(DOMDocument $dom) : self {
+  private function convertAttributes(\DOMDocument $dom) : self {
     foreach (
       [
         'source' => 'srcset',
@@ -115,7 +114,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @return $this
    *   The self.
    */
-  private function convertSvg(DOMDocument $dom) : self {
+  private function convertSvg(\DOMDocument $dom) : self {
     $cache = [];
 
     foreach (['href', 'xlink:href'] as $attribute) {
