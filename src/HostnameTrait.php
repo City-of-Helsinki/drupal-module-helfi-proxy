@@ -16,11 +16,14 @@ trait HostnameTrait {
    *   The hostname.
    */
   protected function getHostname() : string {
+    if (drupal_valid_test_ua()) {
+      return $this->parseHostName(getenv('SIMPLETEST_BASE_URL'));
+    }
+
     $variables = [
       'HOSTNAME',
       'DRUPAL_REVERSE_PROXY_ADDRESS',
       'DRUPAL_ROUTES',
-      'SIMPLETEST_BASE_URL',
     ];
 
     foreach ($variables as $variable) {
@@ -39,9 +42,7 @@ trait HostnameTrait {
    *   The clean host name.
    */
   protected function getCleanHostname() : string {
-    $host = str_replace(['https://', 'http://'], '', $this->getHostname());
-
-    return preg_replace('/[^a-z0-9_]/', '_', $host);
+    return preg_replace('/[^a-z0-9_]/', '_', $this->getHostname());
   }
 
   /**
@@ -56,8 +57,9 @@ trait HostnameTrait {
   protected function parseHostName(string $hostname) : string {
     $hosts = explode(',', $hostname);
 
-    // Always fallback to last hostname.
-    return end($hosts);
+    // Strip protocol. Always fallback to last hostname.
+    return str_replace(['https://', 'http://'], '', end($hosts));
+
   }
 
 }

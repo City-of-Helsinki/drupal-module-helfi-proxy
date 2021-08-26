@@ -23,7 +23,7 @@ final class SessionConfiguration extends CoreSessionConfiguration {
   protected function getName(Request $request) {
     $name = parent::getName($request);
 
-    return str_replace('.', '-', $this->getHostname()) . '-' . $name;
+    return $this->getCleanHostname() . '-' . $name;
   }
 
 }
