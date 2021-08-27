@@ -21,9 +21,9 @@ trait HostnameTrait {
     }
 
     $variables = [
-      'HOSTNAME',
       'DRUPAL_REVERSE_PROXY_ADDRESS',
       'DRUPAL_ROUTES',
+      'HOSTNAME',
     ];
 
     foreach ($variables as $variable) {
