@@ -14,8 +14,10 @@ services:
     class: Drupal\helfi_proxy\PathProcessor\SitePrefixPathProcessor
     arguments: ['@config.factory']
     tags:
-      - { name: path_processor_inbound, priority: 200 }
-      - { name: path_processor_outbound, priority: -600 }
+      # Must be run before PathProcessorFront (200 weight).
+      - { name: path_processor_inbound, priority: 201 }
+      # Must to be run after LanguageProcessorLanguage (100 weight).
+      - { name: path_processor_outbound, priority: 99 }
 
   cache_context.site_prefix:
     class: Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext
