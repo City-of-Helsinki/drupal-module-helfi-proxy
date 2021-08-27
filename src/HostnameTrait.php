@@ -16,14 +16,19 @@ trait HostnameTrait {
    *   The hostname.
    */
   protected function getHostname() : string {
+    // Default to simpletest base url when running tests.
     if (drupal_valid_test_ua()) {
       return $this->parseHostName(getenv('SIMPLETEST_BASE_URL'));
+    }
+
+    // Default to HOSTNAME on local env.
+    if (getenv('APP_ENV') === 'dev') {
+      return getenv('HOSTNAME');
     }
 
     $variables = [
       'DRUPAL_REVERSE_PROXY_ADDRESS',
       'DRUPAL_ROUTES',
-      'HOSTNAME',
     ];
 
     foreach ($variables as $variable) {
