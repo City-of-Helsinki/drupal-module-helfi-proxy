@@ -9,7 +9,7 @@ use Drupal\helfi_proxy\HostnameTrait;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 
 /**
- * Tests path processor.
+ * Tests asset middleware.
  *
  * @group helfi_proxy
  */
@@ -23,7 +23,6 @@ class AssetMidlewareTest extends BrowserTestBase {
   protected static $modules = [
     'node',
     'filter',
-    'language',
     'helfi_proxy',
   ];
 

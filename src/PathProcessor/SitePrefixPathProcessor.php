@@ -7,7 +7,6 @@ namespace Drupal\helfi_proxy\PathProcessor;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
@@ -18,14 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * Adds the 'site name' prefix to all in/outcoming URLs.
  */
-final class SitenamePathProcessor implements OutboundPathProcessorInterface, InboundPathProcessorInterface {
-
-  /**
-   * The language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  private LanguageManagerInterface $languageManager;
+final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, InboundPathProcessorInterface {
 
   /**
    * The config.
@@ -37,13 +29,10 @@ final class SitenamePathProcessor implements OutboundPathProcessorInterface, Inb
   /**
    * Constructs a new instance.
    *
-   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
-   *   The language manager.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
    */
-  public function __construct(LanguageManagerInterface $languageManager, ConfigFactoryInterface $configFactory) {
-    $this->languageManager = $languageManager;
+  public function __construct(ConfigFactoryInterface $configFactory) {
     $this->config = $configFactory->get('helfi_proxy.settings');
   }
 
@@ -70,10 +59,21 @@ final class SitenamePathProcessor implements OutboundPathProcessorInterface, Inb
     Request $request = NULL,
     BubbleableMetadata $bubbleable_metadata = NULL
   ) : string {
-    $language = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_URL);
 
-    $prefix = $this->config->get('prefixes')[$language->getId()] ?? NULL;
+    if (!isset($options['language'])) {
+      return $path;
+    }
 
+    $language = $options['language'];
+
+    if ($options['language'] instanceof LanguageInterface) {
+      $language = $options['language']->getId();
+    }
+    $prefix = $this->config->get('prefixes')[$language] ?? NULL;
+
+    if ($bubbleable_metadata) {
+      $bubbleable_metadata->addCacheContexts(['site_prefix:' . $prefix]);
+    }
     if ($prefix) {
       $options['prefix'] .= $prefix . '/';
     }
