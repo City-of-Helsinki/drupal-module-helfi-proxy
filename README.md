@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/City-of-Helsinki/drupal-module-helfi-proxy/workflows/CI/badge.svg)
 
-Provides various fixes so we can serve multiple Drupal instances in one domain.
+Provides various fixes to serve multiple Drupal instances from one domain.
 
 ## Requirements
 
