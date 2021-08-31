@@ -117,22 +117,26 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private function convertSvg(\DOMDocument $dom) : self {
     $cache = [];
 
-    foreach (['href', 'xlink:href'] as $attribute) {
-      foreach ($dom->getElementsByTagName('use') as $row) {
-        $value = $row->getAttribute($attribute);
+    // Only match SVGs under theme folders.
+    $themePaths = ['/core/themes' => 12, '/themes' => 7];
 
-        // Skip non-theme svgs.
-        if (strpos($value, '/themes') === FALSE) {
-          $this->logger
-            ->critical(
-              sprintf('Found a non-theme SVG that cannot be inlined. Please fix it manually: %s', $value)
-            );
+    foreach ($dom->getElementsByTagName('use') as $row) {
+      foreach (['href', 'xlink:href'] as $attribute) {
+        $value = NULL;
 
-          continue;
+        // Skip non-theme SVGs.
+        foreach ($themePaths as $path => $length) {
+          $attributeValue = $row->getAttribute($attribute);
+
+          if (substr($attributeValue, 0, $length) === $path) {
+            $value = $attributeValue;
+            break;
+          }
         }
+
         $uri = parse_url(DRUPAL_ROOT . $value);
 
-        if (!isset($uri['path'], $uri['fragment'])) {
+        if (!$value || !isset($uri['path'], $uri['fragment'])) {
           $this->logger
             ->critical(
               sprintf('Found a SVG that cannot be inlined. Please fix it manually: %s', $value)
