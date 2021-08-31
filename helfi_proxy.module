@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ * Contains helfi_proxy.
+ */
+
+use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\editor\Entity\Editor;
+use Drupal\helfi_proxy\Hostname;
+
+
+/**
+ * Converts uri to absolute.
+ *
+ * @param string $uri
+ *   The uri to convert.
+ *
+ * @return string
+ *   The absolute url.
+ */
+function helfi_proxy_absolute_url(string $uri) : string {
+  return '//' . Hostname::get() . file_url_transform_relative(file_create_url($uri));
+}
+
+/**
+ * Implements hook_js_settings_alter().
+ */
+function helfi_proxy_js_settings_alter(
+  array &$settings,
+  AttachedAssetsInterface $assets
+) {
+  foreach (['designSelect', 'paragraphSelect'] as $type) {
+    if (!isset($settings[$type]['pathToImages'])) {
+      continue;
+    }
+    $settings[$type]['pathToImages'] = helfi_proxy_absolute_url($settings[$type]['pathToImages']);
+  }
+}
+
+/**
+ * Implements hook_editor_js_settings_alter().
+ */
+function helfi_proxy_editor_js_settings_alter(array &$settings) {
+  if (!\Drupal::moduleHandler()->moduleExists('ckeditor')) {
+    return;
+  }
+  $ckeditor_plugin_manager = \Drupal::service('plugin.manager.ckeditor.plugin');
+
+  foreach ($settings['editor']['formats'] as $format => &$format_settings) {
+    if ($format_settings['editor'] === 'ckeditor') {
+      $editor = Editor::load($format);
+      // @see \Drupal\ckeditor\Plugin\Editor\CKEditor::getJSSettings()
+      $external_plugin_files = $ckeditor_plugin_manager->getEnabledPluginFiles($editor);
+      // Convert editor css and plugin js to use absolute path.
+      $format_settings['editorSettings']['drupalExternalPlugins'] = array_map('helfi_proxy_absolute_url', $external_plugin_files);
+      $format_settings['editorSettings']['contentsCss'] = array_map('helfi_proxy_absolute_url', $format_settings['editorSettings']['contentsCss'] ?? []);
+    }
+  }
+
+}
