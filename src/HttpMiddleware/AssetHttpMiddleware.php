@@ -179,7 +179,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
 
     $html = $response->getContent();
 
-    if (!is_string($html)) {
+    if (!is_string($html) || $request->getMethod() !== 'GET') {
       return $response;
     }
     $dom = $this->getDocument($html);
