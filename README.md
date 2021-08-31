@@ -29,7 +29,7 @@ prefixes:
   sv: kartor-och-trafik
   ru: maps
 ```
-or you can add them to your settings.php:
+or by adding them to your settings.php:
 
 ```
 $config['helfi_proxy.settings']['prefixes'] = [
