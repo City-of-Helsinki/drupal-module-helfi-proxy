@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\HostnameTrait;
@@ -57,8 +58,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private function getDocument(string $html) : \DOMDocument {
     libxml_use_internal_errors(TRUE);
     $dom = new \DOMDocument();
+    $dom->preserveWhiteSpace = FALSE;
 
-    if (!$dom->loadHTML($html)) {
+    // DOMDocument handles text as ISO-8859-1 by default....Add xml encoding
+    // attribute to force UTF-8 encoding.
+    $html = '<?xml encoding="utf-8" ?>' . $html;
+
+    if (!$dom->loadHTML($html, LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED)) {
       foreach (libxml_get_errors() as $error) {
         $this->logger->debug($error->message);
       }
@@ -97,6 +103,37 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
     }
     return $this;
+  }
+
+  /**
+   * Handles ajax responses.
+   *
+   * @param \Symfony\Component\HttpFoundation\Response $response
+   *   The response.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The response.
+   */
+  private function processAjax(Response $response) : Response {
+    $content = json_decode($response->getContent(), TRUE);
+
+    if (!$content) {
+      return $response;
+    }
+
+    foreach ($content as $key => $value) {
+      if (!isset($value['data'])) {
+        continue;
+      }
+
+      $dom = $this->getDocument($value['data']);
+      $this->convertSvg($dom)
+        ->convertAttributes($dom);
+      $content[$key]['data'] = $dom->saveHTML();
+    }
+    $response->setContent(json_encode($content));
+
+    return $response;
   }
 
   /**
@@ -177,8 +214,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) : Response {
     $response = $this->httpKernel->handle($request, $tag, $catch);
 
+    if ($response instanceof AjaxResponse) {
+      return $this->processAjax($response);
+    }
     $html = $response->getContent();
 
+    // Skip non-ajax post requests.
     if (!is_string($html) || $request->getMethod() !== 'GET') {
       return $response;
     }
@@ -186,8 +227,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
 
     $this->convertAttributes($dom)
       ->convertSvg($dom);
-
     $response->setContent($dom->saveHTML());
+
     return $response;
   }
 
