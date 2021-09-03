@@ -117,6 +117,10 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private function processAjax(Response $response) : Response {
     $content = json_decode($response->getContent(), TRUE);
 
+    if (!$content) {
+      return $response;
+    }
+
     foreach ($content as $key => $value) {
       if (!isset($value['data'])) {
         continue;
@@ -215,6 +219,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     }
     $html = $response->getContent();
 
+    // Skip non-ajax post requests.
     if (!is_string($html) || $request->getMethod() !== 'GET') {
       return $response;
     }
