@@ -173,8 +173,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
             continue;
           }
 
-          // Append SVGs before closing body tag, but don't show them since it might have
-          // some negative effects.
+          // Append SVGs before closing body tag, but don't show them since
+          // it might have some negative effects.
           $dom->filter('body')->append('<span style="display: none;">' . $content . '</span>');
         }
         $row->setAttribute($attribute, '#' . $uri['fragment']);
