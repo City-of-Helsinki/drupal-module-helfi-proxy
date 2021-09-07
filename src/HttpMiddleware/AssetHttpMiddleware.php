@@ -8,6 +8,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\HostnameTrait;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -51,27 +52,27 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *
    * @param string $html
    *   The html to load.
+   * @param bool $json
+   *   Whether we're dealing with json or not.
    *
    * @return \DOMDocument
    *   The dom document.
    */
-  private function getDocument(string $html) : \DOMDocument {
+  private function getDocument(string $html, bool $json = FALSE) : \DOMDocument {
     libxml_use_internal_errors(TRUE);
     $dom = new \DOMDocument();
     $dom->preserveWhiteSpace = FALSE;
 
-    // DOMDocument handles text as ISO-8859-1 by default....Add xml encoding
-    // attribute to force UTF-8 encoding.
-    $html = '<?xml encoding="utf-8" ?>' . $html;
-
-    if (!$dom->loadHTML($html, LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED)) {
+    if ($json) {
+      $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+    }
+    if (!$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
       foreach (libxml_get_errors() as $error) {
         $this->logger->debug($error->message);
       }
 
       libxml_clear_errors();
     }
-
     return $dom;
   }
 
@@ -111,29 +112,30 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @param \Symfony\Component\HttpFoundation\Response $response
    *   The response.
    *
-   * @return \Symfony\Component\HttpFoundation\Response
+   * @return string|null
    *   The response.
    */
-  private function processAjax(Response $response) : Response {
+  private function processJson(Response $response) : ? string {
     $content = json_decode($response->getContent(), TRUE);
 
+    $hasChanges = FALSE;
+
     if (!$content) {
-      return $response;
+      return NULL;
     }
 
     foreach ($content as $key => $value) {
       if (!isset($value['data'])) {
         continue;
       }
+      $hasChanges = TRUE;
 
-      $dom = $this->getDocument($value['data']);
+      $dom = $this->getDocument($value['data'], TRUE);
       $this->convertSvg($dom)
         ->convertAttributes($dom);
-      $content[$key]['data'] = $dom->saveHTML();
+      $content[$key]['data'] = $this->format($dom);
     }
-    $response->setContent(json_encode($content));
-
-    return $response;
+    return $hasChanges ? json_encode($content) : NULL;
   }
 
   /**
@@ -205,6 +207,19 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
+   * Formats the response.
+   *
+   * @param \DOMDocument $dom
+   *   The dom.
+   *
+   * @return string
+   *   The formatted response.
+   */
+  private function format(\DOMDocument $dom) : string {
+    return $dom->saveHTML();
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function handle(
@@ -214,8 +229,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) : Response {
     $response = $this->httpKernel->handle($request, $tag, $catch);
 
-    if ($response instanceof AjaxResponse) {
-      return $this->processAjax($response);
+    if ($response instanceof JsonResponse) {
+      if ($json = $this->processJson($response)) {
+        return $response->setContent($json);
+      }
+      return $response;
     }
     $html = $response->getContent();
 
@@ -225,11 +243,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     }
     $dom = $this->getDocument($html);
 
-    $this->convertAttributes($dom)
-      ->convertSvg($dom);
-    $response->setContent($dom->saveHTML());
+    $html = $this->convertAttributes($dom)
+      ->convertSvg($dom)
+      ->format($dom);
 
-    return $response;
+    return $response->setContent($html);
   }
 
 }
