@@ -4,16 +4,19 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\HostnameTrait;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Wa72\HtmlPageDom\HtmlPage;
 
 /**
  * A middleware to alter asset urls.
+ *
+ * @todo This is terrible and we need to achieve the same result some other way.
  */
 final class AssetHttpMiddleware implements HttpKernelInterface {
 
@@ -47,44 +50,15 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
-   * Gets a dom document object for given html.
-   *
-   * @param string $html
-   *   The html to load.
-   *
-   * @return \DOMDocument
-   *   The dom document.
-   */
-  private function getDocument(string $html) : \DOMDocument {
-    libxml_use_internal_errors(TRUE);
-    $dom = new \DOMDocument();
-    $dom->preserveWhiteSpace = FALSE;
-
-    // DOMDocument handles text as ISO-8859-1 by default....Add xml encoding
-    // attribute to force UTF-8 encoding.
-    $html = '<?xml encoding="utf-8" ?>' . $html;
-
-    if (!$dom->loadHTML($html, LIBXML_HTML_NODEFDTD | LIBXML_HTML_NOIMPLIED)) {
-      foreach (libxml_get_errors() as $error) {
-        $this->logger->debug($error->message);
-      }
-
-      libxml_clear_errors();
-    }
-
-    return $dom;
-  }
-
-  /**
    * Converts attributes to have different hostname.
    *
-   * @param \DOMDocument $dom
+   * @param \Wa72\HtmlPageDom\HtmlPage $dom
    *   The dom to manipulate.
    *
    * @return $this
    *   The self.
    */
-  private function convertAttributes(\DOMDocument $dom) : self {
+  private function convertAttributes(HtmlPage $dom) : self {
     foreach (
       [
         'source' => 'srcset',
@@ -92,7 +66,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
         'link' => 'href',
         'script' => 'src',
       ] as $tag => $attribute) {
-      foreach ($dom->getElementsByTagName($tag) as $row) {
+      foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
         $value = $row->getAttribute($attribute);
 
         if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
@@ -111,29 +85,31 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @param \Symfony\Component\HttpFoundation\Response $response
    *   The response.
    *
-   * @return \Symfony\Component\HttpFoundation\Response
+   * @return string|null
    *   The response.
    */
-  private function processAjax(Response $response) : Response {
+  private function processJson(Response $response) : ? string {
     $content = json_decode($response->getContent(), TRUE);
 
+    $hasChanges = FALSE;
+
     if (!$content) {
-      return $response;
+      return NULL;
     }
 
     foreach ($content as $key => $value) {
       if (!isset($value['data'])) {
         continue;
       }
+      $hasChanges = TRUE;
 
-      $dom = $this->getDocument($value['data']);
+      $dom = new HtmlPage($value['data']);
       $this->convertSvg($dom)
         ->convertAttributes($dom);
-      $content[$key]['data'] = $dom->saveHTML();
-    }
-    $response->setContent(json_encode($content));
 
-    return $response;
+      $content[$key]['data'] = $this->format($dom);
+    }
+    return $hasChanges ? json_encode($content) : NULL;
   }
 
   /**
@@ -143,21 +119,21 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * parse all SVGs and insert them directly into dom and convert attributes
    * to only include fragments, like /theme/sprite.svg#logo -> #logo.
    *
-   * @param \DOMDocument $dom
+   * @param \Wa72\HtmlPageDom\HtmlPage $dom
    *   The dom to manipulate.
-   *
-   * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    *
    * @return $this
    *   The self.
+   *
+   * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    */
-  private function convertSvg(\DOMDocument $dom) : self {
+  private function convertSvg(HtmlPage $dom) : self {
     $cache = [];
 
     // Only match SVGs under theme folders.
     $themePaths = ['/core/themes' => 12, '/themes' => 7];
 
-    foreach ($dom->getElementsByTagName('use') as $row) {
+    foreach ($dom->filter('use') as $row) {
       foreach (['href', 'xlink:href'] as $attribute) {
         $value = NULL;
 
@@ -171,9 +147,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
           }
         }
 
+        if (!$value) {
+          continue;
+        }
+
         $uri = parse_url(DRUPAL_ROOT . $value);
 
-        if (!$value || !isset($uri['path'], $uri['fragment'])) {
+        if (!isset($uri['path'], $uri['fragment'])) {
           $this->logger
             ->critical(
               sprintf('Found a SVG that cannot be inlined. Please fix it manually: %s', $value)
@@ -193,15 +173,27 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
             continue;
           }
 
-          $fragment = $dom->createDocumentFragment();
-          // Don't show SVG in dom since it might have some negative effects.
-          $fragment->appendXML('<span style="display: none;">' . $content . '</span>');
-          $dom->documentElement->appendChild($fragment);
+          // Append SVGs before closing body tag, but don't show them since
+          // it might have some negative effects.
+          $dom->filter('body')->append('<span style="display: none;">' . $content . '</span>');
         }
         $row->setAttribute($attribute, '#' . $uri['fragment']);
       }
     }
     return $this;
+  }
+
+  /**
+   * Formats the response.
+   *
+   * @param \Wa72\HtmlPageDom\HtmlPage $dom
+   *   The dom.
+   *
+   * @return string
+   *   The formatted response.
+   */
+  private function format(HtmlPage $dom) : string {
+    return $dom->save();
   }
 
   /**
@@ -214,8 +206,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) : Response {
     $response = $this->httpKernel->handle($request, $tag, $catch);
 
-    if ($response instanceof AjaxResponse) {
-      return $this->processAjax($response);
+    if ($response instanceof JsonResponse) {
+      if ($json = $this->processJson($response)) {
+        return $response->setContent($json);
+      }
+      return $response;
     }
     $html = $response->getContent();
 
@@ -223,13 +218,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     if (!is_string($html) || $request->getMethod() !== 'GET') {
       return $response;
     }
-    $dom = $this->getDocument($html);
+    $dom = new HtmlPage($html);
 
-    $this->convertAttributes($dom)
-      ->convertSvg($dom);
-    $response->setContent($dom->saveHTML());
+    $html = $this->convertAttributes($dom)
+      ->convertSvg($dom)
+      ->format($dom);
 
-    return $response;
+    return $response->setContent($html);
   }
 
 }
