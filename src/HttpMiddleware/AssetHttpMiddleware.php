@@ -8,6 +8,7 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\HostnameTrait;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,44 +49,15 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
-   * Gets a dom document object for given html.
-   *
-   * @param string $html
-   *   The html to load.
-   * @param bool $json
-   *   Whether we're dealing with json or not.
-   *
-   * @return \DOMDocument
-   *   The dom document.
-   */
-  private function getDocument(string $html, bool $json = FALSE) : \DOMDocument {
-    libxml_use_internal_errors(TRUE);
-    $dom = new \DOMDocument();
-    $dom->preserveWhiteSpace = FALSE;
-
-    if ($json) {
-      $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
-    }
-    if (!$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD)) {
-      foreach (libxml_get_errors() as $error) {
-        $this->logger->debug($error->message);
-      }
-
-      libxml_clear_errors();
-    }
-    return $dom;
-  }
-
-  /**
    * Converts attributes to have different hostname.
    *
-   * @param \DOMDocument $dom
+   * @param \Symfony\Component\DomCrawler\Crawler $dom
    *   The dom to manipulate.
    *
    * @return $this
    *   The self.
    */
-  private function convertAttributes(\DOMDocument $dom) : self {
+  private function convertAttributes(Crawler $dom) : self {
     foreach (
       [
         'source' => 'srcset',
@@ -93,7 +65,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
         'link' => 'href',
         'script' => 'src',
       ] as $tag => $attribute) {
-      foreach ($dom->getElementsByTagName($tag) as $row) {
+      foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
         $value = $row->getAttribute($attribute);
 
         if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
@@ -130,10 +102,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
       $hasChanges = TRUE;
 
-      $dom = $this->getDocument($value['data'], TRUE);
+      $dom = new Crawler($value['data']);
       $this->convertSvg($dom)
         ->convertAttributes($dom);
-      $content[$key]['data'] = $this->format($dom);
+
+      $content[$key]['data'] = $dom->outerHtml();
     }
     return $hasChanges ? json_encode($content) : NULL;
   }
@@ -145,21 +118,21 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * parse all SVGs and insert them directly into dom and convert attributes
    * to only include fragments, like /theme/sprite.svg#logo -> #logo.
    *
-   * @param \DOMDocument $dom
+   * @param \Symfony\Component\DomCrawler\Crawler $dom
    *   The dom to manipulate.
-   *
-   * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    *
    * @return $this
    *   The self.
+   *
+   * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    */
-  private function convertSvg(\DOMDocument $dom) : self {
+  private function convertSvg(Crawler $dom) : self {
     $cache = [];
 
     // Only match SVGs under theme folders.
     $themePaths = ['/core/themes' => 12, '/themes' => 7];
 
-    foreach ($dom->getElementsByTagName('use') as $row) {
+    foreach ($dom->filter('use') as $row) {
       foreach (['href', 'xlink:href'] as $attribute) {
         $value = NULL;
 
@@ -195,10 +168,10 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
             continue;
           }
 
-          $fragment = $dom->createDocumentFragment();
+          // $fragment = $dom->createDocumentFragment();
           // Don't show SVG in dom since it might have some negative effects.
-          $fragment->appendXML('<span style="display: none;">' . $content . '</span>');
-          $dom->documentElement->appendChild($fragment);
+          //$fragment->appendXML('<span style="display: none;">' . $content . '</span>');
+          //$dom->documentElement->appendChild($fragment);
         }
         $row->setAttribute($attribute, '#' . $uri['fragment']);
       }
@@ -209,14 +182,14 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   /**
    * Formats the response.
    *
-   * @param \DOMDocument $dom
+   * @param \Symfony\Component\DomCrawler\Crawler $dom
    *   The dom.
    *
    * @return string
    *   The formatted response.
    */
-  private function format(\DOMDocument $dom) : string {
-    return $dom->saveHTML();
+  private function format(Crawler $dom) : string {
+    return $dom->outerHtml();
   }
 
   /**
@@ -241,7 +214,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     if (!is_string($html) || $request->getMethod() !== 'GET') {
       return $response;
     }
-    $dom = $this->getDocument($html);
+    $dom = new Crawler($html);
 
     $html = $this->convertAttributes($dom)
       ->convertSvg($dom)
