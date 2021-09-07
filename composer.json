@@ -9,7 +9,7 @@
         "ext-libxml": "*",
         "ext-dom": "*",
         "symfony/dom-crawler": "^4.0",
-        "wa72/htmlpagedom": "^2.0"
+        "wa72/htmlpagedom": "dev-master"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
