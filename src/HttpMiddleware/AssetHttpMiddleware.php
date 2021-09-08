@@ -214,8 +214,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     }
     $html = $response->getContent();
 
-    // Skip non-ajax post requests.
-    if (!is_string($html) || $request->getMethod() !== 'GET') {
+    if (!is_string($html)) {
       return $response;
     }
     $dom = new HtmlPage($html);
