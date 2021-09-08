@@ -74,6 +74,12 @@ class AssetMidlewareTest extends BrowserTestBase {
     ]);
   }
 
+  /**
+   * Asserts that asset urls are replaced properly.
+   *
+   * @param array $types
+   *   A key value list of tag -> attribute values.
+   */
   private function assertAssetPaths(array $types) : void {
     $html = $this->getSession()->getPage()->getContent();
     $dom = new \DOMDocument();
@@ -96,7 +102,7 @@ class AssetMidlewareTest extends BrowserTestBase {
   }
 
   /**
-   * @throws \Behat\Mink\Exception\ExpectationException
+   * Asserts that SVGs are replaced properly.
    */
   private function assertSvgPaths() : void {
     $html = $this->getSession()->getPage()->getContent();
