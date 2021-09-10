@@ -44,27 +44,31 @@ $config['helfi_proxy.settings']['prefixes'] = [
 
 Converts all assets (`source[srcset]`, `img[src]`, `link[href]`, `script[src]`) to use an absolute URL. The URL is read from `DRUPAL_REVERSE_PROXY_URL` and `DRUPAL_ROUTES` environment variables. The first one to have a value will be used.
 
-This ensures that all local assets are served directly from the instance's real URL instead of `<proxy url>/<project prefix>/<path to asset>`. 
+This ensures that all local assets are served directly from the instance's real URL instead of `<proxy url>/<project prefix>/<path to asset>`.
 
 ### Inline SVGs
 
-SVGs using `<use>` cannot be served from an external domain so this module attempts to 'inline' all SVG `<use>` definitions. 
+SVGs using `<use>` cannot be served from an external domain so this module attempts to 'inline' all SVG `<use>` definitions.
 
-For example, the following SVG: 
+For example, the following SVG:
 ```
 <svg>
   <use href="/core/themes/claro/sprite.svg#helsinki"></use>
 </svg>
-``` 
+```
 
 will be converted to:
 ```
 <svg>
    <use href="#helsinki"></use>
 </svg>
-``` 
+```
 
 The module attempts to read the file and insert it directly into DOM, then change the `href` attribute to `#helsinki`.
+
+### Disallow search engines/robots from indexing the site
+
+Add an environment variable `DRUPAL_X_ROBOTS_TAG_HEADER` with any value to insert a `X-Robots-Tag: noindex, nofollow` header to every response.
 
 ## Contact
 

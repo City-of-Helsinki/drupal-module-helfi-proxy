@@ -22,6 +22,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
 
   use HostnameTrait;
 
+  public const X_ROBOTS_TAG_HEADER_NAME = 'DRUPAL_X_ROBOTS_TAG_HEADER';
+
   /**
    * The http kernel.
    *
@@ -197,6 +199,18 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
+   * Sets response headers.
+   *
+   * @param \Symfony\Component\HttpFoundation\Response $response
+   *   The response.
+   */
+  private function setResponseHeaders(Response $response) : void {
+    if (getenv(self::X_ROBOTS_TAG_HEADER_NAME)) {
+      $response->headers->add(['X-Robots-Tag' => 'noindex, nofollow']);
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function handle(
@@ -205,6 +219,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $catch = TRUE
   ) : Response {
     $response = $this->httpKernel->handle($request, $tag, $catch);
+    $this->setResponseHeaders($response);
 
     if ($response instanceof JsonResponse) {
       if ($json = $this->processJson($response)) {
