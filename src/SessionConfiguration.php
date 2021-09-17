@@ -23,7 +23,10 @@ final class SessionConfiguration extends CoreSessionConfiguration {
   protected function getName(Request $request) {
     $name = parent::getName($request);
 
-    return $this->getCleanHostname() . '-' . $name;
+    if (!$suffix = getenv('DRUPAL_SESSION_SUFFIX')) {
+      $suffix = $this->getCleanHostname();
+    }
+    return $name . $suffix;
   }
 
 }

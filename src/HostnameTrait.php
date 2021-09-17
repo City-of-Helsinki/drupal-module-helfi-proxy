@@ -47,7 +47,7 @@ trait HostnameTrait {
    *   The clean host name.
    */
   protected function getCleanHostname() : string {
-    return preg_replace('/[^a-z0-9_]/', '_', $this->getHostname());
+    return preg_replace('/[^a-z0-9_]/', '', $this->getHostname());
   }
 
   /**
