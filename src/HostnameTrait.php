@@ -17,7 +17,7 @@ trait HostnameTrait {
    */
   protected function getHostname() : string {
     // Default to simpletest base url when running tests.
-    if (drupal_valid_test_ua()) {
+    if (drupal_valid_test_ua() || getenv('CI')) {
       return $this->parseHostName(getenv('SIMPLETEST_BASE_URL'));
     }
 
