@@ -75,7 +75,7 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
       return [];
     }
     return [
-      '\Drupal\helfi_tunnistamo\Event\RedirectUrlEvent' => ['onRedirectUrlEvent'],
+      'Drupal\helfi_tunnistamo\Event\RedirectUrlEvent' => ['onRedirectUrlEvent'],
     ];
   }
 
