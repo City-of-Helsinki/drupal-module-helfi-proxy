@@ -56,7 +56,7 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
       return;
     }
 
-    if ((!$config = $this->configFactory->get('helfi_proxy.settings')) || !$url = $config->get('tunnistamo_return_url')) {
+    if (!$url = $this->configFactory->get('helfi_proxy.settings')->get('tunnistamo_return_url')) {
       return;
     }
 
