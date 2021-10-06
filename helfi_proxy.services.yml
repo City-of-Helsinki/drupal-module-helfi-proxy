@@ -24,3 +24,9 @@ services:
     arguments: ['@config.factory']
     tags:
       - { name: cache.context }
+
+  helfi_proxy.tunnistamo_redirect_subscriber:
+    class: Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber
+    arguments: ['@config.factory']
+    tags:
+      - { name: event_subscriber }

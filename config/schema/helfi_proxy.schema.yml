@@ -1,6 +1,8 @@
 helfi_proxy.settings:
   type: config_entity
   mapping:
+    tunnistamo_return_url:
+      type: string
     prefixes:
       type: sequence
       sequence:
