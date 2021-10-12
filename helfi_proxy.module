@@ -7,7 +7,7 @@
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\editor\Entity\Editor;
-use Drupal\helfi_proxy\Hostname;
+use Drupal\helfi_proxy\ProxyManager;
 
 
 /**
@@ -20,7 +20,12 @@ use Drupal\helfi_proxy\Hostname;
  *   The absolute url.
  */
 function helfi_proxy_absolute_url(string $uri) : string {
-  return '//' . Hostname::get() . file_url_transform_relative(file_create_url($uri));
+  static $relative_path;
+
+  if (!$relative_path) {
+    $relative_path = (new ProxyManager())->config('instance_name');
+  }
+  return '/' . $relative_path . file_url_transform_relative(file_create_url($uri));
 }
 
 /**
@@ -30,6 +35,9 @@ function helfi_proxy_js_settings_alter(
   array &$settings,
   AttachedAssetsInterface $assets
 ) {
+  if (!(new ProxyManager())->isProxyRequest()) {
+    return;
+  }
   foreach (['designSelect', 'paragraphSelect'] as $type) {
     if (!isset($settings[$type]['pathToImages'])) {
       continue;
@@ -42,6 +50,9 @@ function helfi_proxy_js_settings_alter(
  * Implements hook_editor_js_settings_alter().
  */
 function helfi_proxy_editor_js_settings_alter(array &$settings) {
+  if (!(new ProxyManager())->isProxyRequest()) {
+    return;
+  }
   if (!\Drupal::moduleHandler()->moduleExists('ckeditor')) {
     return;
   }

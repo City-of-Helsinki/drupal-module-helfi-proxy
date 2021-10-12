@@ -6,7 +6,7 @@ namespace Drupal\Tests\helfi\Functional;
 
 use Drupal\Core\Url;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\helfi_proxy\HostnameTrait;
+use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
  */
 class AssetMidlewareTest extends BrowserTestBase {
 
-  use HostnameTrait;
+  use ProxyTrait;
 
   /**
    * {@inheritdoc}

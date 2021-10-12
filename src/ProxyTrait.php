@@ -7,7 +7,7 @@ namespace Drupal\helfi_proxy;
 /**
  * A trait to interact with current hostname.
  */
-trait HostnameTrait {
+trait ProxyTrait {
 
   /**
    * Gets the currently active hostname.

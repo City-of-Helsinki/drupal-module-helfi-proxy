@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\EventSubscriber;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Url;
+use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_tunnistamo\Event\RedirectUrlEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -15,33 +15,22 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface {
 
   /**
-   * The config factory.
+   * The proxy manager.
    *
-   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   * @var \Drupal\helfi_proxy\ProxyManager
    */
-  private ConfigFactoryInterface $configFactory;
-
-  /**
-   * Valid host patterns.
-   *
-   * @var string[]
-   */
-  public const HOST_PATTERNS = [
-    'helfi-proxy.docker.so',
-    'www.hel.fi',
-    'www-test.hel.fi',
-  ];
+  private ProxyManager $proxyManager;
 
   /**
    * Constructs a new instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * @param \Drupal\helfi_proxy\ProxyManager $proxyManager
+   *   The proxy manager.
    */
   public function __construct(
-    ConfigFactoryInterface $configFactory
+    ProxyManager $proxyManager
   ) {
-    $this->configFactory = $configFactory;
+    $this->proxyManager = $proxyManager;
   }
 
   /**
@@ -52,11 +41,7 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
    */
   public function onRedirectUrlEvent(RedirectUrlEvent $event) {
     // Do nothing if site is not served through one of the predefined proxies.
-    if (!in_array($event->getRequest()->getHost(), self::HOST_PATTERNS)) {
-      return;
-    }
-
-    if (!$url = $this->configFactory->get('helfi_proxy.settings')->get('tunnistamo_return_url')) {
+    if (!$this->proxyManager->isProxyRequest() || !$url = $this->proxyManager->getTunnistamoReturnUrl()) {
       return;
     }
 
