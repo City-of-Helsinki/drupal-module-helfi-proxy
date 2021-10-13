@@ -73,7 +73,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * @return $this
    *   The self.
    */
-  private function convertAttributes($dom) : self {
+  private function convertAttributes(HtmlPage|HtmlPageCrawler $dom) : self {
     foreach (
       [
         'source' => 'srcset',
@@ -141,7 +141,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *
    * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    */
-  private function convertSvg($dom) : self {
+  private function convertSvg(HtmlPage|HtmlPageCrawler $dom) : self {
     $cache = [];
 
     // Only match SVGs under theme folders.
