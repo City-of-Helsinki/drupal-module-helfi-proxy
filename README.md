@@ -6,7 +6,7 @@ Provides various fixes to serve multiple Drupal instances from one domain.
 
 ## Requirements
 
-- PHP 7.4 or higher
+- PHP 8.0 or higher
 
 ## Features
 
