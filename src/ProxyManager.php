@@ -6,7 +6,6 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -79,7 +78,7 @@ final class ProxyManager {
 
       // Scan other languages as well.
       foreach ($this->getInstancePrefixes() as $prefix) {
-        if (strpos($value, $prefix) !== FALSE || substr($value, 0, 1) !== '/') {
+        if (strpos($value, $prefix) !== FALSE) {
           return $value;
         }
       }
@@ -92,6 +91,12 @@ final class ProxyManager {
     return sprintf('https://%s%s', $this->getHostname(), $value);
   }
 
+  /**
+   * Gets the currently active site prefix.
+   *
+   * @return string|null
+   *   The currently active prefix.
+   */
   private function getActivePrefix() : ? string {
     static $prefix;
 

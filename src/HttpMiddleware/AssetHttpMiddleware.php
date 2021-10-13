@@ -51,6 +51,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   The http kernel.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannel
    *   The logger.
+   * @param \Drupal\helfi_proxy\ProxyManager $proxyManager
+   *   The proxy manager.
    */
   public function __construct(
     HttpKernelInterface $httpKernel,
