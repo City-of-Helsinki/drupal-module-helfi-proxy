@@ -6,12 +6,13 @@ namespace Drupal\helfi_proxy\HttpMiddleware;
 
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
-use Drupal\helfi_proxy\HostnameTrait;
+use Drupal\helfi_proxy\ProxyManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Wa72\HtmlPageDom\HtmlPage;
+use Wa72\HtmlPageDom\HtmlPageCrawler;
 
 /**
  * A middleware to alter asset urls.
@@ -19,8 +20,6 @@ use Wa72\HtmlPageDom\HtmlPage;
  * @todo This is terrible and we need to achieve the same result some other way.
  */
 final class AssetHttpMiddleware implements HttpKernelInterface {
-
-  use HostnameTrait;
 
   public const X_ROBOTS_TAG_HEADER_NAME = 'DRUPAL_X_ROBOTS_TAG_HEADER';
 
@@ -39,42 +38,56 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private LoggerChannelInterface $logger;
 
   /**
+   * The proxy manager.
+   *
+   * @var \Drupal\helfi_proxy\ProxyManager
+   */
+  private ProxyManager $proxyManager;
+
+  /**
    * Constructs a new instance.
    *
    * @param \Symfony\Component\HttpKernel\HttpKernelInterface $httpKernel
    *   The http kernel.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannel
    *   The logger.
+   * @param \Drupal\helfi_proxy\ProxyManager $proxyManager
+   *   The proxy manager.
    */
-  public function __construct(HttpKernelInterface $httpKernel, LoggerChannelFactoryInterface $loggerChannel) {
+  public function __construct(
+    HttpKernelInterface $httpKernel,
+    LoggerChannelFactoryInterface $loggerChannel,
+    ProxyManager $proxyManager
+  ) {
     $this->httpKernel = $httpKernel;
     $this->logger = $loggerChannel->get('helfi_proxy');
+    $this->proxyManager = $proxyManager;
   }
 
   /**
    * Converts attributes to have different hostname.
    *
-   * @param \Wa72\HtmlPageDom\HtmlPage $dom
+   * @param \Wa72\HtmlPageDom\HtmlPage|\Wa72\HtmlPageDom\HtmlPageCrawler $dom
    *   The dom to manipulate.
    *
    * @return $this
    *   The self.
    */
-  private function convertAttributes(HtmlPage $dom) : self {
+  private function convertAttributes(HtmlPage|HtmlPageCrawler $dom) : self {
     foreach (
       [
         'source' => 'srcset',
         'img' => 'src',
         'link' => 'href',
         'script' => 'src',
+        'a' => 'href',
       ] as $tag => $attribute) {
       foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
-        $value = $row->getAttribute($attribute);
+        $originalValue = $row->getAttribute($attribute);
 
-        if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
+        if (!$value = $this->proxyManager->getAttributeValue($tag, $originalValue)) {
           continue;
         }
-        $value = sprintf('//%s%s', $this->getHostname(), $value);
         $row->setAttribute($attribute, $value);
       }
     }
@@ -105,11 +118,10 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
       $hasChanges = TRUE;
 
-      $dom = new HtmlPage($value['data']);
+      $dom = new HtmlPageCrawler($value['data']);
       $this->convertSvg($dom)
         ->convertAttributes($dom);
-
-      $content[$key]['data'] = $this->format($dom);
+      $content[$key]['data'] = $dom->saveHTML();
     }
     return $hasChanges ? json_encode($content) : NULL;
   }
@@ -121,7 +133,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    * parse all SVGs and insert them directly into dom and convert attributes
    * to only include fragments, like /theme/sprite.svg#logo -> #logo.
    *
-   * @param \Wa72\HtmlPageDom\HtmlPage $dom
+   * @param \Wa72\HtmlPageDom\HtmlPage|\Wa72\HtmlPageDom\HtmlPageCrawler $dom
    *   The dom to manipulate.
    *
    * @return $this
@@ -129,7 +141,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *
    * @see https://css-tricks.com/svg-sprites-use-better-icon-fonts/
    */
-  private function convertSvg(HtmlPage $dom) : self {
+  private function convertSvg(HtmlPage|HtmlPageCrawler $dom) : self {
     $cache = [];
 
     // Only match SVGs under theme folders.
@@ -186,19 +198,6 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
-   * Formats the response.
-   *
-   * @param \Wa72\HtmlPageDom\HtmlPage $dom
-   *   The dom.
-   *
-   * @return string
-   *   The formatted response.
-   */
-  private function format(HtmlPage $dom) : string {
-    return $dom->save();
-  }
-
-  /**
    * Sets response headers.
    *
    * @param \Symfony\Component\HttpFoundation\Response $response
@@ -221,6 +220,10 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $response = $this->httpKernel->handle($request, $tag, $catch);
     $this->setResponseHeaders($response);
 
+    if (!$this->proxyManager->isProxyRequest()) {
+      return $response;
+    }
+
     if ($response instanceof JsonResponse) {
       if ($json = $this->processJson($response)) {
         return $response->setContent($json);
@@ -234,9 +237,9 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     }
     $dom = new HtmlPage($html);
 
-    $html = $this->convertAttributes($dom)
-      ->convertSvg($dom)
-      ->format($dom);
+    $this->convertAttributes($dom)
+      ->convertSvg($dom);
+    $html = $dom->save();
 
     return $response->setContent($html);
   }

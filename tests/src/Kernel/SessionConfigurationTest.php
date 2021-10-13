@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy;
 
-use Drupal\helfi_proxy\HostnameTrait;
+use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -14,7 +14,7 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class SessionConfigurationTest extends KernelTestBase {
 
-  use HostnameTrait;
+  use ProxyTrait;
 
   /**
    * The session configuration.

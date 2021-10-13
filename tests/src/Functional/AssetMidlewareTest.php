@@ -6,7 +6,7 @@ namespace Drupal\Tests\helfi\Functional;
 
 use Drupal\Core\Url;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\helfi_proxy\HostnameTrait;
+use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 
 /**
@@ -16,7 +16,7 @@ use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
  */
 class AssetMidlewareTest extends BrowserTestBase {
 
-  use HostnameTrait;
+  use ProxyTrait;
 
   /**
    * {@inheritdoc}
@@ -44,6 +44,15 @@ class AssetMidlewareTest extends BrowserTestBase {
    */
   public function setUp(): void {
     parent::setUp();
+
+    $this->config('helfi_proxy.settings')
+      ->set('asset_path', 'test-assets')
+      ->set('prefixes', [
+        'sv' => 'prefix-sv',
+        'en' => 'prefix-en',
+        'fi' => 'prefix-fi',
+      ])
+      ->save();
 
     $full_html_format = FilterFormat::create([
       'format' => 'full_html',
@@ -85,20 +94,19 @@ class AssetMidlewareTest extends BrowserTestBase {
     $dom = new \DOMDocument();
     @$dom->loadHTML($html);
 
-    foreach ($types as $tag => $attribute) {
+    foreach ($types as $type) {
       $counter = 0;
 
-      foreach ($dom->getElementsByTagName($tag) as $row) {
-        if (!$row->getAttribute($attribute)) {
+      foreach ($dom->getElementsByTagName($type['tag']) as $row) {
+        if (!$row->getAttribute($type['attribute'])) {
           continue;
         }
-        $this->assertStringContainsString('//' . $this->getHostname(), $row->getAttribute($attribute));
+        $this->assertStringContainsString($type['expected'], $row->getAttribute($type['attribute']));
         $counter++;
       }
       // Make sure we have at least one asset with replaced url.
       $this->assertTrue($counter > 0);
     }
-
   }
 
   /**
@@ -129,9 +137,21 @@ class AssetMidlewareTest extends BrowserTestBase {
     // Make sure node canonical url works.
     $this->drupalGet($this->node->toUrl());
     $this->assertAssetPaths([
-      'img' => 'src',
-      'link' => 'href',
-      'script' => 'src',
+      [
+        'tag' => 'img',
+        'attribute' => 'src',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'link',
+        'attribute' => 'href',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'script',
+        'attribute' => 'src',
+        'expected' => '/test-assets',
+      ],
     ]);
     $this->assertSvgPaths();
 
@@ -142,16 +162,32 @@ class AssetMidlewareTest extends BrowserTestBase {
       'pass' => '111',
     ], 'Log in');
     $this->assertAssetPaths([
-      'link' => 'href',
-      'script' => 'src',
+      [
+        'tag' => 'link',
+        'attribute' => 'href',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'script',
+        'attribute' => 'src',
+        'expected' => '/test-assets',
+      ],
     ]);
 
     // Test node edit form.
     $this->drupalLogin($this->rootUser);
     $this->drupalGet($this->node->toUrl('edit-form'));
     $this->assertAssetPaths([
-      'link' => 'href',
-      'script' => 'src',
+      [
+        'tag' => 'link',
+        'attribute' => 'href',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'script',
+        'attribute' => 'src',
+        'expected' => '/test-assets',
+      ],
     ]);
 
     $path = $this->getSession()
@@ -161,9 +197,21 @@ class AssetMidlewareTest extends BrowserTestBase {
 
     $this->submitForm([], 'Save');
     $this->assertAssetPaths([
-      'img' => 'src',
-      'link' => 'href',
-      'script' => 'src',
+      [
+        'tag' => 'img',
+        'attribute' => 'src',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'link',
+        'attribute' => 'href',
+        'expected' => '//' . $this->getHostname(),
+      ],
+      [
+        'tag' => 'script',
+        'attribute' => 'src',
+        'expected' => '/test-assets',
+      ],
     ]);
     $this->assertSvgPaths();
 

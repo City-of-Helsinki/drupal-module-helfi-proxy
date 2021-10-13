@@ -7,8 +7,6 @@
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\editor\Entity\Editor;
-use Drupal\helfi_proxy\Hostname;
-
 
 /**
  * Converts uri to absolute.
@@ -20,7 +18,27 @@ use Drupal\helfi_proxy\Hostname;
  *   The absolute url.
  */
 function helfi_proxy_absolute_url(string $uri) : string {
-  return '//' . Hostname::get() . file_url_transform_relative(file_create_url($uri));
+  static $relative_path;
+
+  if (!$relative_path) {
+    $relative_path = \Drupal::service('helfi_proxy.proxy_manager')->getAssetPath();
+  }
+  return '/' . $relative_path . file_url_transform_relative(file_create_url($uri));
+}
+
+/**
+ * Checks whether site is served via proxy.
+ *
+ * @return bool
+ *   TRUE if site is served via proxy.
+ */
+function helfi_proxy_is_proxy_request() : bool {
+  static $isProxyRequest;
+
+  if ($isProxyRequest === NULL) {
+    $isProxyRequest = \Drupal::service('helfi_proxy.proxy_manager')->isProxyRequest();
+  }
+  return $isProxyRequest;
 }
 
 /**
@@ -30,6 +48,9 @@ function helfi_proxy_js_settings_alter(
   array &$settings,
   AttachedAssetsInterface $assets
 ) {
+  if (!helfi_proxy_is_proxy_request()) {
+    return;
+  }
   foreach (['designSelect', 'paragraphSelect'] as $type) {
     if (!isset($settings[$type]['pathToImages'])) {
       continue;
@@ -42,7 +63,7 @@ function helfi_proxy_js_settings_alter(
  * Implements hook_editor_js_settings_alter().
  */
 function helfi_proxy_editor_js_settings_alter(array &$settings) {
-  if (!\Drupal::moduleHandler()->moduleExists('ckeditor')) {
+  if (!helfi_proxy_is_proxy_request() || !\Drupal::moduleHandler()->moduleExists('ckeditor')) {
     return;
   }
   $ckeditor_plugin_manager = \Drupal::service('plugin.manager.ckeditor.plugin');

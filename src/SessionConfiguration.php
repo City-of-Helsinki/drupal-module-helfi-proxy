@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class SessionConfiguration extends CoreSessionConfiguration {
 
-  use HostnameTrait;
+  use ProxyTrait;
 
   /**
    * {@inheritdoc}

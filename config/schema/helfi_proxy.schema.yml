@@ -3,6 +3,8 @@ helfi_proxy.settings:
   mapping:
     tunnistamo_return_url:
       type: string
+    asset_path:
+      type: string
     prefixes:
       type: sequence
       sequence:
