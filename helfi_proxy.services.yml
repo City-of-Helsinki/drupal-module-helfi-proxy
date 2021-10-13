@@ -1,7 +1,7 @@
 services:
   helfi_proxy.http_middleware:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
-    arguments: ['@logger.factory']
+    arguments: ['@logger.factory', '@helfi_proxy.proxy_manager']
     tags:
       - { name: http_middleware, priority: 500 }
 
@@ -27,7 +27,7 @@ services:
 
   helfi_proxy.tunnistamo_redirect_subscriber:
     class: Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber
-    arguments: ['@helfi_proxy.hostname']
+    arguments: ['@helfi_proxy.proxy_manager']
     tags:
       - { name: event_subscriber }
 

@@ -15,7 +15,7 @@ trait ProxyTrait {
    * @return string
    *   The hostname.
    */
-  protected function getHostname() : string {
+  public function getHostname() : string {
     // Default to simpletest base url when running tests.
     if (drupal_valid_test_ua() || getenv('CI')) {
       return $this->parseHostName(getenv('SIMPLETEST_BASE_URL'));
@@ -46,7 +46,7 @@ trait ProxyTrait {
    * @return string
    *   The clean host name.
    */
-  protected function getCleanHostname() : string {
+  public function getCleanHostname() : string {
     return preg_replace('/[^a-z0-9_]/', '', $this->getHostname());
   }
 

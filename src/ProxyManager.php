@@ -14,12 +14,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 final class ProxyManager {
 
+  use ProxyTrait;
+
   /**
-   * The current request.
+   * The request stack.
    *
-   * @var \Symfony\Component\HttpFoundation\Request
+   * @var \Symfony\Component\HttpFoundation\RequestStack
    */
-  protected Request $request;
+  protected RequestStack $requestStack;
 
   /**
    * The config.
@@ -49,7 +51,61 @@ final class ProxyManager {
    */
   public function __construct(ConfigFactoryInterface $configFactory, RequestStack $requestStack) {
     $this->config = $configFactory->get('helfi_proxy.settings');
-    $this->request = $requestStack->getCurrentRequest();
+    $this->requestStack = $requestStack;
+  }
+
+  /**
+   * Gets the value for given attribute.
+   *
+   * @param string $tag
+   *   The attribute.
+   * @param string|null $value
+   *   The value.
+   *
+   * @return string|null
+   *   The value for given attribute or null.
+   */
+  public function getAttributeValue(string $tag, ?string $value) : ? string {
+    if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
+      return NULL;
+    }
+
+    // Links are always relative to proxy prefix.
+    if ($tag === 'a') {
+      // Make sure we have active site prefix and the given URL is relative.
+      if (!$prefix = $this->getActivePrefix() || substr($value, 0, 1) !== '/') {
+        return $value;
+      }
+
+      // Scan other languages as well.
+      foreach ($this->getInstancePrefixes() as $prefix) {
+        if (strpos($value, $prefix) !== FALSE || substr($value, 0, 1) !== '/') {
+          return $value;
+        }
+      }
+      return sprintf('%s/%s', $prefix, ltrim($value, '/'));
+    }
+    // Serve scripts from same domain via relative asset URL.
+    if ($tag === 'script') {
+      return sprintf('/%s%s', $this->getAssetPath(), $value);
+    }
+    return sprintf('https://%s%s', $this->getHostname(), $value);
+  }
+
+  private function getActivePrefix() : ? string {
+    static $prefix;
+
+    if (!$prefix) {
+      $request = $this->requestStack->getCurrentRequest();
+
+      foreach ($this->getInstancePrefixes() as $langcode => $item) {
+        if (strpos($request->getPathInfo(), $item) !== FALSE) {
+          $prefix = sprintf('/%s/%s', $langcode, $item);
+          break;
+        }
+      }
+    }
+    return $prefix;
   }
 
   /**
@@ -59,16 +115,30 @@ final class ProxyManager {
    *   TRUE if we're serving through proxy.
    */
   public function isProxyRequest() : bool {
-    return in_array($this->request->getHost(), $this->hostPatterns);
+    if (!$this->requestStack->getCurrentRequest()) {
+      return FALSE;
+    }
+    return in_array($this->requestStack->getCurrentRequest()->getHost(), $this->hostPatterns);
   }
 
   /**
    * Gets the instance name.
    *
    * @return string
+   *   The instance name.
    */
-  public function getInstanceName() : ? string {
-    return $this->config->get('instance_name');
+  public function getAssetPath() : ? string {
+    return $this->config->get('asset_path');
+  }
+
+  /**
+   * Gets the instance prefixes.
+   *
+   * @return array
+   *   The instance prefixes.
+   */
+  public function getInstancePrefixes() : array {
+    return $this->config->get('prefixes');
   }
 
   /**

@@ -7,7 +7,6 @@ namespace Drupal\helfi_proxy\HttpMiddleware;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\ProxyManager;
-use Drupal\helfi_proxy\ProxyTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,8 +20,6 @@ use Wa72\HtmlPageDom\HtmlPageCrawler;
  * @todo This is terrible and we need to achieve the same result some other way.
  */
 final class AssetHttpMiddleware implements HttpKernelInterface {
-
-  use ProxyTrait;
 
   public const X_ROBOTS_TAG_HEADER_NAME = 'DRUPAL_X_ROBOTS_TAG_HEADER';
 
@@ -81,14 +78,14 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
         'img' => 'src',
         'link' => 'href',
         'script' => 'src',
+        'a' => 'href',
       ] as $tag => $attribute) {
       foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
-        $value = $row->getAttribute($attribute);
+        $originalValue = $row->getAttribute($attribute);
 
-        if (!$value || substr($value, 0, 4) === 'http' || substr($value, 0, 2) === '//') {
+        if (!$value = $this->proxyManager->getAttributeValue($tag, $originalValue)) {
           continue;
         }
-        $value = sprintf('/%s%s', $this->proxyManager->getInstanceName(), $value);
         $row->setAttribute($attribute, $value);
       }
     }
