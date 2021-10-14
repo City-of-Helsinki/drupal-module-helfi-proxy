@@ -37,6 +37,23 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
+   * Creates a mock request.
+   *
+   * @param string $host
+   *   The host.
+   * @param string $uri
+   *   The uri.
+   *
+   * @return \Symfony\Component\HttpFoundation\Request
+   *   The request.
+   */
+  private function createRequest(string $host = '127.0.0.1', string $uri = '') : Request {
+    return Request::create($uri, server: [
+      'HTTP_HOST' => $host,
+    ]);
+  }
+
+  /**
    * Tests instance prefixes.
    */
   public function testPrefixes() : void {
@@ -61,18 +78,12 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests proxy request.
    */
   public function testIsProxyRequest() : void {
-    $this->assertFalse($this->proxyManager()->isProxyRequest());
+    $request = $this->createRequest('nonexistent');
+    $this->assertFalse($this->proxyManager()->isProxyRequest($request));
 
     foreach (ProxyManager::HOST_PATTERNS as $host) {
-      $request = Request::create('', server: [
-        'HTTP_HOST' => $host,
-      ]);
-      /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
-      $requestStack = $this->container->get('request_stack');
-      $requestStack->push($request);
-      $this->container->set('request_stack', $requestStack);
-
-      $this->assertTrue($this->proxyManager()->isProxyRequest());
+      $request = $this->createRequest($host);
+      $this->assertTrue($this->proxyManager()->isProxyRequest($request));
     }
   }
 
@@ -108,9 +119,11 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests generic attribute value.
    */
   public function testGenericAttributeValue() : void {
+    $request = $this->createRequest();
+
     foreach (['link', 'source', 'img'] as $tag) {
       $path = '/sites/default/files/asset.png';
-      $this->assertEquals('//' . $this->getHostname() . $path, $this->proxyManager()->getAttributeValue($tag, $path));
+      $this->assertEquals('//' . $this->getHostname() . $path, $this->proxyManager()->getAttributeValue($request, $tag, $path));
     }
   }
 
@@ -122,15 +135,18 @@ class ProxyManagerTest extends KernelTestBase {
     $this->config('helfi_proxy.settings')
       ->set('asset_path', $path)
       ->save();
+    $request = $this->createRequest();
 
-    $this->assertEquals('/test-assets/core/modules/system/test.svg', $this->proxyManager()->getAttributeValue('script', '/core/modules/system/test.svg'));
+    $this->assertEquals('/test-assets/core/modules/system/test.svg', $this->proxyManager()->getAttributeValue($request, 'script', '/core/modules/system/test.svg'));
   }
 
   /**
    * Tests A tags.
    */
   public function testAhrefAttributeValue() : void {
-    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue('a', 'https://google.com'));
+    $request = $this->createRequest();
+
+    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, 'a', 'https://google.com'));
 
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
@@ -141,15 +157,10 @@ class ProxyManagerTest extends KernelTestBase {
       ->save();
 
     $url = '/fi/prefix-fi/link';
-    $this->assertEquals($url, $this->proxyManager()->getAttributeValue('a', $url));
+    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, 'a', $url));
 
-    $request = Request::create('https://localhost/fi/prefix-fi');
-    /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
-    $requestStack = $this->container->get('request_stack');
-    $requestStack->push($request);
-    $this->container->set('request_stack', $requestStack);
-
-    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue('a', '/link'));
+    $request = $this->createRequest(uri: 'https://localhost/fi/prefix-fi');
+    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, 'a', '/link'));
   }
 
   /**
@@ -158,7 +169,8 @@ class ProxyManagerTest extends KernelTestBase {
    * @dataProvider getEmptyAttributeValueData
    */
   public function testEmptyGetAttributeValue(string $tag, string $value) : void {
-    $this->assertEquals($value, $this->proxyManager()->getAttributeValue($tag, $value));
+    $request = $this->createRequest();
+    $this->assertEquals($value, $this->proxyManager()->getAttributeValue($request, $tag, $value));
   }
 
   /**

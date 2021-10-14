@@ -36,7 +36,8 @@ function helfi_proxy_is_proxy_request() : bool {
   static $isProxyRequest;
 
   if ($isProxyRequest === NULL) {
-    $isProxyRequest = \Drupal::service('helfi_proxy.proxy_manager')->isProxyRequest();
+    $isProxyRequest = \Drupal::service('helfi_proxy.proxy_manager')
+      ->isProxyRequest(\Drupal::request());
   }
   return $isProxyRequest;
 }
