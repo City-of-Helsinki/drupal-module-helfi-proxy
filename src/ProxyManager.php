@@ -6,7 +6,7 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * A class to determine sites hostname.
@@ -14,13 +14,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 final class ProxyManager {
 
   use ProxyTrait;
-
-  /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected RequestStack $requestStack;
 
   /**
    * The config.
@@ -46,17 +39,16 @@ final class ProxyManager {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
-   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
-   *   The request stack.
    */
-  public function __construct(ConfigFactoryInterface $configFactory, RequestStack $requestStack) {
+  public function __construct(ConfigFactoryInterface $configFactory) {
     $this->config = $configFactory->get('helfi_proxy.settings');
-    $this->requestStack = $requestStack;
   }
 
   /**
    * Gets the value for given attribute.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
    * @param string $tag
    *   The attribute.
    * @param string|null $value
@@ -65,7 +57,7 @@ final class ProxyManager {
    * @return string|null
    *   The value for given attribute or null.
    */
-  public function getAttributeValue(string $tag, ?string $value) : ? string {
+  public function getAttributeValue(Request $request, string $tag, ?string $value) : ? string {
     if (!$value || str_starts_with($value, 'http') || str_starts_with($value,
         '//')) {
       return $value;
@@ -74,7 +66,7 @@ final class ProxyManager {
     // Links are always relative to proxy prefix.
     if ($tag === 'a') {
       // Make sure we have active site prefix and the given URL is relative.
-      if ((!$prefix = $this->getActivePrefix()) || !str_starts_with($value, '/')) {
+      if ((!$prefix = $this->getActivePrefix($request->getPathInfo())) || !str_starts_with($value, '/')) {
         return $value;
       }
 
@@ -99,14 +91,12 @@ final class ProxyManager {
    * @return string|null
    *   The currently active prefix.
    */
-  private function getActivePrefix() : ? string {
+  private function getActivePrefix(string $path) : ? string {
     static $prefix;
 
     if ($prefix === NULL) {
-      $request = $this->requestStack->getCurrentRequest();
-
       foreach ($this->getInstancePrefixes() as $langcode => $item) {
-        if (str_contains($request->getPathInfo(), $item)) {
+        if (str_contains($path, $item)) {
           $prefix = sprintf('/%s/%s', $langcode, $item);
           break;
         }
@@ -118,14 +108,13 @@ final class ProxyManager {
   /**
    * Checks if current request is served via proxy.
    *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   *
    * @return bool
    *   TRUE if we're serving through proxy.
    */
-  public function isProxyRequest() : bool {
-    if (!$request = $this->requestStack->getCurrentRequest()) {
-      return FALSE;
-    }
-
+  public function isProxyRequest(Request $request) : bool {
     $xforwardedHosts = $request->headers->get('x-forwarded-host');
 
     if (!is_array($xforwardedHosts)) {

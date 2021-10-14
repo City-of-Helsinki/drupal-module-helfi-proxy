@@ -45,6 +45,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private ProxyManager $proxyManager;
 
   /**
+   * The request object.
+   *
+   * @var \Symfony\Component\HttpFoundation\Request|null
+   */
+  private ?Request $request;
+
+  /**
    * Constructs a new instance.
    *
    * @param \Symfony\Component\HttpKernel\HttpKernelInterface $httpKernel
@@ -85,7 +92,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
         $originalValue = $row->getAttribute($attribute);
 
-        if (!$value = $this->proxyManager->getAttributeValue($tag, $originalValue)) {
+        if (!$value = $this->proxyManager->getAttributeValue($this->request, $tag, $originalValue)) {
           continue;
         }
         $row->setAttribute($attribute, $value);
@@ -217,10 +224,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $tag = self::MASTER_REQUEST,
     $catch = TRUE
   ) : Response {
+    $this->request = $request;
     $response = $this->httpKernel->handle($request, $tag, $catch);
     $this->setResponseHeaders($response);
 
-    if (!$this->proxyManager->isProxyRequest()) {
+    if (!$this->proxyManager->isProxyRequest($this->request)) {
       return $response;
     }
 
