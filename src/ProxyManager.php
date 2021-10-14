@@ -122,10 +122,23 @@ final class ProxyManager {
    *   TRUE if we're serving through proxy.
    */
   public function isProxyRequest() : bool {
-    if (!$this->requestStack->getCurrentRequest()) {
+    if (!$request = $this->requestStack->getCurrentRequest()) {
       return FALSE;
     }
-    return in_array($this->requestStack->getCurrentRequest()->getHost(), self::HOST_PATTERNS);
+
+    $xforwardedHosts = $request->headers->get('x-forwarded-host');
+
+    if (!is_array($xforwardedHosts)) {
+      $xforwardedHosts = [$xforwardedHosts];
+    }
+    $hosts = array_merge([$request->getHost()], $xforwardedHosts);
+
+    foreach ($hosts as $host) {
+      if (in_array($host, self::HOST_PATTERNS)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**
