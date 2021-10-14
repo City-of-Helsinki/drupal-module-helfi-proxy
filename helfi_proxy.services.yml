@@ -3,7 +3,7 @@ services:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
     arguments: ['@logger.factory', '@helfi_proxy.proxy_manager']
     tags:
-      - { name: http_middleware, priority: 500 }
+      - { name: http_middleware, priority: 50 }
 
   helfi_proxy.session_configuration:
     class: Drupal\helfi_proxy\SessionConfiguration
