@@ -75,19 +75,6 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Tests proxy request.
-   */
-  public function testIsProxyRequest() : void {
-    $request = $this->createRequest('nonexistent');
-    $this->assertFalse($this->proxyManager()->isProxyRequest($request));
-
-    foreach (ProxyManager::HOST_PATTERNS as $host) {
-      $request = $this->createRequest($host);
-      $this->assertTrue($this->proxyManager()->isProxyRequest($request));
-    }
-  }
-
-  /**
    * Tests tunnistamo return url.
    */
   public function testTunnistamoReturnUrl() : void {

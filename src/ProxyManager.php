@@ -23,18 +23,6 @@ final class ProxyManager {
   protected ImmutableConfig $config;
 
   /**
-   * Valid host patterns.
-   *
-   * @var string[]
-   */
-  public const HOST_PATTERNS = [
-    'helfi-proxy.docker.so',
-    'www.hel.fi',
-    'www-test.hel.fi',
-    '127.0.0.1',
-  ];
-
-  /**
    * Constructs a new instance.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
@@ -103,31 +91,6 @@ final class ProxyManager {
       }
     }
     return $prefix;
-  }
-
-  /**
-   * Checks if current request is served via proxy.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   *
-   * @return bool
-   *   TRUE if we're serving through proxy.
-   */
-  public function isProxyRequest(Request $request) : bool {
-    $xforwardedHosts = $request->headers->get('x-forwarded-host');
-
-    if (!is_array($xforwardedHosts)) {
-      $xforwardedHosts = [$xforwardedHosts];
-    }
-    $hosts = array_merge([$request->getHost()], $xforwardedHosts);
-
-    foreach ($hosts as $host) {
-      if (in_array($host, self::HOST_PATTERNS)) {
-        return TRUE;
-      }
-    }
-    return FALSE;
   }
 
   /**
