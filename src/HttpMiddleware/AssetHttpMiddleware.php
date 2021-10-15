@@ -228,10 +228,6 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $response = $this->httpKernel->handle($request, $tag, $catch);
     $this->setResponseHeaders($response);
 
-    if (!$this->proxyManager->isProxyRequest($this->request)) {
-      return $response;
-    }
-
     if ($response instanceof JsonResponse) {
       if ($json = $this->processJson($response)) {
         return $response->setContent($json);

@@ -27,31 +27,12 @@ function helfi_proxy_absolute_url(string $uri) : string {
 }
 
 /**
- * Checks whether site is served via proxy.
- *
- * @return bool
- *   TRUE if site is served via proxy.
- */
-function helfi_proxy_is_proxy_request() : bool {
-  static $isProxyRequest;
-
-  if ($isProxyRequest === NULL) {
-    $isProxyRequest = \Drupal::service('helfi_proxy.proxy_manager')
-      ->isProxyRequest(\Drupal::request());
-  }
-  return $isProxyRequest;
-}
-
-/**
  * Implements hook_js_settings_alter().
  */
 function helfi_proxy_js_settings_alter(
   array &$settings,
   AttachedAssetsInterface $assets
 ) {
-  if (!helfi_proxy_is_proxy_request()) {
-    return;
-  }
   foreach (['designSelect', 'paragraphSelect'] as $type) {
     if (!isset($settings[$type]['pathToImages'])) {
       continue;
@@ -64,7 +45,7 @@ function helfi_proxy_js_settings_alter(
  * Implements hook_editor_js_settings_alter().
  */
 function helfi_proxy_editor_js_settings_alter(array &$settings) {
-  if (!helfi_proxy_is_proxy_request() || !\Drupal::moduleHandler()->moduleExists('ckeditor')) {
+  if (!\Drupal::moduleHandler()->moduleExists('ckeditor')) {
     return;
   }
   $ckeditor_plugin_manager = \Drupal::service('plugin.manager.ckeditor.plugin');
