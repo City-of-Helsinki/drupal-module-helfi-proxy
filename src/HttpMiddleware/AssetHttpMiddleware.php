@@ -6,8 +6,8 @@ namespace Drupal\helfi_proxy\HttpMiddleware;
 
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
-use Drupal\helfi_proxy\AttributeMap;
 use Drupal\helfi_proxy\ProxyManager;
+use Drupal\helfi_proxy\Tag\Tags;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -82,15 +82,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   The self.
    */
   private function convertAttributes(HtmlPage|HtmlPageCrawler $dom) : self {
-    $attributeMaps = [
-      new AttributeMap('source', 'srcset'),
-      new AttributeMap('img', 'src'),
-      new AttributeMap('link', 'href'),
-      new AttributeMap('meta[property="og:image:url"]', 'content', forceRelative: TRUE),
-      new AttributeMap('script', 'src', toAssetPath: TRUE),
-      new AttributeMap('a', 'href', toSitePrefixed: TRUE),
-    ];
-    foreach ($attributeMaps as $map) {
+    foreach (Tags::all() as $map) {
       foreach ($dom->filter(sprintf('%s[%s]', $map->tagSelector, $map->attribute)) as $row) {
         $originalValue = $row->getAttribute($map->attribute);
 

@@ -6,6 +6,7 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\helfi_proxy\Tag\Tag;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -56,7 +57,7 @@ final class ProxyManager {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param \Drupal\helfi_proxy\AttributeMap $map
+   * @param \Drupal\helfi_proxy\Tag\Tag $map
    *   The attrbiteu map object.
    * @param string|null $value
    *   The value.
@@ -64,7 +65,7 @@ final class ProxyManager {
    * @return string|null
    *   The value for given attribute or null.
    */
-  public function getAttributeValue(Request $request, AttributeMap $map, ?string $value) : ? string {
+  public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
     // Certain elements are forced to have absolute URL already (such as
     // og:image:url) so we need to convert the given URL to relative first.
     if ($map->forceRelative) {
@@ -77,7 +78,7 @@ final class ProxyManager {
     }
 
     // Convert value to have a site prefix, like /fi/site-prefix/.
-    if ($map->toSitePrefixed) {
+    if ($map->sitePrefix) {
       // Make sure we have active site prefix and the given URL is relative.
       if ((!$prefix = $this->getActivePrefix($request->getPathInfo())) || !str_starts_with($value, '/')) {
         return $value;
@@ -93,7 +94,7 @@ final class ProxyManager {
     }
 
     // Serve certain elements from same domain via relative asset URL.
-    if ($map->toAssetPath) {
+    if ($map->assetPath) {
       return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
     }
     return sprintf('//%s%s', $this->getHostname(), $value);
