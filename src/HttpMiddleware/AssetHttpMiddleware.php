@@ -6,6 +6,7 @@ namespace Drupal\helfi_proxy\HttpMiddleware;
 
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\helfi_proxy\AttributeMap;
 use Drupal\helfi_proxy\ProxyManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -81,21 +82,22 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   The self.
    */
   private function convertAttributes(HtmlPage|HtmlPageCrawler $dom) : self {
-    foreach (
-      [
-        'source' => 'srcset',
-        'img' => 'src',
-        'link' => 'href',
-        'script' => 'src',
-        'a' => 'href',
-      ] as $tag => $attribute) {
-      foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
-        $originalValue = $row->getAttribute($attribute);
+    $attributeMaps = [
+      new AttributeMap('source', 'srcset'),
+      new AttributeMap('img', 'src'),
+      new AttributeMap('link', 'href'),
+      new AttributeMap('meta[property="og:image:url"]', 'content', forceRelative: TRUE),
+      new AttributeMap('script', 'src', toAssetPath: TRUE),
+      new AttributeMap('a', 'href', toSitePrefixed: TRUE),
+    ];
+    foreach ($attributeMaps as $map) {
+      foreach ($dom->filter(sprintf('%s[%s]', $map->tagSelector, $map->attribute)) as $row) {
+        $originalValue = $row->getAttribute($map->attribute);
 
-        if (!$value = $this->proxyManager->getAttributeValue($this->request, $tag, $originalValue)) {
+        if (!$value = $this->proxyManager->getAttributeValue($this->request, $map, $originalValue)) {
           continue;
         }
-        $row->setAttribute($attribute, $value);
+        $row->setAttribute($map->attribute, $value);
       }
     }
     return $this;
