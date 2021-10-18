@@ -31,7 +31,7 @@ final class Tag {
     public bool $sitePrefix = FALSE
   ) {
     if ($this->assetPath && $this->sitePrefix) {
-      throw new \InvalidArgumentException('Cannot set both; asset path and prefix at the same time.');
+      throw new \InvalidArgumentException('Cannot set both asset path and prefix to true.');
     }
   }
 
