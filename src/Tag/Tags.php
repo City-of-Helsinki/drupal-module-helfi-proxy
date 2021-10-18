@@ -17,6 +17,7 @@ final class Tags {
    */
   public static function all() : array {
     return [
+      'input' => new Tag('input[type="image"]', 'src'),
       'source' => new Tag('source', 'srcset'),
       'img' => new Tag('img', 'src'),
       'link' => new Tag('link', 'href'),

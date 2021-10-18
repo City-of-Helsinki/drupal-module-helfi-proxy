@@ -146,17 +146,17 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $cache = [];
 
     // Only match SVGs under theme folders.
-    $themePaths = ['/core/themes' => 12, '/themes' => 7];
+    $themePaths = ['/core/themes', '/themes', '/core/misc'];
 
     foreach ($dom->filter('use') as $row) {
       foreach (['href', 'xlink:href'] as $attribute) {
         $value = NULL;
 
         // Skip non-theme SVGs.
-        foreach ($themePaths as $path => $length) {
+        foreach ($themePaths as $path) {
           $attributeValue = $row->getAttribute($attribute);
 
-          if (substr($attributeValue, 0, $length) === $path) {
+          if (str_starts_with($attributeValue, $path)) {
             $value = $attributeValue;
             break;
           }
