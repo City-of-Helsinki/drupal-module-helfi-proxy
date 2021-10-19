@@ -5,3 +5,11 @@ helfi_proxy.front:
     _controller: '\Drupal\helfi_proxy\Controller\FrontController::index'
   requirements:
     _access: 'TRUE'
+
+helfi_proxy.purge:
+  path: '/admin/config/development/performance/helfi_proxy/purge'
+  defaults:
+    _title: 'Purge everything'
+    _form: 'Drupal\helfi_proxy\Form\PurgeForm'
+  requirements:
+    _permission: 'administer site configuration'
