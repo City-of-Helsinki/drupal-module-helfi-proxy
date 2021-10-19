@@ -66,12 +66,13 @@ final class ProxyManager {
    *   The value for given attribute or null.
    */
   public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
-    // Certain elements are forced to have absolute URL already (such as
-    // og:image:url) so we need to convert the given URL to relative first.
+    // Certain elements are absolute URLs already (such as og:image:url)
+    // so we need to convert them to relative URLs first.
     if ($map->forceRelative) {
       $value = $this->convertAbsoluteToRelative($value);
     }
 
+    // Ignore absolute URLs.
     if (!$value || str_starts_with($value, 'http') || str_starts_with($value,
         '//')) {
       return $value;
@@ -93,7 +94,8 @@ final class ProxyManager {
       return sprintf('%s/%s', $prefix, ltrim($value, '/'));
     }
 
-    // Serve certain elements from same domain via relative asset URL.
+    // Serve element from same domain via relative asset URL. Like:
+    // /assets/sites/default/files/js/{sha256}.js.
     if ($map->assetPath) {
       return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
     }
