@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.0",
         "league/uri": "^6.0",
+        "drupal/purge": "^3.0",
         "ext-libxml": "*",
         "ext-dom": "*",
         "symfony/dom-crawler": "^4.0",
