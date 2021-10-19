@@ -7,6 +7,7 @@ namespace Drupal\helfi_proxy\HttpMiddleware;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelInterface;
 use Drupal\helfi_proxy\ProxyManager;
+use Drupal\helfi_proxy\Tag\Tags;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -81,21 +82,14 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   The self.
    */
   private function convertAttributes(HtmlPage|HtmlPageCrawler $dom) : self {
-    foreach (
-      [
-        'source' => 'srcset',
-        'img' => 'src',
-        'link' => 'href',
-        'script' => 'src',
-        'a' => 'href',
-      ] as $tag => $attribute) {
-      foreach ($dom->filter(sprintf('%s[%s]', $tag, $attribute)) as $row) {
-        $originalValue = $row->getAttribute($attribute);
+    foreach (Tags::all() as $map) {
+      foreach ($dom->filter(sprintf('%s[%s]', $map->tagSelector, $map->attribute)) as $row) {
+        $originalValue = $row->getAttribute($map->attribute);
 
-        if (!$value = $this->proxyManager->getAttributeValue($this->request, $tag, $originalValue)) {
+        if (!$value = $this->proxyManager->getAttributeValue($this->request, $map, $originalValue)) {
           continue;
         }
-        $row->setAttribute($attribute, $value);
+        $row->setAttribute($map->attribute, $value);
       }
     }
     return $this;
@@ -152,17 +146,17 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $cache = [];
 
     // Only match SVGs under theme folders.
-    $themePaths = ['/core/themes' => 12, '/themes' => 7];
+    $themePaths = ['/core/themes', '/themes', '/core/misc'];
 
     foreach ($dom->filter('use') as $row) {
       foreach (['href', 'xlink:href'] as $attribute) {
         $value = NULL;
 
         // Skip non-theme SVGs.
-        foreach ($themePaths as $path => $length) {
+        foreach ($themePaths as $path) {
           $attributeValue = $row->getAttribute($attribute);
 
-          if (substr($attributeValue, 0, $length) === $path) {
+          if (str_starts_with($attributeValue, $path)) {
             $value = $attributeValue;
             break;
           }

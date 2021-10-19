@@ -6,6 +6,8 @@ namespace Drupal\Tests\helfi\Functional;
 
 use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyTrait;
+use Drupal\helfi_proxy\Tag\Tag;
+use Drupal\helfi_proxy\Tag\Tags;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -108,7 +110,13 @@ class ProxyManagerTest extends KernelTestBase {
   public function testGenericAttributeValue() : void {
     $request = $this->createRequest();
 
-    foreach (['link', 'source', 'img'] as $tag) {
+    $attributeMap = [
+      Tags::tag('link'),
+      Tags::tag('source'),
+      Tags::tag('img'),
+    ];
+
+    foreach ($attributeMap as $tag) {
       $path = '/sites/default/files/asset.png';
       $this->assertEquals('//' . $this->getHostname() . $path, $this->proxyManager()->getAttributeValue($request, $tag, $path));
     }
@@ -124,7 +132,7 @@ class ProxyManagerTest extends KernelTestBase {
       ->save();
     $request = $this->createRequest();
 
-    $this->assertEquals('/test-assets/core/modules/system/test.svg', $this->proxyManager()->getAttributeValue($request, 'script', '/core/modules/system/test.svg'));
+    $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Tags::tag('script'), '/core/modules/system/test.js'));
   }
 
   /**
@@ -133,7 +141,7 @@ class ProxyManagerTest extends KernelTestBase {
   public function testAhrefAttributeValue() : void {
     $request = $this->createRequest();
 
-    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, 'a', 'https://google.com'));
+    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), 'https://google.com'));
 
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
@@ -144,10 +152,19 @@ class ProxyManagerTest extends KernelTestBase {
       ->save();
 
     $url = '/fi/prefix-fi/link';
-    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, 'a', $url));
+    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), $url));
 
     $request = $this->createRequest(uri: 'https://localhost/fi/prefix-fi');
-    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, 'a', '/link'));
+    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), '/link'));
+  }
+
+  /**
+   * Tests the og:image:url.
+   */
+  public function testOgImageUrl() : void {
+    $request = $this->createRequest();
+
+    $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://www.hel.fi/path/to/og-image.png'));
   }
 
   /**
@@ -155,7 +172,7 @@ class ProxyManagerTest extends KernelTestBase {
    *
    * @dataProvider getEmptyAttributeValueData
    */
-  public function testEmptyGetAttributeValue(string $tag, string $value) : void {
+  public function testEmptyGetAttributeValue(Tag $tag, string $value) : void {
     $request = $this->createRequest();
     $this->assertEquals($value, $this->proxyManager()->getAttributeValue($request, $tag, $value));
   }
@@ -168,15 +185,15 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function getEmptyAttributeValueData() : array {
     return [
-      ['link', ''],
-      ['link', 'https://localhost/test.svg'],
-      ['link', '//localhost/test.svg'],
-      ['a', ''],
-      ['a', 'https://localhost/test.svg'],
-      ['a', '//localhost/test.svg'],
-      ['script', ''],
-      ['script', 'https://localhost/test.svg'],
-      ['script', '//localhost/test.svg'],
+      [Tags::tag('link'), ''],
+      [Tags::tag('link'), 'https://localhost/test.svg'],
+      [Tags::tag('link'), '//localhost/test.svg'],
+      [Tags::tag('a'), ''],
+      [Tags::tag('a'), 'https://localhost/test'],
+      [Tags::tag('a'), '//localhost/test'],
+      [Tags::tag('script'), ''],
+      [Tags::tag('script'), 'https://localhost/test.js'],
+      [Tags::tag('script'), '//localhost/test.js'],
     ];
   }
 
