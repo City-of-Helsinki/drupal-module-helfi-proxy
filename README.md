@@ -70,6 +70,54 @@ The module attempts to read the file and insert it directly into DOM, then chang
 
 Add an environment variable `DRUPAL_X_ROBOTS_TAG_HEADER` with any value to insert a `X-Robots-Tag: noindex, nofollow` header to every response.
 
+
+### Varnish support
+
+Enable modules with `drush en varnish_purger varnish_purge_tags purge_drush purge_processor_cron purge_queuer_coretags purge_tokens`.
+
+Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder if you enabled this module before Varnish/Purge modules and import configuration changes.
+
+Add these to your settings.php to use varnish cache:
+
+```
+if ($varnish_host = getenv('DRUPAL_VARNISH_HOST')) {
+  $config['varnish_purger.settings.default']['hostname'] = $varnish_host;
+  $config['varnish_purger.settings.varnish_purge_all']['hostname'] = $varnish_host;
+}
+
+if ($varnish_port = getenv('DRUPAL_VARNISH_PORT')) {
+  $config['varnish_purger.settings.default']['port'] = $varnish_port;
+  $config['varnish_purger.settings.varnish_purge_all']['port'] = $varnish_port;
+}
+
+// Configuration doesn't know about existing config here so we can't
+// append to existing headers array here and have to include all headers.
+// If you have any extra headers you must add them here as well.
+$config['varnish_purger.settings.default']['headers'] = [
+  [
+    'field' => 'Cache-Tags',
+    'value' => '[invalidation:expression]',
+  ],
+];
+$config['varnish_purger.settings.varnish_purge_all']['headers'] = [
+  [
+    'field' => 'X-VC-Purge-Method',
+    'value' => 'regex',
+  ],
+];
+
+if ($varnish_purge_key = getenv('VARNISH_PURGE_KEY')) {
+  $config['varnish_purger.settings.default']['headers'][] = [
+    'field' => 'X-VC-Purge-Key',
+    'value' => $varnish_purge_key,
+  ];
+  $config['varnish_purger.settings.varnish_purge_all']['headers'][] = [
+    'field' => 'X-VC-Purge-Key',
+    'value' => $varnish_purge_key,
+  ];
+}
+```
+
 ## Contact
 
 Slack: #helfi-drupal (http://helsinkicity.slack.com/)

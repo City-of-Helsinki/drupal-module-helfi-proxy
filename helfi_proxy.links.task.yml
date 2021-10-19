@@ -1,0 +1,4 @@
+helfi_proxy.purge:
+  title: 'Purge everything'
+  route_name: helfi_proxy.purge
+  base_route: system.performance_settings
