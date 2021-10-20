@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\EventSubscriber;
 
 use Drupal\Core\Url;
-use Drupal\helfi_proxy\ProxyManager;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_tunnistamo\Event\RedirectUrlEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -17,18 +17,18 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
   /**
    * The proxy manager.
    *
-   * @var \Drupal\helfi_proxy\ProxyManager
+   * @var \Drupal\helfi_proxy\ProxyManagerInterface
    */
-  private ProxyManager $proxyManager;
+  private ProxyManagerInterface $proxyManager;
 
   /**
    * Constructs a new instance.
    *
-   * @param \Drupal\helfi_proxy\ProxyManager $proxyManager
+   * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
    *   The proxy manager.
    */
   public function __construct(
-    ProxyManager $proxyManager
+    ProxyManagerInterface $proxyManager
   ) {
     $this->proxyManager = $proxyManager;
   }
@@ -39,9 +39,8 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
    * @param \Drupal\helfi_tunnistamo\Event\RedirectUrlEvent $event
    *   Response event.
    */
-  public function onRedirectUrlEvent(RedirectUrlEvent $event) {
-    // Do nothing if site is not served through one of the predefined proxies.
-    if (!$this->proxyManager->isProxyRequest() || !$url = $this->proxyManager->getTunnistamoReturnUrl()) {
+  public function onRedirectUrlEvent(RedirectUrlEvent $event) : void {
+    if (!$url = $this->proxyManager->getTunnistamoReturnUrl()) {
       return;
     }
 

@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * A class to determine sites hostname.
  */
-final class ProxyManager {
+final class ProxyManager implements ProxyManagerInterface {
 
   use ProxyTrait;
 
@@ -53,17 +53,7 @@ final class ProxyManager {
   }
 
   /**
-   * Gets the value for given attribute.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   * @param \Drupal\helfi_proxy\Tag\Tag $map
-   *   The attrbiteu map object.
-   * @param string|null $value
-   *   The value.
-   *
-   * @return string|null
-   *   The value for given attribute or null.
+   * {@inheritdoc}
    */
   public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
     // Certain elements are absolute URLs already (such as og:image:url)
@@ -123,30 +113,21 @@ final class ProxyManager {
   }
 
   /**
-   * Gets the instance name.
-   *
-   * @return string|null
-   *   The instance name.
+   * {@inheritdoc}
    */
   public function getAssetPath() : ? string {
     return $this->config->get('asset_path');
   }
 
   /**
-   * Gets the instance prefixes.
-   *
-   * @return array
-   *   The instance prefixes.
+   * {@inheritdoc}
    */
   public function getInstancePrefixes() : array {
     return $this->config->get('prefixes') ?? [];
   }
 
   /**
-   * Gets the tunnistamo return url.
-   *
-   * @return string|null
-   *   The tunnistamo return url.
+   * {@inheritdoc}
    */
   public function getTunnistamoReturnUrl() : ? string {
     return $this->config->get('tunnistamo_return_url');
