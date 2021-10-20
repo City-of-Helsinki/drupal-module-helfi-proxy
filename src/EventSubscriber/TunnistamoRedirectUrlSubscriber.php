@@ -40,8 +40,7 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
    *   Response event.
    */
   public function onRedirectUrlEvent(RedirectUrlEvent $event) {
-    // Do nothing if site is not served through one of the predefined proxies.
-    if (!$this->proxyManager->isProxyRequest() || !$url = $this->proxyManager->getTunnistamoReturnUrl()) {
+    if (!$url = $this->proxyManager->getTunnistamoReturnUrl()) {
       return;
     }
 
