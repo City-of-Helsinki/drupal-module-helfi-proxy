@@ -1,7 +1,7 @@
 helfi_proxy.front:
   path: '/front'
   defaults:
-    _title: 'Front'
+    _title_callback: '\Drupal\helfi_proxy\Controller\FrontController::title'
     _controller: '\Drupal\helfi_proxy\Controller\FrontController::index'
   requirements:
     _access: 'TRUE'

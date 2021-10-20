@@ -1,6 +1,8 @@
 helfi_proxy.settings:
   type: config_entity
   mapping:
+    front_page_title:
+      type: string
     tunnistamo_return_url:
       type: string
     asset_path:
