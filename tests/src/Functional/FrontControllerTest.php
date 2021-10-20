@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi\Functional;
 
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Url;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 
