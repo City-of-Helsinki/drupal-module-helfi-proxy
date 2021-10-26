@@ -71,9 +71,9 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     }
     $prefix = $this->config->get('prefixes')[$language] ?? NULL;
 
-    if ($bubbleable_metadata) {
-      $bubbleable_metadata->addCacheContexts(['site_prefix:' . $prefix]);
-    }
+    $bubbleable_metadata?->addCacheContexts(['site_prefix:' . $prefix])
+      ->addCacheableDependency($this->config);
+
     if ($prefix) {
       $options['prefix'] .= $prefix . '/';
     }
