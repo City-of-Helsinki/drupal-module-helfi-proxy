@@ -39,6 +39,7 @@ function helfi_proxy_js_settings_alter(
     }
     $settings[$type]['pathToImages'] = helfi_proxy_absolute_url($settings[$type]['pathToImages']);
   }
+  $settings['iconsPath'] = helfi_proxy_absolute_url($settings['iconsPath']);
 }
 
 /**
