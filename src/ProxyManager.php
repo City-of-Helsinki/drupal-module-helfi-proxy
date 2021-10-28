@@ -89,6 +89,15 @@ final class ProxyManager implements ProxyManagerInterface {
     if ($map->assetPath) {
       return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
     }
+
+    if ($map->multipleValues) {
+      $parts = [];
+      foreach (explode($map->multivalueSeparator, $value) as $item) {
+        $parts[] = sprintf('//%s%s', $this->getHostname(), trim($item));
+      }
+      return implode($map->multivalueSeparator, $parts);
+    }
+
     return sprintf('//%s%s', $this->getHostname(), $value);
   }
 
