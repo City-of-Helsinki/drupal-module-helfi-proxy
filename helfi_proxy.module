@@ -40,8 +40,11 @@ function helfi_proxy_js_settings_alter(
     $settings[$type]['pathToImages'] = helfi_proxy_absolute_url($settings[$type]['pathToImages']);
   }
 
-  if (isset($settings['iconsPath'])) {
-    $settings['iconsPath'] = helfi_proxy_absolute_url($settings['iconsPath']);
+  foreach (['hdbtSubthemeIconsPath', 'iconsPath'] as $key) {
+    if (!isset($settings[$key])) {
+      continue;
+    }
+    $settings[$key] = helfi_proxy_absolute_url($settings[$key]);
   }
 }
 
