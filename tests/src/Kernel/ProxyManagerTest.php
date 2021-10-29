@@ -180,6 +180,9 @@ class ProxyManagerTest extends KernelTestBase {
     $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://www.hel.fi/path/to/og-image.png'));
   }
 
+  /**
+   * Tests source srcset.
+   */
   public function testSourceSrcSet() : void {
     $request = $this->createRequest();
 
