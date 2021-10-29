@@ -77,6 +77,19 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
+   * Gets the expected hostname with path.
+   *
+   * @param string $path
+   *   The path.
+   *
+   * @return string
+   *   The url.
+   */
+  private function expectedUrlWithPath(string $path) : string {
+    return sprintf('//%s%s', $this->getHostname(), $path);
+  }
+
+  /**
    * Tests tunnistamo return url.
    */
   public function testTunnistamoReturnUrl() : void {
@@ -165,6 +178,23 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
 
     $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://www.hel.fi/path/to/og-image.png'));
+  }
+
+  public function testSourceSrcSet() : void {
+    $request = $this->createRequest();
+
+    $values = [
+      '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x,//helfi-kymp.docker.so/sites/default/files/styles/3_2_xxs_2x/public/image%20%281%29.png?itok=pSa7Ws3i 2x',
+    ];
+
+    foreach ($values as $value) {
+      $this->assertEquals(
+        $this->expectedUrlWithPath($value),
+        $this->proxyManager()->getAttributeValue($request, Tags::tag('source'), $value)
+      );
+    }
+
   }
 
   /**
