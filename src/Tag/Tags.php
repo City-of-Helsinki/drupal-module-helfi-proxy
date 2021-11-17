@@ -21,7 +21,7 @@ final class Tags {
       'source' => new Tag('source', 'srcset', multipleValues: TRUE, multivalueSeparator: ', '),
       'img' => new Tag('img', 'src'),
       'link' => new Tag('link', 'href'),
-      'og:image' => new Tag('meta[property="og:image:url"]', 'content', forceRelative: TRUE),
+      'meta-content' => new Tag('meta[property]', 'content', forceRelative: TRUE),
       'script' => new Tag('script', 'src', assetPath: TRUE),
       'a' => new Tag('a', 'href', sitePrefix: TRUE),
     ];
