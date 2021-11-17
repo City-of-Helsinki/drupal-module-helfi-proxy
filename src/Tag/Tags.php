@@ -22,6 +22,7 @@ final class Tags {
       'img' => new Tag('img', 'src'),
       'link' => new Tag('link', 'href'),
       'meta-content' => new Tag('meta[property]', 'content', forceRelative: TRUE),
+      'meta-name' => new Tag('meta[name]', 'content', forceRelative: TRUE),
       'script' => new Tag('script', 'src', assetPath: TRUE),
       'a' => new Tag('a', 'href', sitePrefix: TRUE),
     ];

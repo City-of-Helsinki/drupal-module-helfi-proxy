@@ -174,7 +174,7 @@ class ProxyManagerTest extends KernelTestBase {
   /**
    * Tests the og:image:url.
    */
-  public function testOgImageUrl() : void {
+  public function testMetaContent() : void {
     $request = $this->createRequest();
 
     $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('meta-content'), 'https://www.hel.fi/path/to/og-image.png'));
