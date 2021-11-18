@@ -236,6 +236,7 @@ class AssetMidlewareTest extends BrowserTestBase {
       <meta property="og:url" content="https://www.hel.fi/fi/kaupunkiymparisto-ja-liikenne/test-0">
       <meta property="og:title" content="test">
       <meta property="og:image" content="https://www.hel.fi/themes/contrib/hdbt/src/images/og-global.png">
+      <meta property="og:image:url" content="https://www.hel.fi/themes/contrib/hdbt/src/images/og-global.png">
       <meta property="og:updated_time" content="2021-11-17T10:11:40+0200">
       <meta property="article:published_time" content="2021-11-17T10:11:33+0200">
       <meta property="article:modified_time" content="2021-11-17T10:11:33+0200">
@@ -261,16 +262,17 @@ class AssetMidlewareTest extends BrowserTestBase {
       '<!DOCTYPE html>
 <html><head>
       <meta property="og:site_name" content="Pys&auml;k&ouml;inti">
-      <meta property="og:url" content="//@hostname/fi/kaupunkiymparisto-ja-liikenne/test-0">
+      <meta property="og:url" content="https://www.hel.fi/fi/kaupunkiymparisto-ja-liikenne/test-0">
       <meta property="og:title" content="test">
       <meta property="og:image" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
+      <meta property="og:image:url" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
       <meta property="og:updated_time" content="2021-11-17T10:11:40+0200">
       <meta property="article:published_time" content="2021-11-17T10:11:33+0200">
       <meta property="article:modified_time" content="2021-11-17T10:11:33+0200">
       <meta name="twitter:image" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
       <meta name="twitter:card" content="summary_large_image">
       <meta name="twitter:title" content="test | Helsingin kaupunki">
-      <meta name="twitter:url" content="//@hostname/fi/kaupunkiymparisto-ja-liikenne/test-0">
+      <meta name="twitter:url" content="https://www.hel.fi/fi/kaupunkiymparisto-ja-liikenne/test-0">
       </head>
       </html>
       ', ['@hostname' => $this->getHostname()]);

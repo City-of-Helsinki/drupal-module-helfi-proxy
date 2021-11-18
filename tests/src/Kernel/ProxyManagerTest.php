@@ -172,12 +172,15 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Tests the og:image:url.
+   * Tests meta tags.
    */
-  public function testMetaContent() : void {
+  public function testMetaTags() : void {
     $request = $this->createRequest();
 
-    $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('meta-content'), 'https://www.hel.fi/path/to/og-image.png'));
+    foreach (['og:image', 'og:image:url'] as $tag) {
+      $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag($tag), 'https://www.hel.fi/path/to/og-image.png'));
+    }
+    $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
   }
 
   /**
