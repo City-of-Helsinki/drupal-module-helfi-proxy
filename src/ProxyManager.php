@@ -60,6 +60,11 @@ final class ProxyManager implements ProxyManagerInterface {
     // so we need to convert them to relative URLs first.
     if ($map->forceRelative) {
       $value = $this->convertAbsoluteToRelative($value);
+
+      // Skip non-relative values.
+      if (!str_starts_with($value, '/')) {
+        return $value;
+      }
     }
 
     // Ignore absolute URLs.
