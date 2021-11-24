@@ -184,6 +184,30 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
+   * Tests blob storage url when AZURE_BLOB_STORAGE_CONTAINER is set.
+   */
+  public function testBlobStorageUrlWithContainer() : void {
+    putenv('STAGE_FILE_PROXY_ORIGIN=');
+    putenv('AZURE_BLOB_STORAGE_CONTAINER=test');
+    $request = $this->createRequest();
+    // Make sure file is served from blob storage when blob storage container
+    // is set.
+    $this->assertEquals('https://test.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png'));
+  }
+
+  /**
+   * Tests blob storage url when STAGE_FILE_PROXY_ORIGIN is set.
+   */
+  public function testBlobStorageUrlWithStageFileProxy() : void {
+    putenv('STAGE_FILE_PROXY_ORIGIN=https://test.core.windows.net');
+    putenv('AZURE_BLOB_STORAGE_CONTAINER=');
+    $request = $this->createRequest();
+    // Make sure file is served from blob storage when blob storage container
+    // is set.
+    $this->assertEquals('https://test.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png'));
+  }
+
+  /**
    * Tests source srcset.
    */
   public function testSourceSrcSet() : void {
