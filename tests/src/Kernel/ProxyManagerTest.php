@@ -24,6 +24,7 @@ class ProxyManagerTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'path_alias',
     'helfi_proxy',
   ];
 
