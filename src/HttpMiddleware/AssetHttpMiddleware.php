@@ -22,28 +22,12 @@ use Wa72\HtmlPageDom\HtmlPageCrawler;
  */
 final class AssetHttpMiddleware implements HttpKernelInterface {
 
-  public const X_ROBOTS_TAG_HEADER_NAME = 'DRUPAL_X_ROBOTS_TAG_HEADER';
-
-  /**
-   * The http kernel.
-   *
-   * @var \Symfony\Component\HttpKernel\HttpKernelInterface
-   */
-  private HttpKernelInterface $httpKernel;
-
   /**
    * The logger.
    *
    * @var \Drupal\Core\Logger\LoggerChannelInterface
    */
   private LoggerChannelInterface $logger;
-
-  /**
-   * The proxy manager.
-   *
-   * @var \Drupal\helfi_proxy\ProxyManager
-   */
-  private ProxyManager $proxyManager;
 
   /**
    * The request object.
@@ -63,13 +47,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   The proxy manager.
    */
   public function __construct(
-    HttpKernelInterface $httpKernel,
+    private HttpKernelInterface $httpKernel,
     LoggerChannelFactoryInterface $loggerChannel,
-    ProxyManager $proxyManager
+    private ProxyManager $proxyManager
   ) {
-    $this->httpKernel = $httpKernel;
     $this->logger = $loggerChannel->get('helfi_proxy');
-    $this->proxyManager = $proxyManager;
   }
 
   /**
@@ -199,28 +181,15 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
-   * Sets response headers.
-   *
-   * @param \Symfony\Component\HttpFoundation\Response $response
-   *   The response.
-   */
-  private function setResponseHeaders(Response $response) : void {
-    if (getenv(self::X_ROBOTS_TAG_HEADER_NAME)) {
-      $response->headers->add(['X-Robots-Tag' => 'noindex, nofollow']);
-    }
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function handle(
     Request $request,
-    $tag = self::MASTER_REQUEST,
+    $type = self::MASTER_REQUEST,
     $catch = TRUE
   ) : Response {
     $this->request = $request;
-    $response = $this->httpKernel->handle($request, $tag, $catch);
-    $this->setResponseHeaders($response);
+    $response = $this->httpKernel->handle($request, $type, $catch);
 
     if ($response instanceof JsonResponse) {
       if ($json = $this->processJson($response)) {
