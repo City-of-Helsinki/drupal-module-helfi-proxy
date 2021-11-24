@@ -72,9 +72,12 @@ final class ProxyManager implements ProxyManagerInterface {
     if (!$value || !$domain = parse_url($value, PHP_URL_HOST)) {
       return FALSE;
     }
+
     static $patterns;
 
-    if (!$patterns) {
+    if (!is_array($patterns)) {
+      $patterns = [];
+
       if ($stageFileProxy = getenv('STAGE_FILE_PROXY_ORIGIN')) {
         $patterns[] = $this->parseHostName($stageFileProxy);
       }
