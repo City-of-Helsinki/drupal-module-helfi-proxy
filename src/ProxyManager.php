@@ -49,6 +49,18 @@ final class ProxyManager implements ProxyManagerInterface {
     if (empty($parts['host'])) {
       return $value;
     }
+
+    static $blobStorage;
+
+    if ($blobStorage === NULL) {
+      $blobStorage = getenv('AZURE_BLOB_STORAGE_CONTAINER') ?: FALSE;
+    }
+
+    // Skip if file is served from blob storage.
+    if (str_starts_with($parts['host'], $blobStorage)) {
+      return $value;
+    }
+
     return $parts['path'] ?? NULL;
   }
 
