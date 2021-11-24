@@ -42,7 +42,7 @@ final class ProxyManager implements ProxyManagerInterface {
    * @return string|null
    *   the value.
    */
-  private function convertAbsoluteToRelative(?string $value) : ?  string {
+  private function convertAbsoluteToRelative(?string $value) : ? string {
     if (!$value) {
       return $value;
     }
