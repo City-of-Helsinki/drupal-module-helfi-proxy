@@ -26,7 +26,7 @@ class SessionConfigurationTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['helfi_proxy'];
+  protected static $modules = ['helfi_proxy', 'path_alias'];
 
   /**
    * {@inheritdoc}

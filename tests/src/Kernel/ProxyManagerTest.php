@@ -24,6 +24,7 @@ class ProxyManagerTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'path_alias',
     'helfi_proxy',
   ];
 
@@ -144,7 +145,6 @@ class ProxyManagerTest extends KernelTestBase {
       ->set('asset_path', $path)
       ->save();
     $request = $this->createRequest();
-
     $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Tags::tag('script'), '/core/modules/system/test.js'));
   }
 
