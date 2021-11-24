@@ -192,7 +192,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://test.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png'));
+    $this->assertEquals('https://test.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png?itok=123'));
   }
 
   /**

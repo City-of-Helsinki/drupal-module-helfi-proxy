@@ -42,7 +42,7 @@ final class ProxyManager implements ProxyManagerInterface {
    * @return string|null
    *   the value.
    */
-  private function convertAbsoluteToRelative(?string $value) : ? string {
+  private function convertAbsoluteToRelative(?string $value) : string {
     $parts = parse_url($value);
 
     // Value is already relative.
@@ -64,7 +64,10 @@ final class ProxyManager implements ProxyManagerInterface {
       return $value;
     }
 
-    return $parts['path'] ?? NULL;
+    if (isset($parts['path'])) {
+      return $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
+    }
+    return $value;
   }
 
   /**
