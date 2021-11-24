@@ -42,25 +42,14 @@ final class ProxyManager implements ProxyManagerInterface {
    * @return string|null
    *   the value.
    */
-  private function convertAbsoluteToRelative(?string $value) : string {
+  private function convertAbsoluteToRelative(?string $value) : ?  string {
+    if (!$value) {
+      return $value;
+    }
     $parts = parse_url($value);
 
     // Value is already relative.
     if (empty($parts['host'])) {
-      return $value;
-    }
-
-    static $blobStorage;
-
-    if ($blobStorage === NULL) {
-      $blobStorage = getenv('AZURE_BLOB_STORAGE_CONTAINER');
-
-      if ($stageFileProxy = getenv('STAGE_FILE_PROXY_ORIGIN')) {
-        $blobStorage = $this->parseHostName($stageFileProxy);
-      }
-    }
-    // Skip if file is served from blob storage.
-    if ($blobStorage && str_starts_with($parts['host'], $blobStorage)) {
       return $value;
     }
 
@@ -71,12 +60,52 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Checks if given URL is hosted from a CDN.
+   *
+   * @param string|null $value
+   *   The value.
+   *
+   * @return bool
+   *   TRUE if given url is CDN.
+   */
+  private function isCdnAddress(?string $value) : bool {
+    if (!$value || !$domain = parse_url($value, PHP_URL_HOST)) {
+      return FALSE;
+    }
+    static $patterns;
+
+    if (!$patterns) {
+      if ($stageFileProxy = getenv('STAGE_FILE_PROXY_ORIGIN')) {
+        $patterns[] = $this->parseHostName($stageFileProxy);
+      }
+
+      if ($blobStorageName = getenv('AZURE_BLOB_STORAGE_NAME')) {
+        $patterns[] = sprintf('%s.core.windows.net', $blobStorageName);
+      }
+    }
+
+    foreach ($patterns as $pattern) {
+      if (str_starts_with($domain, $pattern)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
+    if (!$value) {
+      return $value;
+    }
     // Certain elements are absolute URLs already (such as og:image:url)
     // so we need to convert them to relative URLs first.
     if ($map->forceRelative) {
+      // Skip if file is being served from a CDN already.
+      if ($this->isCdnAddress($value)) {
+        return $value;
+      }
       $value = $this->convertAbsoluteToRelative($value);
 
       // Skip non-relative values.

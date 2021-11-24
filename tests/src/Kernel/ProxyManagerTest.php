@@ -184,27 +184,27 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Tests blob storage url when AZURE_BLOB_STORAGE_CONTAINER is set.
+   * Tests blob storage url when blob storage name is set.
    */
-  public function testBlobStorageUrlWithContainer() : void {
+  public function testBlobStorageUrlWithStorage() : void {
     putenv('STAGE_FILE_PROXY_ORIGIN=');
-    putenv('AZURE_BLOB_STORAGE_CONTAINER=test');
+    putenv('AZURE_BLOB_STORAGE_NAME=kymp');
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://test.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png?itok=123'));
+    $this->assertEquals('https://kymp.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://kymp.core.windows.net/test/og-image.png?itok=123'));
   }
 
   /**
    * Tests blob storage url when STAGE_FILE_PROXY_ORIGIN is set.
    */
   public function testBlobStorageUrlWithStageFileProxy() : void {
-    putenv('STAGE_FILE_PROXY_ORIGIN=https://test.core.windows.net');
-    putenv('AZURE_BLOB_STORAGE_CONTAINER=');
+    putenv('STAGE_FILE_PROXY_ORIGIN=https://kymp.core.windows.net');
+    putenv('AZURE_BLOB_STORAGE_NAME=sote');
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://test.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://test.core.windows.net/test/og-image.png'));
+    $this->assertEquals('https://sote.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://sote.core.windows.net/test/og-image.png'));
   }
 
   /**
@@ -224,7 +224,19 @@ class ProxyManagerTest extends KernelTestBase {
         $this->proxyManager()->getAttributeValue($request, Tags::tag('source'), $value)
       );
     }
+  }
 
+  /**
+   * Tests empty string and null values.
+   */
+  public function testNullValue() : void {
+    $request = $this->createRequest();
+
+    foreach ([NULL, ''] as $value) {
+      foreach (Tags::all() as $tag) {
+        $this->assertEquals($this->proxyManager()->getAttributeValue($request, $tag, $value), $value);
+      }
+    }
   }
 
   /**
