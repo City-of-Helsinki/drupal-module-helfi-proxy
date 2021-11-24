@@ -63,7 +63,7 @@ trait ProxyTrait {
     $hosts = explode(',', $hostname);
 
     // Strip protocol. Always fallback to last hostname.
-    return parse_url(end($hosts), PHP_URL_HOST);
+    return str_replace(['https://', 'http://'], '', end($hosts));
 
   }
 
