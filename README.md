@@ -70,6 +70,13 @@ The module attempts to read the file and insert it directly into DOM, then chang
 
 Add an environment variable `DRUPAL_X_ROBOTS_TAG_HEADER` with any value to insert a `X-Robots-Tag: noindex, nofollow` header to every response.
 
+You can use `helfi_proxy.settings` configuration to only ignore certain paths:
+
+```
+robots_paths:
+  - '/user/login'
+  - '/residential-*'
+```
 
 ### Varnish support
 
