@@ -12,9 +12,9 @@ Provides various fixes to serve multiple Drupal instances from one domain.
 
 All these features are made to ensure that the instance can be served from `<proxy url>/<project prefix>`.
 
-### Cookie name prefix
+### Cookie name suffix
 
-Cookie name will be prefixed with the site's hostname. For example `helfi-docker-so-SSID{sha256}`.
+Cookie name will be suffixed with the site's hostname. For example `SSID{sha256}helfi-docker-so`.
 
 ### Site prefix
 
