@@ -42,9 +42,11 @@ $config['helfi_proxy.settings']['prefixes'] = [
 
 ### Absolute URL for assets
 
-Converts all assets (`source[srcset]`, `img[src]`, `link[href]`, `script[src]`) to use an absolute URL. The URL is read from `DRUPAL_REVERSE_PROXY_URL` and `DRUPAL_ROUTES` environment variables. The first one to have a value will be used.
+Converts all assets (`source[srcset]`, `img[src]`, `link[href]`) to use an absolute URL. The URL is read from `DRUPAL_REVERSE_PROXY_URL` and `DRUPAL_ROUTES` environment variables. The first one to have a value will be used.
 
 This ensures that all local assets are served directly from the instance's real URL instead of `<proxy url>/<project prefix>/<path to asset>`.
+
+Javascripts (`script[src]`) are served from the path configured in (`helfi_proxy.settings`) `asset-path` setting. For example `liikenne-assets`.
 
 ### Inline SVGs
 
