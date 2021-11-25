@@ -83,7 +83,7 @@ final class ProxyManager implements ProxyManagerInterface {
       }
 
       if ($blobStorageName = getenv('AZURE_BLOB_STORAGE_NAME')) {
-        $patterns[] = sprintf('%s.core.windows.net', $blobStorageName);
+        $patterns[] = sprintf('%s.blob.core.windows.net', $blobStorageName);
       }
     }
 
