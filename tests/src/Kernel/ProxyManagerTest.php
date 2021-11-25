@@ -192,19 +192,19 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://kymp.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://kymp.core.windows.net/test/og-image.png?itok=123'));
+    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
   }
 
   /**
    * Tests blob storage url when STAGE_FILE_PROXY_ORIGIN is set.
    */
   public function testBlobStorageUrlWithStageFileProxy() : void {
-    putenv('STAGE_FILE_PROXY_ORIGIN=https://kymp.core.windows.net');
+    putenv('STAGE_FILE_PROXY_ORIGIN=https://kymp.blob.core.windows.net');
     putenv('AZURE_BLOB_STORAGE_NAME=sote');
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://sote.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://sote.core.windows.net/test/og-image.png'));
+    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
   }
 
   /**
