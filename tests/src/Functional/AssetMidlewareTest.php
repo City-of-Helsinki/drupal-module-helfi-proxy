@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\Tests\helfi\Functional;
+namespace Drupal\Tests\helfi_proxy\Functional;
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
