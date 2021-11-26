@@ -14,6 +14,11 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 class JsExampleTest extends WebDriverTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Tests something.
    */
   public function testSomething() {
