@@ -55,4 +55,4 @@ jobs:
         run: |
           cd $DRUPAL_ROOT
           vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
-          vendor/bin/phpunit -c $DRUPAL_ROOT/phpunit.platform.xml --verbose --group ${{ secrets.MODULE_NAME }}
+          vendor/bin/phpunit --fail-on-skipped -c $DRUPAL_ROOT/phpunit.platform.xml --verbose --group ${{ secrets.MODULE_NAME }}
