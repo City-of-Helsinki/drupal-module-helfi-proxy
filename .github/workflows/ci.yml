@@ -52,11 +52,11 @@ jobs:
       - name: Run PHPCS
         run: |
           cd $DRUPAL_ROOT
-          vendor/bin/phpcs public/modules/contrib/$MODULE_NAME --standard=Drupal
+          vendor/bin/phpcs public/modules/contrib/${{ secrets.MODULE_NAME }} --standard=Drupal
 
       - name: Run PHPUnit tests
         run: |
           cd $DRUPAL_ROOT
           vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
           chromedriver --port=4444 > /dev/null 2>&1 &
-          vendor/bin/phpunit -c $DRUPAL_ROOT/phpunit.platform.xml --verbose --group $MODULE_NAME
+          vendor/bin/phpunit -c $DRUPAL_ROOT/phpunit.platform.xml --verbose --group ${{ secrets.MODULE_NAME }}
