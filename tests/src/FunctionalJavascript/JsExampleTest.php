@@ -23,7 +23,7 @@ class JsExampleTest extends WebDriverTestBase {
    */
   public function testSomething() {
     $this->drupalGet('<front>');
-    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('Log in');
   }
 
 }
