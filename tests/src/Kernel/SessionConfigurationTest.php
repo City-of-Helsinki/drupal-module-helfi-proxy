@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\Tests\helfi_proxy;
+namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\KernelTests\KernelTestBase;
