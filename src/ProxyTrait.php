@@ -27,8 +27,8 @@ trait ProxyTrait {
     }
 
     $variables = [
-      'DRUPAL_REVERSE_PROXY_ADDRESS',
       'DRUPAL_ROUTES',
+      'DRUPAL_REVERSE_PROXY_ADDRESS',
     ];
 
     foreach ($variables as $variable) {
