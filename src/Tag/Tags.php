@@ -21,10 +21,10 @@ final class Tags {
       'source' => new Tag('source', 'srcset', multipleValues: TRUE, multivalueSeparator: ', '),
       'img' => new Tag('img', 'src'),
       'link' => new Tag('link', 'href'),
-      'og:image' => new Tag('meta[property="og:image"]', 'content', forceRelative: TRUE),
-      'og:image:url' => new Tag('meta[property="og:image:url"]', 'content', forceRelative: TRUE),
-      'twitter:image' => new Tag('meta[name="twitter:image"]', 'content', forceRelative: TRUE),
-      'script' => new Tag('script', 'src', assetPath: TRUE),
+      'og:image' => new Tag('meta[property="og:image"]', 'content', alwaysAbsolute: TRUE),
+      'og:image:url' => new Tag('meta[property="og:image:url"]', 'content', alwaysAbsolute: TRUE),
+      'twitter:image' => new Tag('meta[name="twitter:image"]', 'content', alwaysAbsolute: TRUE),
+      'script' => new Tag('script', 'src'),
       'a' => new Tag('a', 'href', sitePrefix: TRUE),
     ];
   }

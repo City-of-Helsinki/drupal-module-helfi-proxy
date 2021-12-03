@@ -40,3 +40,9 @@ services:
     arguments: ['@config.factory', '@path.current', '@path_alias.manager', '@path.matcher']
     tags:
       - { name: event_subscriber }
+
+  helfi_proxy.asset.css.optimizer:
+    public: false
+    class: Drupal\helfi_proxy\Asset\CssOptimizer
+    decorates: asset.css.optimizer
+    arguments: ['@config.factory']

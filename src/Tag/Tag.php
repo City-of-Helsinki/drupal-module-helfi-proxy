@@ -16,10 +16,8 @@ final class Tag {
    *   The tag.
    * @param null|string $attribute
    *   The atribute.
-   * @param bool $forceRelative
+   * @param bool $alwaysAbsolute
    *   Whether the given value needs to be converted to relative url.
-   * @param bool $assetPath
-   *   Whether the URL should have asset path (like /assets/to/image.svg).
    * @param bool $sitePrefix
    *   Whether the url should have a site prefix (like /fi/site-prefix/link).
    * @param bool $multipleValues
@@ -30,15 +28,11 @@ final class Tag {
   public function __construct(
     public ?string $tagSelector,
     public ?string $attribute,
-    public bool $forceRelative = FALSE,
-    public bool $assetPath = FALSE,
+    public bool $alwaysAbsolute = FALSE,
     public bool $sitePrefix = FALSE,
     public bool $multipleValues = FALSE,
     public string $multivalueSeparator = ','
   ) {
-    if ($this->assetPath && $this->sitePrefix) {
-      throw new \InvalidArgumentException('Cannot set both asset path and prefix to true.');
-    }
   }
 
 }

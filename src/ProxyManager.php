@@ -99,16 +99,13 @@ final class ProxyManager implements ProxyManagerInterface {
    * {@inheritdoc}
    */
   public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
-    if (!$value) {
+    // Skip if value is being served from CDN already.
+    if (!$value || $this->isCdnAddress($value)) {
       return $value;
     }
     // Certain elements are absolute URLs already (such as og:image:url)
-    // so we need to convert them to relative URLs first.
-    if ($map->forceRelative) {
-      // Skip if file is being served from a CDN already.
-      if ($this->isCdnAddress($value)) {
-        return $value;
-      }
+    // so we need to convert them to relative URLs.
+    if ($map->alwaysAbsolute) {
       $value = $this->convertAbsoluteToRelative($value);
 
       // Skip non-relative values.
@@ -118,8 +115,7 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     // Ignore absolute URLs.
-    if (!$value || str_starts_with($value, 'http') || str_starts_with($value,
-        '//')) {
+    if (str_starts_with($value, 'http') || str_starts_with($value, '//')) {
       return $value;
     }
 
@@ -139,12 +135,6 @@ final class ProxyManager implements ProxyManagerInterface {
       return sprintf('%s/%s', $prefix, ltrim($value, '/'));
     }
 
-    // Serve element from same domain via relative asset URL. Like:
-    // /assets/sites/default/files/js/{sha256}.js.
-    if ($map->assetPath) {
-      return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
-    }
-
     if ($map->multipleValues) {
       $parts = [];
       foreach (explode($map->multivalueSeparator, $value) as $item) {
@@ -153,7 +143,14 @@ final class ProxyManager implements ProxyManagerInterface {
       return implode($map->multivalueSeparator, $parts);
     }
 
-    return sprintf('//%s%s', $this->getHostname(), $value);
+    // Serve element from same domain via relative asset URL. Like:
+    // /assets/sites/default/files/js/{sha256}.js.
+    $assetValue = sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
+
+    if ($map->alwaysAbsolute) {
+      return sprintf('%s%s', $request->getSchemeAndHttpHost(), $assetValue);
+    }
+    return $assetValue;
   }
 
   /**
