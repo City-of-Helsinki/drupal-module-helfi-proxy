@@ -86,6 +86,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $result = trim($dom->saveHTML());
     libxml_use_internal_errors($previousXmlErrorBehavior);
 
+    // Remove the debug xml encoding.
     return str_replace($encoding, '', $result);
   }
 

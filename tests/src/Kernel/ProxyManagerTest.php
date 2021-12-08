@@ -44,15 +44,17 @@ class ProxyManagerTest extends KernelTestBase {
    *
    * @param string $host
    *   The host.
+   * @param int $port
+   *   The port.
    * @param string $uri
    *   The uri.
    *
    * @return \Symfony\Component\HttpFoundation\Request
    *   The request.
    */
-  private function createRequest(string $host = '127.0.0.1', string $uri = '') : Request {
+  private function createRequest(string $host = '127.0.0.1', int $port = 8888, string $uri = '') : Request {
     return Request::create($uri, server: [
-      'HTTP_HOST' => $host,
+      'HTTP_HOST' => $host . ':' . $port,
     ]);
   }
 
@@ -78,16 +80,15 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Gets the expected hostname with path.
+   * Sets the asset path.
    *
    * @param string $path
-   *   The path.
-   *
-   * @return string
-   *   The url.
+   *   The asset path.
    */
-  private function expectedUrlWithPath(string $path) : string {
-    return sprintf('//%s%s', $this->getHostname(), $path);
+  private function setAssetPath(string $path) : void {
+    $this->config('helfi_proxy.settings')
+      ->set('asset_path', $path)
+      ->save();
   }
 
   /**
@@ -109,13 +110,9 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function testAssetPath() : void {
     $this->assertEquals(NULL, $this->proxyManager()->getAssetPath());
+    $this->setAssetPath('test-assets');
 
-    $path = 'test-assets';
-    $this->config('helfi_proxy.settings')
-      ->set('asset_path', $path)
-      ->save();
-
-    $this->assertEquals($path, $this->proxyManager()->getAssetPath());
+    $this->assertEquals('test-assets', $this->proxyManager()->getAssetPath());
   }
 
   /**
@@ -129,10 +126,11 @@ class ProxyManagerTest extends KernelTestBase {
       Tags::tag('source'),
       Tags::tag('img'),
     ];
+    $this->setAssetPath('test-assets');
 
     foreach ($attributeMap as $tag) {
       $path = '/sites/default/files/asset.png';
-      $this->assertEquals('//' . $this->getHostname() . $path, $this->proxyManager()->getAttributeValue($request, $tag, $path));
+      $this->assertEquals('/test-assets' . $path, $this->proxyManager()->getAttributeValue($request, $tag, $path));
     }
   }
 
@@ -140,10 +138,7 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests script tag attribute value.
    */
   public function testScriptAttributeValue() : void {
-    $path = 'test-assets';
-    $this->config('helfi_proxy.settings')
-      ->set('asset_path', $path)
-      ->save();
+    $this->setAssetPath('test-assets');
     $request = $this->createRequest();
     $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Tags::tag('script'), '/core/modules/system/test.js'));
   }
@@ -176,11 +171,12 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function testMetaTags() : void {
     $request = $this->createRequest();
+    $this->setAssetPath('test-assets');
 
     foreach (['og:image', 'og:image:url'] as $tag) {
-      $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag($tag), 'https://www.hel.fi/path/to/og-image.png'));
+      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag($tag), 'https://www.hel.fi/path/to/og-image.png'));
     }
-    $this->assertEquals('//' . $this->getHostname() . '/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
+    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
   }
 
   /**
@@ -212,6 +208,7 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function testSourceSrcSet() : void {
     $request = $this->createRequest();
+    $this->setAssetPath('test-assets');
 
     $values = [
       '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
@@ -220,7 +217,7 @@ class ProxyManagerTest extends KernelTestBase {
 
     foreach ($values as $value) {
       $this->assertEquals(
-        $this->expectedUrlWithPath($value),
+        '/test-assets' . $value,
         $this->proxyManager()->getAttributeValue($request, Tags::tag('source'), $value)
       );
     }
