@@ -6,12 +6,10 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^8.0",
-        "league/uri": "^6.0",
         "drupal/purge": "^3.0",
         "drupal/varnish_purge": "^2.1",
         "ext-libxml": "*",
-        "ext-dom": "*",
-        "symfony/dom-crawler": "^4.0"
+        "ext-dom": "*"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
