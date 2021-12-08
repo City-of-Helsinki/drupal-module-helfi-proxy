@@ -5,8 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\Asset;
 
 use Drupal\Core\Asset\CssOptimizer as DrupalCssOptimizer;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
  * Convert files to use asset path.
@@ -14,29 +13,21 @@ use Drupal\Core\Config\ImmutableConfig;
 final class CssOptimizer extends DrupalCssOptimizer {
 
   /**
-   * The config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  private ImmutableConfig $config;
-
-  /**
    * Constructs a new instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
+   *   The proxy manager.
    */
   public function __construct(
-    ConfigFactoryInterface $configFactory
+    private ProxyManagerInterface $proxyManager
   ) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
   }
 
   /**
    * {@inheritdoc}
    */
   public function rewriteFileURI($matches) : string { // phpcs:ignore
-    if (!$assetPath = $this->config->get('asset_path')) {
+    if (!$assetPath = $this->proxyManager->getAssetPath()) {
       return parent::rewriteFileURI($matches);
     }
     // Prefix with base and remove '../' segments where possible.

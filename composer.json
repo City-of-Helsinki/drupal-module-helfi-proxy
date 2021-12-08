@@ -11,8 +11,7 @@
         "drupal/varnish_purge": "^2.1",
         "ext-libxml": "*",
         "ext-dom": "*",
-        "symfony/dom-crawler": "^4.0",
-        "wa72/htmlpagedom": "dev-master"
+        "symfony/dom-crawler": "^4.0"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",

@@ -17,15 +17,16 @@ final class Tags {
    */
   public static function all() : array {
     return [
-      'input' => new Tag('input[type="image"]', 'src'),
-      'source' => new Tag('source', 'srcset', multipleValues: TRUE, multivalueSeparator: ', '),
-      'img' => new Tag('img', 'src'),
-      'link' => new Tag('link', 'href'),
-      'og:image' => new Tag('meta[property="og:image"]', 'content', alwaysAbsolute: TRUE),
-      'og:image:url' => new Tag('meta[property="og:image:url"]', 'content', alwaysAbsolute: TRUE),
-      'twitter:image' => new Tag('meta[name="twitter:image"]', 'content', alwaysAbsolute: TRUE),
-      'script' => new Tag('script', 'src'),
-      'a' => new Tag('a', 'href', sitePrefix: TRUE),
+      'input' => new Tag('//input[@type="image"]', 'src'),
+      'source' => new Tag('//source', 'srcset', multipleValues: TRUE, multivalueSeparator: ', '),
+      'img' => new Tag('//img', 'src'),
+      'link' => new Tag('//link', 'href'),
+      'og:image' => new Tag('//meta[@property="og:image"]', 'content', alwaysAbsolute: TRUE),
+      'og:image:url' => new Tag('//meta[@property="og:image:url"]', 'content', alwaysAbsolute: TRUE),
+      'twitter:image' => new Tag('//meta[@name="twitter:image"]', 'content', alwaysAbsolute: TRUE),
+      'script' => new Tag('//script', 'src'),
+      'a' => new Tag('//a', 'href', sitePrefix: TRUE),
+      'use' => new Tag('//use', 'href'),
     ];
   }
 
