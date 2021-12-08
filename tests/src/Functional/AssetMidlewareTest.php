@@ -66,23 +66,17 @@ class AssetMidlewareTest extends BrowserTestBase {
       'filters' => [],
     ]);
     $full_html_format->save();
+
     $this->drupalCreateContentType(['type' => 'page']);
-
-    // Copy fixture SVG file to the theme folder.
-    $content = file_get_contents(__DIR__ . '/../../fixtures/sprite.svg');
-    $svgPath = drupal_get_path('theme', $this->defaultTheme) . '/sprite.svg';
-
-    file_put_contents($svgPath, $content);
-
     $this->node = $this->drupalCreateNode([
       'body' => [
-        'value' => sprintf('
+        'value' => '
           <svg class="icon">
             <title>Helsinki</title>
             <use href="/%s#helsinki" />
           </svg>
           <img src="/themes/test.jpg">
-        ', $svgPath),
+        ',
         'format' => 'full_html',
       ],
     ]);
@@ -95,44 +89,21 @@ class AssetMidlewareTest extends BrowserTestBase {
    *   A key value list of tag -> attribute values.
    */
   private function assertAssetPaths(array $types) : void {
-    $html = $this->getSession()->getPage()->getContent();
-    $dom = new \DOMDocument();
-    @$dom->loadHTML($html);
-
     foreach ($types as $type) {
       $counter = 0;
 
-      foreach ($dom->getElementsByTagName($type['tag']) as $row) {
-        if (!$row->getAttribute($type['attribute'])) {
+      $elements = $this->getSession()->getPage()->findAll('css', $type['tag']);
+
+      foreach ($elements as $row) {
+        if (!$value = $row->getAttribute($type['attribute'])) {
           continue;
         }
-        $this->assertStringContainsString($type['expected'], $row->getAttribute($type['attribute']));
+        $this->assertStringStartsWith($type['expected'], $value);
         $counter++;
       }
       // Make sure we have at least one asset with replaced url.
       $this->assertTrue($counter > 0);
     }
-  }
-
-  /**
-   * Asserts that SVGs are replaced properly.
-   */
-  private function assertSvgPaths() : void {
-    $html = $this->getSession()->getPage()->getContent();
-    $dom = new \DOMDocument();
-    @$dom->loadHTML($html);
-
-    $counter = 0;
-    // Make sure SVGs are inlined into dom.
-    foreach ($dom->getElementsByTagName('use') as $row) {
-      if (!$row->getAttribute('href')) {
-        continue;
-      }
-      $counter++;
-      $this->assertEquals('#helsinki', $row->getAttribute('href'));
-    }
-    $this->assertEquals(1, $counter);
-    $this->assertSession()->responseContains('<span style="display: none;"><svg ');
   }
 
   /**
@@ -145,20 +116,19 @@ class AssetMidlewareTest extends BrowserTestBase {
       [
         'tag' => 'img',
         'attribute' => 'src',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/themes/test.jpg',
       ],
       [
-        'tag' => 'link',
+        'tag' => 'link[rel="stylesheet"]',
         'attribute' => 'href',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/',
       ],
       [
         'tag' => 'script',
         'attribute' => 'src',
-        'expected' => '/test-assets',
+        'expected' => '/test-assets/',
       ],
     ]);
-    $this->assertSvgPaths();
 
     // Make sure post requests work when we have form errors.
     $this->drupalGet(Url::fromRoute('user.login'));
@@ -168,14 +138,14 @@ class AssetMidlewareTest extends BrowserTestBase {
     ], 'Log in');
     $this->assertAssetPaths([
       [
-        'tag' => 'link',
+        'tag' => 'link[rel="stylesheet"]',
         'attribute' => 'href',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/',
       ],
       [
         'tag' => 'script',
         'attribute' => 'src',
-        'expected' => '/test-assets',
+        'expected' => '/test-assets/',
       ],
     ]);
 
@@ -184,9 +154,9 @@ class AssetMidlewareTest extends BrowserTestBase {
     $this->drupalGet($this->node->toUrl('edit-form'));
     $this->assertAssetPaths([
       [
-        'tag' => 'link',
+        'tag' => 'link[rel="stylesheet"]',
         'attribute' => 'href',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/',
       ],
       [
         'tag' => 'script',
@@ -205,12 +175,12 @@ class AssetMidlewareTest extends BrowserTestBase {
       [
         'tag' => 'img',
         'attribute' => 'src',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/themes/test.jpg',
       ],
       [
-        'tag' => 'link',
+        'tag' => 'link[rel="stylesheet"]',
         'attribute' => 'href',
-        'expected' => '//' . $this->getHostname(),
+        'expected' => '/test-assets/',
       ],
       [
         'tag' => 'script',
@@ -218,7 +188,6 @@ class AssetMidlewareTest extends BrowserTestBase {
         'expected' => '/test-assets',
       ],
     ]);
-    $this->assertSvgPaths();
 
     // Test json response (autocomplete field).
     $this->drupalGet($path, ['query' => ['q' => 'Anonymous']]);
@@ -254,7 +223,6 @@ class AssetMidlewareTest extends BrowserTestBase {
       ->willReturn(new Response($html));
     $sut = new AssetHttpMiddleware(
       $kernelMock,
-      $this->container->get('logger.factory'),
       $this->container->get('helfi_proxy.proxy_manager')
     );
 
@@ -264,12 +232,12 @@ class AssetMidlewareTest extends BrowserTestBase {
       <meta property="og:site_name" content="Pys&auml;k&ouml;inti">
       <meta property="og:url" content="https://www.hel.fi/fi/kaupunkiymparisto-ja-liikenne/test-0">
       <meta property="og:title" content="test">
-      <meta property="og:image" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
-      <meta property="og:image:url" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
+      <meta property="og:image" content="http://@hostname/test-assets/themes/contrib/hdbt/src/images/og-global.png">
+      <meta property="og:image:url" content="http://@hostname/test-assets/themes/contrib/hdbt/src/images/og-global.png">
       <meta property="og:updated_time" content="2021-11-17T10:11:40+0200">
       <meta property="article:published_time" content="2021-11-17T10:11:33+0200">
       <meta property="article:modified_time" content="2021-11-17T10:11:33+0200">
-      <meta name="twitter:image" content="//@hostname/themes/contrib/hdbt/src/images/og-global.png">
+      <meta name="twitter:image" content="http://@hostname/test-assets/themes/contrib/hdbt/src/images/og-global.png">
       <meta name="twitter:card" content="summary_large_image">
       <meta name="twitter:title" content="test | Helsingin kaupunki">
       <meta name="twitter:url" content="https://www.hel.fi/fi/kaupunkiymparisto-ja-liikenne/test-0">

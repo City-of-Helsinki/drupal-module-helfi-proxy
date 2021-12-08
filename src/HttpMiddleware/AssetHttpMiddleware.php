@@ -81,7 +81,6 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     );
     $dom->encoding = 'UTF-8';
 
-    libxml_use_internal_errors($previousXmlErrorBehavior);
     $callback($dom);
 
     $result = trim($dom->saveHTML());
