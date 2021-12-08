@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
 use Drupal\helfi_proxy\ProxyManager;
-use Drupal\helfi_proxy\Tag\Tags;
+use Drupal\helfi_proxy\Selector\Selectors;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,8 +46,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   private function processHtml(string $html, Request $request) : string {
     return $this->manipulate($html, function (\DOMDocument $dom) use ($request) {
       $xpath = new \DOMXPath($dom);
-      foreach (Tags::all() as $map) {
-        foreach ($xpath->query($map->tagSelector) as $row) {
+      foreach (Selectors::all() as $map) {
+        foreach ($xpath->query($map->xpath) as $row) {
           $originalValue = $row->getAttribute($map->attribute);
 
           if (!$value = $this->proxyManager->getAttributeValue($request, $map, $originalValue)) {

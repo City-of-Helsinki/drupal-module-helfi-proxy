@@ -6,8 +6,8 @@ namespace Drupal\Tests\helfi_proxy\Functional;
 
 use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyTrait;
-use Drupal\helfi_proxy\Tag\Tag;
-use Drupal\helfi_proxy\Tag\Tags;
+use Drupal\helfi_proxy\Selector\Selector;
+use Drupal\helfi_proxy\Selector\Selectors;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -122,9 +122,9 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
 
     $attributeMap = [
-      Tags::tag('link'),
-      Tags::tag('source'),
-      Tags::tag('img'),
+      Selectors::get('link'),
+      Selectors::get('source'),
+      Selectors::get('img'),
     ];
     $this->setAssetPath('test-assets');
 
@@ -140,7 +140,7 @@ class ProxyManagerTest extends KernelTestBase {
   public function testScriptAttributeValue() : void {
     $this->setAssetPath('test-assets');
     $request = $this->createRequest();
-    $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Tags::tag('script'), '/core/modules/system/test.js'));
+    $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Selectors::get('script'), '/core/modules/system/test.js'));
   }
 
   /**
@@ -149,7 +149,7 @@ class ProxyManagerTest extends KernelTestBase {
   public function testAhrefAttributeValue() : void {
     $request = $this->createRequest();
 
-    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), 'https://google.com'));
+    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), 'https://google.com'));
 
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
@@ -160,10 +160,10 @@ class ProxyManagerTest extends KernelTestBase {
       ->save();
 
     $url = '/fi/prefix-fi/link';
-    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), $url));
+    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), $url));
 
     $request = $this->createRequest(uri: 'https://localhost/fi/prefix-fi');
-    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, Tags::tag('a'), '/link'));
+    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), '/link'));
   }
 
   /**
@@ -174,9 +174,9 @@ class ProxyManagerTest extends KernelTestBase {
     $this->setAssetPath('test-assets');
 
     foreach (['og:image', 'og:image:url'] as $tag) {
-      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag($tag), 'https://www.hel.fi/path/to/og-image.png'));
+      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get($tag), 'https://www.hel.fi/path/to/og-image.png'));
     }
-    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
+    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
   }
 
   /**
@@ -188,7 +188,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
+    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Selectors::get('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
   }
 
   /**
@@ -200,7 +200,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Tags::tag('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
+    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
   }
 
   /**
@@ -218,7 +218,7 @@ class ProxyManagerTest extends KernelTestBase {
     foreach ($values as $value) {
       $this->assertEquals(
         '/test-assets' . $value,
-        $this->proxyManager()->getAttributeValue($request, Tags::tag('source'), $value)
+        $this->proxyManager()->getAttributeValue($request, Selectors::get('source'), $value)
       );
     }
   }
@@ -230,7 +230,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
 
     foreach ([NULL, ''] as $value) {
-      foreach (Tags::all() as $tag) {
+      foreach (Selectors::all() as $tag) {
         $this->assertEquals($this->proxyManager()->getAttributeValue($request, $tag, $value), $value);
       }
     }
@@ -241,7 +241,7 @@ class ProxyManagerTest extends KernelTestBase {
    *
    * @dataProvider getEmptyAttributeValueData
    */
-  public function testEmptyGetAttributeValue(Tag $tag, string $value) : void {
+  public function testEmptyGetAttributeValue(Selector $tag, string $value) : void {
     $request = $this->createRequest();
     $this->assertEquals($value, $this->proxyManager()->getAttributeValue($request, $tag, $value));
   }
@@ -254,15 +254,15 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function getEmptyAttributeValueData() : array {
     return [
-      [Tags::tag('link'), ''],
-      [Tags::tag('link'), 'https://localhost/test.svg'],
-      [Tags::tag('link'), '//localhost/test.svg'],
-      [Tags::tag('a'), ''],
-      [Tags::tag('a'), 'https://localhost/test'],
-      [Tags::tag('a'), '//localhost/test'],
-      [Tags::tag('script'), ''],
-      [Tags::tag('script'), 'https://localhost/test.js'],
-      [Tags::tag('script'), '//localhost/test.js'],
+      [Selectors::get('link'), ''],
+      [Selectors::get('link'), 'https://localhost/test.svg'],
+      [Selectors::get('link'), '//localhost/test.svg'],
+      [Selectors::get('a'), ''],
+      [Selectors::get('a'), 'https://localhost/test'],
+      [Selectors::get('a'), '//localhost/test'],
+      [Selectors::get('script'), ''],
+      [Selectors::get('script'), 'https://localhost/test.js'],
+      [Selectors::get('script'), '//localhost/test.js'],
     ];
   }
 

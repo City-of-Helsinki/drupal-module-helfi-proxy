@@ -6,7 +6,7 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
-use Drupal\helfi_proxy\Tag\Tag;
+use Drupal\helfi_proxy\Selector\Selector;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -179,14 +179,15 @@ final class ProxyManager implements ProxyManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
+  public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string {
     // Skip if value is being served from CDN already.
     if (!$value || $this->isCdnAddress($value)) {
       return $value;
     }
     // Certain elements are absolute URLs already (such as og:image:url)
-    // so we need to convert them to relative URLs.
-    if ($map->alwaysAbsolute) {
+    // so we need to convert them to relative first and then back to
+    // absolute.
+    if ($tag->alwaysAbsolute) {
       return $this->handleAlwaysAbsolute($request, $value);
     }
 
@@ -196,12 +197,12 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     // Convert value to have a site prefix, like /fi/site-prefix/.
-    if ($map->sitePrefix) {
+    if ($tag->sitePrefix) {
       return $this->handleSitePrefix($request, $value);
     }
 
-    if ($map->multipleValues) {
-      return $this->handleMultiValue($value, $map->multivalueSeparator);
+    if ($tag->multipleValues) {
+      return $this->handleMultiValue($value, $tag->multivalueSeparator);
     }
 
     return $this->addAssetPath($value);

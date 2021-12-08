@@ -2,19 +2,19 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\helfi_proxy\Tag;
+namespace Drupal\helfi_proxy\Selector;
 
 /**
  * A value object to store HTML attribute data.
  */
-final class Tag {
+class Selector {
 
   /**
    * Constructs a new instance.
    *
-   * @param null|string $tagSelector
+   * @param string $xpath
    *   The tag.
-   * @param null|string $attribute
+   * @param string $attribute
    *   The atribute.
    * @param bool $alwaysAbsolute
    *   Whether the given value needs to be converted to relative url.
@@ -26,8 +26,8 @@ final class Tag {
    *   The separator used for multi-value fields.
    */
   public function __construct(
-    public ?string $tagSelector,
-    public ?string $attribute,
+    public string $xpath,
+    public string $attribute,
     public bool $alwaysAbsolute = FALSE,
     public bool $sitePrefix = FALSE,
     public bool $multipleValues = FALSE,
