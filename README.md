@@ -40,33 +40,11 @@ $config['helfi_proxy.settings']['prefixes'] = [
 ];
 ```
 
-### Absolute URL for assets
+### Serve assets from asset path
 
-Converts all assets (`source[srcset]`, `img[src]`, `link[href]`) to use an absolute URL. The URL is read from `DRUPAL_REVERSE_PROXY_URL` and `DRUPAL_ROUTES` environment variables. The first one to have a value will be used.
+All assets (`script[src]`, `source[srcset]`, `img[src]` etc.) are served from the path configured in (`helfi_proxy.settings`) `asset-path` setting. For example `liikenne-assets`.
 
-This ensures that all local assets are served directly from the instance's real URL instead of `<proxy url>/<project prefix>/<path to asset>`.
-
-Javascripts (`script[src]`) are served from the path configured in (`helfi_proxy.settings`) `asset-path` setting. For example `liikenne-assets`.
-
-### Inline SVGs
-
-SVGs using `<use>` cannot be served from an external domain so this module attempts to 'inline' all SVG `<use>` definitions.
-
-For example, the following SVG:
-```
-<svg>
-  <use href="/core/themes/claro/sprite.svg#helsinki"></use>
-</svg>
-```
-
-will be converted to:
-```
-<svg>
-   <use href="#helsinki"></use>
-</svg>
-```
-
-The module attempts to read the file and insert it directly into DOM, then change the `href` attribute to `#helsinki`.
+This ensures that all local assets are served directly from the asset path (`<proxy url>/<asset path>/<path to asset>`) instead of `<proxy url>/<project prefix>/<path to asset>`.
 
 ### Disallow search engines/robots from indexing the site
 
