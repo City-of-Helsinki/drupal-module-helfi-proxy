@@ -6,7 +6,7 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
-use Drupal\helfi_proxy\Tag\Tag;
+use Drupal\helfi_proxy\Selector\Selector;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -96,64 +96,116 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Handles tags with 'alwaysAbsolute' option.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param string $value
+   *   The value to convert.
+   *
+   * @return string|null
+   *   The value.
+   */
+  private function handleAlwaysAbsolute(Request $request, string $value) : ? string {
+    $value = $this->convertAbsoluteToRelative($value);
+
+    // Skip non-relative values.
+    if (!str_starts_with($value, '/')) {
+      return $value;
+    }
+    return sprintf('%s%s', $request->getSchemeAndHttpHost(), $this->addAssetPath($value));
+  }
+
+  /**
+   * Prefixes the given value with /{asset-path}.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return string|null
+   *   The path.
+   */
+  private function addAssetPath(string $value) : ? string {
+    // Serve element from same domain via relative asset URL. Like:
+    // /assets/sites/default/files/js/{sha256}.js.
+    return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
+  }
+
+  /**
+   * Handles tags with 'multipleValues' option.
+   *
+   * @param string $value
+   *   The value.
+   * @param string $separator
+   *   The separator.
+   *
+   * @return string|null
+   *   The value.
+   */
+  private function handleMultiValue(string $value, string $separator) : ? string {
+    $parts = [];
+    foreach (explode($separator, $value) as $item) {
+      $parts[] = $this->addAssetPath(trim($item));
+    }
+    return implode($separator, $parts);
+  }
+
+  /**
+   * Handles values with 'sitePrefix' option.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param string $value
+   *   The value.
+   *
+   * @return string|null
+   *   The value.
+   */
+  private function handleSitePrefix(Request $request, string $value) : ? string {
+    // Make sure we have active site prefix and the given URL is relative.
+    if ((!$prefix = $this->getActivePrefix($request->getPathInfo())) || !str_starts_with($value, '/')) {
+      return $value;
+    }
+
+    // Scan other languages as well.
+    foreach ($this->getInstancePrefixes() as $item) {
+      if (str_contains($value, $item)) {
+        return $value;
+      }
+    }
+    return sprintf('%s/%s', $prefix, ltrim($value, '/'));
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string {
-    if (!$value) {
+  public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string {
+    // Skip if value is being served from CDN already.
+    if (!$value || $this->isCdnAddress($value)) {
       return $value;
     }
     // Certain elements are absolute URLs already (such as og:image:url)
-    // so we need to convert them to relative URLs first.
-    if ($map->forceRelative) {
-      // Skip if file is being served from a CDN already.
-      if ($this->isCdnAddress($value)) {
-        return $value;
-      }
-      $value = $this->convertAbsoluteToRelative($value);
-
-      // Skip non-relative values.
-      if (!str_starts_with($value, '/')) {
-        return $value;
-      }
+    // so we need to convert them to relative first and then back to
+    // absolute.
+    if ($tag->alwaysAbsolute) {
+      return $this->handleAlwaysAbsolute($request, $value);
     }
 
     // Ignore absolute URLs.
-    if (!$value || str_starts_with($value, 'http') || str_starts_with($value,
-        '//')) {
+    if (str_starts_with($value, 'http') || str_starts_with($value, '//')) {
       return $value;
     }
 
     // Convert value to have a site prefix, like /fi/site-prefix/.
-    if ($map->sitePrefix) {
-      // Make sure we have active site prefix and the given URL is relative.
-      if ((!$prefix = $this->getActivePrefix($request->getPathInfo())) || !str_starts_with($value, '/')) {
-        return $value;
-      }
-
-      // Scan other languages as well.
-      foreach ($this->getInstancePrefixes() as $item) {
-        if (str_contains($value, $item)) {
-          return $value;
-        }
-      }
-      return sprintf('%s/%s', $prefix, ltrim($value, '/'));
+    if ($tag->sitePrefix) {
+      return $this->handleSitePrefix($request, $value);
     }
 
-    // Serve element from same domain via relative asset URL. Like:
-    // /assets/sites/default/files/js/{sha256}.js.
-    if ($map->assetPath) {
-      return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
+    if ($tag->multipleValues) {
+      return $this->handleMultiValue($value, $tag->multivalueSeparator);
     }
 
-    if ($map->multipleValues) {
-      $parts = [];
-      foreach (explode($map->multivalueSeparator, $value) as $item) {
-        $parts[] = sprintf('//%s%s', $this->getHostname(), trim($item));
-      }
-      return implode($map->multivalueSeparator, $parts);
-    }
-
-    return sprintf('//%s%s', $this->getHostname(), $value);
+    return $this->addAssetPath($value);
   }
 
   /**

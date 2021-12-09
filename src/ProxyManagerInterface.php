@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy;
 
-use Drupal\helfi_proxy\Tag\Tag;
+use Drupal\helfi_proxy\Selector\Selector;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -17,7 +17,7 @@ interface ProxyManagerInterface {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param \Drupal\helfi_proxy\Tag\Tag $map
+   * @param \Drupal\helfi_proxy\Selector\Selector $tag
    *   The attrbiteu map object.
    * @param string|null $value
    *   The value.
@@ -25,7 +25,7 @@ interface ProxyManagerInterface {
    * @return string|null
    *   The value for given attribute or null.
    */
-  public function getAttributeValue(Request $request, Tag $map, ?string $value) : ? string;
+  public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string;
 
   /**
    * Gets the instance name.
