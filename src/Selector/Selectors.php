@@ -27,6 +27,7 @@ final class Selectors {
       'script' => new Selector('//script', 'src'),
       'a' => new Selector('//a', 'href', sitePrefix: TRUE),
       'use' => new Selector('//use', 'href'),
+      'use-xhref' => new Selector('//use', 'xlink:href'),
     ];
   }
 
