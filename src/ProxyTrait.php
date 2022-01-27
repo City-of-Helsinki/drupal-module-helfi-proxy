@@ -27,6 +27,7 @@ trait ProxyTrait {
     }
 
     $variables = [
+      'DRUPAL_BACKEND_DOMAIN',
       'DRUPAL_ROUTES',
       'DRUPAL_REVERSE_PROXY_ADDRESS',
     ];

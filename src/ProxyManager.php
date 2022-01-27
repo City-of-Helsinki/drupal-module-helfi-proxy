@@ -138,14 +138,16 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value.
    * @param string $separator
    *   The separator.
+   * @param callable $callback
+   *   The callback to run value through.
    *
    * @return string|null
    *   The value.
    */
-  private function handleMultiValue(string $value, string $separator) : ? string {
+  private function handleMultiValue(string $value, string $separator, callable $callback) : ? string {
     $parts = [];
     foreach (explode($separator, $value) as $item) {
-      $parts[] = $this->addAssetPath(trim($item));
+      $parts[] = $callback(trim($item));
     }
     return implode($separator, $parts);
   }
@@ -177,12 +179,65 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Checks if the given value is an image style.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return bool
+   *   TRUE if image is image style.
+   */
+  private function isImageStyle(string $value) : bool {
+    return str_contains($value, '/files/styles/');
+  }
+
+  /**
+   * Special handling for image styles.
+   *
+   * @param \Drupal\helfi_proxy\Selector\Selector $tag
+   *   The tag.
+   * @param string $value
+   *   The value with domain added to it.
+   *
+   * @return string|null
+   *   The image style url.
+   */
+  private function handleImageStyle(Selector $tag, string $value) : ? string {
+    if ($tag->multipleValues) {
+      return $this->handleMultiValue($value, $tag->multivalueSeparator,
+        function (string $value): string {
+          return $this->addDomain($value);
+        });
+    }
+    return $this->addDomain($value);
+  }
+
+  /**
+   * Adds domain to relative URL.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return string
+   *   The value with domain added to it.
+   */
+  private function addDomain(string $value) : string {
+    return sprintf('//%s/%s', $this->getHostname(), ltrim($value, '/'));
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string {
     // Skip if value is being served from CDN already.
     if (!$value || $this->isCdnAddress($value)) {
       return $value;
+    }
+
+    // Image styles need special handling because they need to be run through
+    // PHP before they are uploaded to CDN.
+    if ($this->isImageStyle($value)) {
+      return $this->handleImageStyle($tag, $value);
     }
     // Certain elements are absolute URLs already (such as og:image:url)
     // so we need to convert them to relative first and then back to
@@ -202,7 +257,11 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     if ($tag->multipleValues) {
-      return $this->handleMultiValue($value, $tag->multivalueSeparator);
+      return $this->handleMultiValue($value, $tag->multivalueSeparator,
+        function (string $value) : string {
+          return $this->addAssetPath($value);
+        }
+      );
     }
 
     return $this->addAssetPath($value);
