@@ -217,7 +217,7 @@ class ProxyManagerTest extends KernelTestBase {
 
     foreach ($values as $value) {
       $this->assertEquals(
-        '/test-assets' . $value,
+        '//' . $this->getHostname() . $value,
         $this->proxyManager()->getAttributeValue($request, Selectors::get('source'), $value)
       );
     }
