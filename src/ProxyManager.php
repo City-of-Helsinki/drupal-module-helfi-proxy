@@ -34,32 +34,6 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
-   * Converts the given URL to relative.
-   *
-   * @param string|null $value
-   *   The value.
-   *
-   * @return string|null
-   *   the value.
-   */
-  private function convertAbsoluteToRelative(?string $value) : ? string {
-    if (!$value) {
-      return $value;
-    }
-    $parts = parse_url($value);
-
-    // Value is already relative.
-    if (empty($parts['host'])) {
-      return $value;
-    }
-
-    if (isset($parts['path'])) {
-      return $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
-    }
-    return $value;
-  }
-
-  /**
    * Checks if given URL is hosted from a CDN.
    *
    * @param string|null $value
@@ -96,6 +70,24 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Checks whether the asset is hosted locally.
+   *
+   * @param string $value
+   *   The path to given asset.
+   *
+   * @return bool
+   *   TRUE if asset is local.
+   */
+  private function isLocalAsset(string $value) : bool {
+    return match(TRUE) {
+      str_starts_with($value, '/sites'),
+      str_starts_with($value, '/core'),
+      str_starts_with($value, '/themes') => TRUE,
+      default => FALSE,
+    };
+  }
+
+  /**
    * Handles tags with 'alwaysAbsolute' option.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -107,11 +99,23 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value.
    */
   private function handleAlwaysAbsolute(Request $request, string $value) : ? string {
-    $value = $this->convertAbsoluteToRelative($value);
-
-    // Skip non-relative values.
-    if (!str_starts_with($value, '/')) {
+    if (!$value) {
       return $value;
+    }
+    $parts = parse_url($value);
+
+    // Value is already relative.
+    if (empty($parts['host']) || empty($parts['path'])) {
+      return $value;
+    }
+
+    // Skip non-local assets.
+    if (!$this->isLocalAsset($parts['path'])) {
+      return $value;
+    }
+
+    if (isset($parts['path'])) {
+      $value = $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
     }
     return sprintf('%s%s', $request->getSchemeAndHttpHost(), $this->addAssetPath($value));
   }
@@ -239,9 +243,8 @@ final class ProxyManager implements ProxyManagerInterface {
     if ($this->isImageStyle($value)) {
       return $this->handleImageStyle($tag, $value);
     }
-    // Certain elements are absolute URLs already (such as og:image:url)
-    // so we need to convert them to relative first and then back to
-    // absolute.
+    // Certain elements might be absolute URLs already (such as og:image:url).
+    // Make sure locally hosted files are always served from correct domain.
     if ($tag->alwaysAbsolute) {
       return $this->handleAlwaysAbsolute($request, $value);
     }
