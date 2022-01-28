@@ -62,7 +62,7 @@ robots_paths:
 
 Enable modules with `drush en varnish_purger varnish_purge_tags purge_drush purge_processor_cron purge_queuer_coretags purge_tokens`.
 
-Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder if you enabled this module before Varnish/Purge modules and import configuration changes.
+Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder if you enabled this module before Varnish/Purge modules.
 
 Add these to your settings.php to use varnish cache:
 
