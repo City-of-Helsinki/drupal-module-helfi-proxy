@@ -15,7 +15,7 @@ class Selector {
    * @param string $xpath
    *   The tag.
    * @param string $attribute
-   *   The atribute.
+   *   The attribute.
    * @param bool $alwaysAbsolute
    *   Whether the given value needs to be converted to relative url.
    * @param bool $sitePrefix

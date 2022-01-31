@@ -34,32 +34,6 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
-   * Converts the given URL to relative.
-   *
-   * @param string|null $value
-   *   The value.
-   *
-   * @return string|null
-   *   the value.
-   */
-  private function convertAbsoluteToRelative(?string $value) : ? string {
-    if (!$value) {
-      return $value;
-    }
-    $parts = parse_url($value);
-
-    // Value is already relative.
-    if (empty($parts['host'])) {
-      return $value;
-    }
-
-    if (isset($parts['path'])) {
-      return $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
-    }
-    return $value;
-  }
-
-  /**
    * Checks if given URL is hosted from a CDN.
    *
    * @param string|null $value
@@ -96,6 +70,24 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Checks whether the asset is hosted locally.
+   *
+   * @param string $value
+   *   The path to given asset.
+   *
+   * @return bool
+   *   TRUE if asset is local.
+   */
+  private function isLocalAsset(string $value) : bool {
+    return match(TRUE) {
+      str_starts_with($value, '/sites'),
+      str_starts_with($value, '/core'),
+      str_starts_with($value, '/themes') => TRUE,
+      default => FALSE,
+    };
+  }
+
+  /**
    * Handles tags with 'alwaysAbsolute' option.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -107,11 +99,23 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value.
    */
   private function handleAlwaysAbsolute(Request $request, string $value) : ? string {
-    $value = $this->convertAbsoluteToRelative($value);
-
-    // Skip non-relative values.
-    if (!str_starts_with($value, '/')) {
+    if (!$value) {
       return $value;
+    }
+    $parts = parse_url($value);
+
+    // Value is already relative.
+    if (empty($parts['host']) || empty($parts['path'])) {
+      return $value;
+    }
+
+    // Skip non-local assets.
+    if (!$this->isLocalAsset($parts['path'])) {
+      return $value;
+    }
+
+    if (isset($parts['path'])) {
+      $value = $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
     }
     return sprintf('%s%s', $request->getSchemeAndHttpHost(), $this->addAssetPath($value));
   }
@@ -138,14 +142,16 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value.
    * @param string $separator
    *   The separator.
+   * @param callable $callback
+   *   The callback to run value through.
    *
    * @return string|null
    *   The value.
    */
-  private function handleMultiValue(string $value, string $separator) : ? string {
+  private function handleMultiValue(string $value, string $separator, callable $callback) : ? string {
     $parts = [];
     foreach (explode($separator, $value) as $item) {
-      $parts[] = $this->addAssetPath(trim($item));
+      $parts[] = $callback(trim($item));
     }
     return implode($separator, $parts);
   }
@@ -177,6 +183,53 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
+   * Checks if the given value is an image style.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return bool
+   *   TRUE if image is image style.
+   */
+  private function isImageStyle(string $value) : bool {
+    return str_contains($value, '/files/styles/');
+  }
+
+  /**
+   * Special handling for image styles.
+   *
+   * @param \Drupal\helfi_proxy\Selector\Selector $tag
+   *   The tag.
+   * @param string $value
+   *   The value with domain added to it.
+   *
+   * @return string|null
+   *   The image style url.
+   */
+  private function handleImageStyle(Selector $tag, string $value) : ? string {
+    if ($tag->multipleValues) {
+      return $this->handleMultiValue($value, $tag->multivalueSeparator,
+        function (string $value): string {
+          return $this->addDomain($value);
+        });
+    }
+    return $this->addDomain($value);
+  }
+
+  /**
+   * Adds domain to relative URL.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return string
+   *   The value with domain added to it.
+   */
+  private function addDomain(string $value) : string {
+    return sprintf('//%s/%s', $this->getHostname(), ltrim($value, '/'));
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string {
@@ -184,9 +237,14 @@ final class ProxyManager implements ProxyManagerInterface {
     if (!$value || $this->isCdnAddress($value)) {
       return $value;
     }
-    // Certain elements are absolute URLs already (such as og:image:url)
-    // so we need to convert them to relative first and then back to
-    // absolute.
+
+    // Image styles need special handling because they need to be run through
+    // PHP before they are uploaded to CDN.
+    if ($this->isImageStyle($value)) {
+      return $this->handleImageStyle($tag, $value);
+    }
+    // Certain elements might be absolute URLs already (such as og:image:url).
+    // Make sure locally hosted files are always served from correct domain.
     if ($tag->alwaysAbsolute) {
       return $this->handleAlwaysAbsolute($request, $value);
     }
@@ -202,7 +260,11 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     if ($tag->multipleValues) {
-      return $this->handleMultiValue($value, $tag->multivalueSeparator);
+      return $this->handleMultiValue($value, $tag->multivalueSeparator,
+        function (string $value) : string {
+          return $this->addAssetPath($value);
+        }
+      );
     }
 
     return $this->addAssetPath($value);

@@ -174,9 +174,9 @@ class ProxyManagerTest extends KernelTestBase {
     $this->setAssetPath('test-assets');
 
     foreach (['og:image', 'og:image:url'] as $tag) {
-      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get($tag), 'https://www.hel.fi/path/to/og-image.png'));
+      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/themes/hdbt/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get($tag), 'https://www.hel.fi/themes/hdbt/og-image.png'));
     }
-    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/path/to/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('twitter:image'), 'https://www.hel.fi/path/to/og-image.png'));
+    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/themes/hdbt/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('twitter:image'), 'https://www.hel.fi/themes/hdbt/og-image.png'));
   }
 
   /**
@@ -217,7 +217,7 @@ class ProxyManagerTest extends KernelTestBase {
 
     foreach ($values as $value) {
       $this->assertEquals(
-        '/test-assets' . $value,
+        '//' . $this->getHostname() . $value,
         $this->proxyManager()->getAttributeValue($request, Selectors::get('source'), $value)
       );
     }
