@@ -106,12 +106,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
 
     $hasChanges = FALSE;
 
-    if (!$content) {
+    if (!$content || !is_array($content)) {
       return NULL;
     }
 
     foreach ($content as $key => $value) {
-      if (!isset($value['data'])) {
+      if (!isset($value['data']) || !is_string($value['data'])) {
         continue;
       }
       $hasChanges = TRUE;
