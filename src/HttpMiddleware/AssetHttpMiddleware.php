@@ -122,6 +122,23 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
+   * Checks if the given response is json.
+   *
+   * @param \Symfony\Component\HttpFoundation\Response $response
+   *   The response.
+   *
+   * @return bool
+   *   TRUE if response is JSON.
+   */
+  private function isJsonResponse(Response $response) : bool {
+    if ($response instanceof JsonResponse) {
+      return TRUE;
+    }
+
+    return $response->headers->get('content-type') === 'application/json';
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function handle(
@@ -141,7 +158,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       return $response;
     }
 
-    if ($response instanceof JsonResponse) {
+    if ($this->isJsonResponse($response)) {
       if ($json = $this->processJson($content, $request)) {
         return $response->setContent($json);
       }
