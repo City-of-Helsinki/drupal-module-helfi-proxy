@@ -106,12 +106,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
 
     $hasChanges = FALSE;
 
-    if (!$content) {
+    if (!$content || !is_array($content)) {
       return NULL;
     }
 
     foreach ($content as $key => $value) {
-      if (!isset($value['data'])) {
+      if (!isset($value['data']) || !is_string($value['data'])) {
         continue;
       }
       $hasChanges = TRUE;
@@ -119,6 +119,23 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       $content[$key]['data'] = $this->processHtml($value['data'], $request);
     }
     return $hasChanges ? json_encode($content) : NULL;
+  }
+
+  /**
+   * Checks if the given response is json.
+   *
+   * @param \Symfony\Component\HttpFoundation\Response $response
+   *   The response.
+   *
+   * @return bool
+   *   TRUE if response is JSON.
+   */
+  private function isJsonResponse(Response $response) : bool {
+    if ($response instanceof JsonResponse) {
+      return TRUE;
+    }
+
+    return $response->headers->get('content-type') === 'application/json';
   }
 
   /**
@@ -141,7 +158,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       return $response;
     }
 
-    if ($response instanceof JsonResponse) {
+    if ($this->isJsonResponse($response)) {
       if ($json = $this->processJson($content, $request)) {
         return $response->setContent($json);
       }
