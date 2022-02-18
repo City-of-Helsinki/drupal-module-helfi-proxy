@@ -62,7 +62,7 @@ class TunnistamoRedirectUrlSubscriberTest extends UnitTestCase {
     \Drupal::setContainer($container);
 
     $proxyManager = $this->prophesize(ProxyManagerInterface::class);
-    $proxyManager->getTunnistamoReturnUrl()->willReturn($url);
+    $proxyManager->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL)->willReturn($url);
 
     $subscriber = new TunnistamoRedirectUrlSubscriber($proxyManager->reveal());
     $stub = $this->getRedirectUrlEventStub($url);

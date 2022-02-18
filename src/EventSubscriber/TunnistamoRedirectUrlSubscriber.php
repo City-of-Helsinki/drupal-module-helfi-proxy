@@ -40,7 +40,7 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
    *   Response event.
    */
   public function onRedirectUrlEvent(RedirectUrlEvent $event) : void {
-    if (!$url = $this->proxyManager->getTunnistamoReturnUrl()) {
+    if (!$url = $this->proxyManager->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL)) {
       return;
     }
 

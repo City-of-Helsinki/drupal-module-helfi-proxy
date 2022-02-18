@@ -64,7 +64,7 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests instance prefixes.
    */
   public function testPrefixes() : void {
-    $this->assertEquals([], $this->proxyManager()->getConfig(ProxyManagerInterface::PREFIXES));
+    $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::PREFIXES));
 
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
