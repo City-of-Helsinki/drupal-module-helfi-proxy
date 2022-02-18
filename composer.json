@@ -8,7 +8,7 @@
         "php": "^8.0",
         "drupal/purge": "^3.0",
         "drupal/varnish_purge": "^2.1",
-        "drupal/helfi_api_base": "^2.0",
+        "drupal/helfi_api_base": "*",
         "ext-libxml": "*",
         "ext-dom": "*"
     },
