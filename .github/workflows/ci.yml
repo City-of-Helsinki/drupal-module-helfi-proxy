@@ -30,10 +30,9 @@ jobs:
       - name: Build project
         run: |
           composer create-project city-of-helsinki/drupal-helfi-platform:dev-main $DRUPAL_ROOT --no-interaction --repository https://repository.drupal.hel.ninja/
-          cd $DRUPAL_ROOT
           # Use 1.x entity module until https://www.drupal.org/project/entity/issues/3249372 is
           # fixed.
-          composer require drupal/entity:dev-1.x#0f0bd50d8e830fdb05bfb3dae1105ed771655b56
+          composer require drupal/entity:1.x-dev@dev
 
       - name: Install Drupal
         run: |
