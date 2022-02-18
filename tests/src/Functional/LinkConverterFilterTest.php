@@ -17,7 +17,9 @@ class LinkConverterFilterTest extends SitePrefixTestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
+    'filter',
     'filter_test',
+    'helfi_api_base',
   ];
 
   /**
@@ -27,12 +29,12 @@ class LinkConverterFilterTest extends SitePrefixTestBase {
     parent::setUp();
 
     FilterFormat::load('full_html')
-      ->setFilterConfig('helfi_link_converter', ['status' => 1])
+      ->setFilterConfig('helfi_link_converter', ['status' => 1, 'weight' => -100])
       ->save();
 
-    $body = function ($langcode) : array {
+    $body = function (string $langcode) : array {
       return [
-        'value' => sprintf('<a href="/relative/link">Link %s</a>', $langcode),
+        'value' => sprintf('<a class="test-link" href="/node/1">Link %s</a>', $langcode),
         'format' => 'full_html',
       ];
     };
@@ -52,7 +54,7 @@ class LinkConverterFilterTest extends SitePrefixTestBase {
   }
 
   /**
-   * Tests that language prefixes are added to text fields.
+   * Tests that language prefixes are added to the links in text fields.
    */
   public function testFilter() : void {
     foreach (['en' => '', 'fi' => 'fi/', 'sv' => 'sv/'] as $langcode => $langPrefix) {
@@ -61,7 +63,7 @@ class LinkConverterFilterTest extends SitePrefixTestBase {
       // Make sure links in body field have a site prefix.
       $this->assertSession()
         ->elementAttributeContains('css', '.test-link', 'href',
-          "/{$langPrefix}prefix-$langcode/relative/link"
+          "/{$langPrefix}prefix-$langcode/node/1"
         );
     }
   }

@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Functional;
 
-use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 
 /**
@@ -12,7 +11,7 @@ use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
  *
  * @group helfi_proxy
  */
-class SitePrefixPathProcessorTest extends BrowserTestBase {
+class SitePrefixPathProcessorTest extends SitePrefixTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
 

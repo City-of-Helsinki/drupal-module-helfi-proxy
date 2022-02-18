@@ -18,7 +18,6 @@ abstract class SitePrefixTestBase extends BrowserTestBase {
   protected static $modules = [
     'node',
     'content_translation',
-    'helfi_api_base',
     'helfi_proxy',
   ];
 

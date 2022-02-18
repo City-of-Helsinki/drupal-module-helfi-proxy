@@ -131,7 +131,7 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     // Ignore absolute URLs.
-    if (str_starts_with($value, 'http') || str_starts_with($value, '//')) {
+    if ($this->isAbsoluteUri($value)) {
       return $value;
     }
 
@@ -144,6 +144,19 @@ final class ProxyManager implements ProxyManagerInterface {
     }
 
     return $this->addAssetPath($value);
+  }
+
+  /**
+   * Checks if URI is absolute.
+   *
+   * @param string $uri
+   *   The uri.
+   *
+   * @return bool
+   *   TRUE if given uri is absolute.
+   */
+  private function isAbsoluteUri(string $uri) : bool {
+    return str_starts_with($uri, 'http') || str_starts_with($uri, '//');
   }
 
   /**
@@ -246,6 +259,10 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value with domain added to it.
    */
   private function addDomain(string $value) : string {
+    // Skip absolute uris.
+    if ($this->isAbsoluteUri($value)) {
+      return $value;
+    }
     return sprintf('//%s/%s', $this->getHostname(), ltrim($value, '/'));
   }
 

@@ -134,22 +134,23 @@ class ProxyManagerTest extends KernelTestBase {
   private function createHtmlTag(
     string $tag,
     array $attributes,
-    string $value = NULL
+    string $value = NULL,
+    bool $hasClosingTag = TRUE
   ) : string {
-    return vsprintf('<%s %s>%s</%s>', [
+    return vsprintf('<%s %s>%s%s', [
       $tag,
       implode(' ', array_map(function ($key, $value) {
         return sprintf('%s="%s"', $key, $value);
       }, array_keys($attributes), $attributes)),
       $value,
-      $tag,
+      $hasClosingTag ? "</$tag>" : NULL,
     ]);
   }
 
   /**
    * Tests script tag attribute value.
    */
-  public function testScriptAttributeValue() : void {
+  public function testAttributeSelector() : void {
     $this->setAssetPath('test-assets');
     $request = $this->createRequest();
 
@@ -161,26 +162,46 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Tests meta tags.
+   * Tests AbsoluteUriAttributeSelector() object.
    */
-  public function testMetaTags() : void {
+  public function testAbsoluteUriAttributeSelector() : void {
     $request = $this->createRequest();
     $this->setAssetPath('test-assets');
     $xpaths = [
-      'og:image' => 'property',
       'og:image:url' => 'property',
       'twitter:image' => 'name',
     ];
 
     foreach ($xpaths as $value => $selector) {
-      $expected = $this->createHtmlTag('meta', ['content' => 'http://' . $this->getHostname() . '/test-assets/theme/contrib/hdbt/test.png']);
-      $html = $this->createHtmlTag('meta', ['content' => '/theme/contrib/hdbt/test.png']);
+      // Make sure domain is added to relative paths when dealing with
+      // AbsoluteUriAttributeSelectors.
+      $expected = $this->createHtmlTag('meta', [
+        $selector => $value,
+        'content' => 'http://' . $this->getHostname() . '/test-assets/themes/contrib/hdbt/test.png',
+      ], hasClosingTag: FALSE);
+      $html = $this->createHtmlTag('meta', [
+        $selector => $value,
+        'content' => '/themes/contrib/hdbt/test.png',
+      ], hasClosingTag: FALSE);
 
       $xpath = sprintf('//meta[@%s="%s"]', $selector, $value);
-      $selector = new AbsoluteUriAttributeSelector($xpath, 'content');
-      $processed = $this->proxyManager()->processHtml($html, $request, [$selector]);
+      $attributeSelector = new AbsoluteUriAttributeSelector($xpath, 'content');
 
-      $this->assertEquals($expected, $processed);
+      $this->assertEquals(
+        $expected,
+        $this->proxyManager()->processHtml($html, $request, [$attributeSelector])
+      );
+
+      // Make sure the domain is converted to correct one.
+      $html = $this->createHtmlTag('meta', [
+        $selector => $value,
+        'content' => 'http://www.hel.fi/themes/contrib/hdbt/test.png',
+      ], hasClosingTag: FALSE);
+
+      $this->assertEquals(
+        $expected,
+        $this->proxyManager()->processHtml($html, $request, [$attributeSelector])
+      );
     }
   }
 
@@ -191,9 +212,17 @@ class ProxyManagerTest extends KernelTestBase {
     putenv('STAGE_FILE_PROXY_ORIGIN=');
     putenv('AZURE_BLOB_STORAGE_NAME=kymp');
     $request = $this->createRequest();
+
+    $html = $this->createHtmlTag('meta', [
+      'property' => 'og:image:url',
+      'content' => 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123',
+    ], hasClosingTag: FALSE);
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
+    $this->assertEquals(
+      $html,
+      $this->proxyManager()->processHtml($html, $request, [new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content')])
+    );
   }
 
   /**
@@ -205,67 +234,47 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
+    $html = $this->createHtmlTag('meta', [
+      'property' => 'og:image:url',
+      'content' => 'https://sote.blob.core.windows.net/test/og-image.png',
+    ], hasClosingTag: FALSE);
+
+    $this->assertEquals(
+      $html,
+      $this->proxyManager()->processHtml($html, $request, [
+        new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content'),
+      ])
+    );
   }
 
   /**
    * Tests source srcset.
    */
-  public function testSourceSrcSet() : void {
+  public function testMultivalueAttributeSelector() : void {
     $request = $this->createRequest();
     $this->setAssetPath('test-assets');
 
     $values = [
       '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
-      '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x,//helfi-kymp.docker.so/sites/default/files/styles/3_2_xxs_2x/public/image%20%281%29.png?itok=pSa7Ws3i 2x',
+      '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      '//helfi-kymp.docker.so/sites/default/files/styles/3_2_xxs_2x/public/image%20%281%29.png?itok=pSa7Ws3i 2x',
     ];
+    $html = $this->createHtmlTag('source', ['srcset' => implode(', ', $values)]);
 
-    foreach ($values as $value) {
-      $this->assertEquals(
-        '//' . $this->getHostname() . $value,
-        $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('source'), $value)
-      );
-    }
-  }
-
-  /**
-   * Tests empty string and null values.
-   */
-  public function testNullValue() : void {
-    $request = $this->createRequest();
-
-    foreach ([NULL, ''] as $value) {
-      foreach (DefaultSelectors::all() as $tag) {
-        $this->assertEquals($this->proxyManager()->getAttributeValue($request, $tag, $value), $value);
-      }
-    }
-  }
-
-  /**
-   * Tests supported tags with empty values.
-   *
-   * @dataProvider getEmptyAttributeValueData
-   */
-  public function testEmptyGetAttributeValue(DefaultAttributeValueProcessor $tag, string $value) : void {
-    $request = $this->createRequest();
-    $this->assertEquals($value, $this->proxyManager()->getAttributeValue($request, $tag, $value));
-  }
-
-  /**
-   * Data provider for testEmptyGetAttributeValue.
-   *
-   * @return \string[][]
-   *   The test data.
-   */
-  public function getEmptyAttributeValueData() : array {
-    return [
-      [DefaultSelectors::get('link'), ''],
-      [DefaultSelectors::get('link'), 'https://localhost/test.svg'],
-      [DefaultSelectors::get('link'), '//localhost/test.svg'],
-      [DefaultSelectors::get('script'), ''],
-      [DefaultSelectors::get('script'), 'https://localhost/test.js'],
-      [DefaultSelectors::get('script'), '//localhost/test.js'],
+    $expectedValues = [
+      '//' . $this->getHostname() . '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      '//' . $this->getHostname() . '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      // Make sure absolute uris are ignored.
+      '//helfi-kymp.docker.so/sites/default/files/styles/3_2_xxs_2x/public/image%20%281%29.png?itok=pSa7Ws3i 2x',
     ];
+    $expected = $this->createHtmlTag('source', ['srcset' => implode(', ', $expectedValues)]);
+
+    $this->assertEquals(
+      $expected,
+      $this->proxyManager()->processHtml($html, $request, [
+        new MultiValueAttributeSelector('//source', 'srcset', ', '),
+      ])
+    );
   }
 
 }
