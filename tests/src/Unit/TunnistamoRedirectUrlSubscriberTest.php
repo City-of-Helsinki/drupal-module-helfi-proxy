@@ -28,15 +28,20 @@ class TunnistamoRedirectUrlSubscriberTest extends UnitTestCase {
    * @param string $url
    *   The url.
    *
-   * @return \Drupal\helfi_tunnistamo\Event\RedirectUrlEvent|mixed|\PHPUnit\Framework\MockObject\MockObject
+   * @return \Drupal\helfi_tunnistamo\Event\RedirectUrlEvent|\PHPUnit\Framework\MockObject\MockObject
    *   The stub class.
    */
   private function getRedirectUrlEventStub(string $url) {
     if (!class_exists('\Drupal\helfi_tunnistamo\Event\RedirectUrlEvent')) {
-      $stub = $this->createPartialMock('\Drupal\helfi_tunnistamo\Event\RedirectUrlEvent', [
-        'setRedirectUrl',
-        'getRedirectUrl',
-      ]);
+      $stub = $this->getMockBuilder('\Drupal\helfi_tunnistamo\Event\RedirectUrlEvent')
+        ->allowMockingUnknownTypes()
+        // @todo Fix this before phpunit 10.
+        // @see https://github.com/sebastianbergmann/phpunit/issues/4852
+        ->setMethods([
+          'setRedirectUrl',
+          'getRedirectUrl',
+        ])
+        ->getMock();
       $stub->method('getRedirectUrl')->willReturn(Url::fromUserInput($url));
     }
     else {
