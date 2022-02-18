@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
 use Drupal\helfi_proxy\ProxyManager;
-use Drupal\helfi_proxy\Selector\Selectors;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,64 +30,6 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     private HttpKernelInterface $httpKernel,
     private ProxyManager $proxyManager
   ) {
-  }
-
-  /**
-   * Manipulates the given attributes to have correct values.
-   *
-   * @param string $html
-   *   The html to manipulate.
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   *
-   * @return \Symfony\Component\HttpFoundation\Response
-   *   The manipulated response.
-   */
-  private function processHtml(string $html, Request $request) : string {
-    return $this->manipulate($html, function (\DOMDocument $dom) use ($request) {
-      $xpath = new \DOMXPath($dom);
-      foreach (Selectors::all() as $map) {
-        foreach ($xpath->query($map->xpath) as $row) {
-          $originalValue = $row->getAttribute($map->attribute);
-
-          if (!$value = $this->proxyManager->getAttributeValue($request, $map, $originalValue)) {
-            continue;
-          }
-          $row->setAttribute($map->attribute, $value);
-        }
-      }
-    });
-  }
-
-  /**
-   * Manipulates given html.
-   *
-   * @param string $html
-   *   The html to manipulate.
-   * @param callable $callback
-   *   The callback to manipulate dom.
-   *
-   * @return string
-   *   The manipulated dom.
-   */
-  private function manipulate(string $html, callable $callback) : string {
-    $dom = new \DOMDocument();
-    $previousXmlErrorBehavior = libxml_use_internal_errors(TRUE);
-    $encoding = '<?xml encoding="utf-8" ?>';
-
-    @$dom->loadHTML(
-      $encoding . $html,
-      LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-    );
-    $dom->encoding = 'UTF-8';
-
-    $callback($dom);
-
-    $result = trim($dom->saveHTML());
-    libxml_use_internal_errors($previousXmlErrorBehavior);
-
-    // Remove the debug xml encoding.
-    return str_replace($encoding, '', $result);
   }
 
   /**
@@ -116,7 +58,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
       $hasChanges = TRUE;
 
-      $content[$key]['data'] = $this->processHtml($value['data'], $request);
+      $content[$key]['data'] = $this->proxyManager
+        ->processHtml($value['data'], $request);
     }
     return $hasChanges ? json_encode($content) : NULL;
   }
@@ -149,7 +92,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     $response = $this->httpKernel->handle($request, $type, $catch);
 
     // Nothing to do if asset path is not configured.
-    if (!$this->proxyManager->getAssetPath()) {
+    if (!$this->proxyManager->isConfigured(ProxyManagerInterface::ASSET_PATH)) {
       return $response;
     }
     $content = $response->getContent();
@@ -164,7 +107,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
       return $response;
     }
-    $content = $this->processHtml($content, $request);
+    $content = $this->proxyManager
+      ->processHtml($content, $request);
 
     return $response->setContent($content);
   }

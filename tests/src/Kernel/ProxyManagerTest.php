@@ -2,12 +2,15 @@
 
 declare(strict_types = 1);
 
-namespace Drupal\Tests\helfi_proxy\Functional;
+namespace Drupal\Tests\helfi_proxy\Kernel;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\helfi_proxy\ProxyManager;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
-use Drupal\helfi_proxy\Selector\Selector;
-use Drupal\helfi_proxy\Selector\Selectors;
+use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
+use Drupal\helfi_proxy\Selector\AttributeSelector;
+use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -62,7 +65,7 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests instance prefixes.
    */
   public function testPrefixes() : void {
-    $this->assertEquals([], $this->proxyManager()->getInstancePrefixes());
+    $this->assertEquals([], $this->proxyManager()->getConfig(ProxyManagerInterface::PREFIXES));
 
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
@@ -76,7 +79,7 @@ class ProxyManagerTest extends KernelTestBase {
       'sv' => 'prefix-sv',
       'en' => 'prefix-en',
       'fi' => 'prefix-fi',
-    ], $this->proxyManager()->getInstancePrefixes());
+    ], $this->proxyManager()->getConfig(ProxyManagerInterface::PREFIXES));
   }
 
   /**
@@ -95,43 +98,52 @@ class ProxyManagerTest extends KernelTestBase {
    * Tests tunnistamo return url.
    */
   public function testTunnistamoReturnUrl() : void {
-    $this->assertEquals(NULL, $this->proxyManager()->getTunnistamoReturnUrl());
+    $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
 
     $prefix = '/fi/site-prefix';
     $this->config('helfi_proxy.settings')
       ->set('tunnistamo_return_url', $prefix)
       ->save();
 
-    $this->assertEquals($prefix, $this->proxyManager()->getTunnistamoReturnUrl());
+    $this->assertEquals($prefix, $this->proxyManager()->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
   }
 
   /**
    * Tests asset path.
    */
   public function testAssetPath() : void {
-    $this->assertEquals(NULL, $this->proxyManager()->getAssetPath());
+    $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::ASSET_PATH));
     $this->setAssetPath('test-assets');
 
-    $this->assertEquals('test-assets', $this->proxyManager()->getAssetPath());
+    $this->assertEquals('test-assets', $this->proxyManager()->getConfig(ProxyManagerInterface::ASSET_PATH));
   }
 
   /**
-   * Tests generic attribute value.
+   * Constructs a HTML tag.
+   *
+   * @param string $tag
+   *   The tag.
+   * @param array $attributes
+   *   The attributes.
+   * @param string|null $value
+   *   The value or null.
+   *
+   * @return string
+   *   The created html tag.
    */
-  public function testGenericAttributeValue() : void {
-    $request = $this->createRequest();
-
-    $attributeMap = [
-      Selectors::get('link'),
-      Selectors::get('source'),
-      Selectors::get('img'),
-    ];
-    $this->setAssetPath('test-assets');
-
-    foreach ($attributeMap as $tag) {
-      $path = '/sites/default/files/asset.png';
-      $this->assertEquals('/test-assets' . $path, $this->proxyManager()->getAttributeValue($request, $tag, $path));
-    }
+  private function createHtmlTag(
+    string $tag,
+    array $attributes,
+    string $value = NULL
+  ) : string {
+    return vsprintf('<%s %s>%s</%s>', [
+      $tag,
+      implode(' ', array_map(function ($key, $value) {
+        return sprintf('%s="%s"', $key, $value);
+      }, array_keys($attributes), $attributes)),
+      $value,
+      $tag,
+    ]);
   }
 
   /**
@@ -140,30 +152,12 @@ class ProxyManagerTest extends KernelTestBase {
   public function testScriptAttributeValue() : void {
     $this->setAssetPath('test-assets');
     $request = $this->createRequest();
-    $this->assertEquals('/test-assets/core/modules/system/test.js', $this->proxyManager()->getAttributeValue($request, Selectors::get('script'), '/core/modules/system/test.js'));
-  }
 
-  /**
-   * Tests A tags.
-   */
-  public function testAhrefAttributeValue() : void {
-    $request = $this->createRequest();
+    $expected = $this->createHtmlTag('script', ['src' => '/test-assets/core/modules/system/test.js']);
+    $html = $this->createHtmlTag('script', ['src' => '/core/modules/system/test.js']);
 
-    $this->assertEquals('https://google.com', $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), 'https://google.com'));
-
-    $this->config('helfi_proxy.settings')
-      ->set('prefixes', [
-        'sv' => 'prefix-sv',
-        'en' => 'prefix-en',
-        'fi' => 'prefix-fi',
-      ])
-      ->save();
-
-    $url = '/fi/prefix-fi/link';
-    $this->assertEquals($url, $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), $url));
-
-    $request = $this->createRequest(uri: 'https://localhost/fi/prefix-fi');
-    $this->assertEquals('/fi/prefix-fi/link', $this->proxyManager()->getAttributeValue($request, Selectors::get('a'), '/link'));
+    $processed = $this->proxyManager()->processHtml($html, $request, [new AttributeSelector('//script', 'src')]);
+    $this->assertEquals($expected, $processed);
   }
 
   /**
@@ -172,11 +166,22 @@ class ProxyManagerTest extends KernelTestBase {
   public function testMetaTags() : void {
     $request = $this->createRequest();
     $this->setAssetPath('test-assets');
+    $xpaths = [
+      'og:image' => 'property',
+      'og:image:url' => 'property',
+      'twitter:image' => 'name',
+    ];
 
-    foreach (['og:image', 'og:image:url'] as $tag) {
-      $this->assertEquals('http://' . $this->getHostname() . '/test-assets/themes/hdbt/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get($tag), 'https://www.hel.fi/themes/hdbt/og-image.png'));
+    foreach ($xpaths as $value => $selector) {
+      $expected = $this->createHtmlTag('meta', ['content' => 'http://' . $this->getHostname() . '/test-assets/theme/contrib/hdbt/test.png']);
+      $html = $this->createHtmlTag('meta', ['content' => '/theme/contrib/hdbt/test.png']);
+
+      $xpath = sprintf('//meta[@%s="%s"]', $selector, $value);
+      $selector = new AbsoluteUriAttributeSelector($xpath, 'content');
+      $processed = $this->proxyManager()->processHtml($html, $request, [$selector]);
+
+      $this->assertEquals($expected, $processed);
     }
-    $this->assertEquals('http://' . $this->getHostname() . '/test-assets/themes/hdbt/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('twitter:image'), 'https://www.hel.fi/themes/hdbt/og-image.png'));
   }
 
   /**
@@ -188,7 +193,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, Selectors::get('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
+    $this->assertEquals('https://kymp.blob.core.windows.net/test/og-image.png?itok=123', $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('og:image'), 'https://kymp.blob.core.windows.net/test/og-image.png?itok=123'));
   }
 
   /**
@@ -200,7 +205,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
     // Make sure file is served from blob storage when blob storage container
     // is set.
-    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, Selectors::get('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
+    $this->assertEquals('https://sote.blob.core.windows.net/test/og-image.png', $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('og:image'), 'https://sote.blob.core.windows.net/test/og-image.png'));
   }
 
   /**
@@ -218,7 +223,7 @@ class ProxyManagerTest extends KernelTestBase {
     foreach ($values as $value) {
       $this->assertEquals(
         '//' . $this->getHostname() . $value,
-        $this->proxyManager()->getAttributeValue($request, Selectors::get('source'), $value)
+        $this->proxyManager()->getAttributeValue($request, DefaultSelectors::get('source'), $value)
       );
     }
   }
@@ -230,7 +235,7 @@ class ProxyManagerTest extends KernelTestBase {
     $request = $this->createRequest();
 
     foreach ([NULL, ''] as $value) {
-      foreach (Selectors::all() as $tag) {
+      foreach (DefaultSelectors::all() as $tag) {
         $this->assertEquals($this->proxyManager()->getAttributeValue($request, $tag, $value), $value);
       }
     }
@@ -241,7 +246,7 @@ class ProxyManagerTest extends KernelTestBase {
    *
    * @dataProvider getEmptyAttributeValueData
    */
-  public function testEmptyGetAttributeValue(Selector $tag, string $value) : void {
+  public function testEmptyGetAttributeValue(DefaultAttributeValueProcessor $tag, string $value) : void {
     $request = $this->createRequest();
     $this->assertEquals($value, $this->proxyManager()->getAttributeValue($request, $tag, $value));
   }
@@ -254,15 +259,12 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function getEmptyAttributeValueData() : array {
     return [
-      [Selectors::get('link'), ''],
-      [Selectors::get('link'), 'https://localhost/test.svg'],
-      [Selectors::get('link'), '//localhost/test.svg'],
-      [Selectors::get('a'), ''],
-      [Selectors::get('a'), 'https://localhost/test'],
-      [Selectors::get('a'), '//localhost/test'],
-      [Selectors::get('script'), ''],
-      [Selectors::get('script'), 'https://localhost/test.js'],
-      [Selectors::get('script'), '//localhost/test.js'],
+      [DefaultSelectors::get('link'), ''],
+      [DefaultSelectors::get('link'), 'https://localhost/test.svg'],
+      [DefaultSelectors::get('link'), '//localhost/test.svg'],
+      [DefaultSelectors::get('script'), ''],
+      [DefaultSelectors::get('script'), 'https://localhost/test.js'],
+      [DefaultSelectors::get('script'), '//localhost/test.js'],
     ];
   }
 

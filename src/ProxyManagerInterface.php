@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy;
 
-use Drupal\helfi_proxy\Selector\Selector;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -12,43 +11,47 @@ use Symfony\Component\HttpFoundation\Request;
  */
 interface ProxyManagerInterface {
 
+  public const PREFIXES = 'prefixes';
+  public const ASSET_PATH = 'asset_path';
+  public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
+  public const ROBOTS_PATHS = 'robots_paths';
+  public const FRONT_PAGE_TITLE = 'front_page_title';
+
   /**
-   * Gets the value for given attribute.
+   * Manipulates the given attributes to have correct values.
    *
+   * @param string $html
+   *   The html to manipulate.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param \Drupal\helfi_proxy\Selector\Selector $tag
-   *   The attrbiteu map object.
-   * @param string|null $value
-   *   The value.
+   * @param array $selectors
+   *   The selectors.
    *
-   * @return string|null
-   *   The value for given attribute or null.
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   The manipulated response.
    */
-  public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string;
+  public function processHtml(string $html, Request $request, array $selectors = []) : string;
 
   /**
-   * Gets the instance name.
+   * Whether the proxy is configured or not.
    *
-   * @return string|null
-   *   The instance name.
+   * @param string $key
+   *   The key.
+   *
+   * @return bool
+   *   TRUE if the proxy should be used.
    */
-  public function getAssetPath() : ? string;
+  public function isConfigured(string $key) : bool;
 
   /**
-   * Gets the instance prefixes.
+   * Gets the config.
    *
-   * @return array
-   *   The instance prefixes.
-   */
-  public function getInstancePrefixes() : array;
-
-  /**
-   * Gets the tunnistamo return url.
+   * @param string $key
+   *   The key to get config for.
    *
-   * @return string|null
-   *   The tunnistamo return url.
+   * @return mixed
+   *   The data.
    */
-  public function getTunnistamoReturnUrl() : ? string;
+  public function getConfig(string $key, mixed $defaultValue = NULL) : mixed;
 
 }
