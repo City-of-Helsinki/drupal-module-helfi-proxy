@@ -40,6 +40,9 @@ jobs:
           cd $DRUPAL_ROOT
           composer config repositories.5 path $GITHUB_WORKSPACE
           composer require drupal/${{ secrets.MODULE_NAME }}
+          # Use 1.x entity module until https://www.drupal.org/project/entity/issues/3249372 is
+          # fixed.
+          composer require drupal/entity:dev-1.x#0f0bd50d8e830fdb05bfb3dae1105ed771655b56
           vendor/bin/drush en ${{ secrets.MODULE_NAME }} -y
 
       - name: Run PHPCS
