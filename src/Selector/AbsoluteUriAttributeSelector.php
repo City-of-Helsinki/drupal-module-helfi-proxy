@@ -9,4 +9,3 @@ namespace Drupal\helfi_proxy\Selector;
  */
 class AbsoluteUriAttributeSelector extends AttributeSelector {
 }
-

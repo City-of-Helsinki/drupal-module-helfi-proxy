@@ -28,4 +28,3 @@ class MultiValueAttributeSelector extends AttributeSelector {
   }
 
 }
-

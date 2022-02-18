@@ -29,7 +29,7 @@ class LinkConverterFilterTest extends SitePrefixTestBase {
     parent::setUp();
 
     FilterFormat::load('full_html')
-      ->setFilterConfig('helfi_link_converter', ['status' => 1, 'weight' => -100])
+      ->setFilterConfig('helfi_link_converter', ['status' => 1])
       ->save();
 
     $body = function (string $langcode) : array {

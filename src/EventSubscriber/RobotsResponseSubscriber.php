@@ -9,6 +9,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Path\PathMatcherInterface;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\path_alias\AliasManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,7 +81,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    if (!$paths = implode("\n", $this->config->get('robots_paths') ?? [])) {
+    if (!$paths = implode("\n", $this->config->get(ProxyManagerInterface::ROBOTS_PATHS) ?? [])) {
       return;
     }
     $alias = $this->aliasManager

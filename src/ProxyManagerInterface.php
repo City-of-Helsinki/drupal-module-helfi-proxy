@@ -48,6 +48,8 @@ interface ProxyManagerInterface {
    *
    * @param string $key
    *   The key to get config for.
+   * @param mixed|null $defaultValue
+   *   The default value if no value is present.
    *
    * @return mixed
    *   The data.

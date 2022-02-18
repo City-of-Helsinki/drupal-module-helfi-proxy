@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
@@ -127,6 +126,8 @@ class ProxyManagerTest extends KernelTestBase {
    *   The attributes.
    * @param string|null $value
    *   The value or null.
+   * @param bool $hasClosingTag
+   *   Whether we should include closing tag or not.
    *
    * @return string
    *   The created html tag.
@@ -221,7 +222,9 @@ class ProxyManagerTest extends KernelTestBase {
     // is set.
     $this->assertEquals(
       $html,
-      $this->proxyManager()->processHtml($html, $request, [new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content')])
+      $this->proxyManager()->processHtml($html, $request, [
+        new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content'),
+      ])
     );
   }
 

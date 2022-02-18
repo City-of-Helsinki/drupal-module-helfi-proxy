@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\helfi_proxy\Functional;
 
 use Drupal\Core\Cache\Cache;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -35,7 +36,7 @@ class RobotsHeaderTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderDoesNotExist('X-Robots-Tag');
 
     $this->config('helfi_proxy.settings')
-      ->set('robots_paths', [
+      ->set(ProxyManagerInterface::ROBOTS_PATHS, [
         '/*',
       ])
       ->save();
