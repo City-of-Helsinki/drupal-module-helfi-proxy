@@ -5,7 +5,8 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\Asset;
 
 use Drupal\Core\Asset\CssOptimizer as DrupalCssOptimizer;
-use Drupal\helfi_proxy\ProxyManagerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileUrlGeneratorInterface;
 
 /**
  * Convert files to use asset path.
@@ -13,21 +14,35 @@ use Drupal\helfi_proxy\ProxyManagerInterface;
 final class CssOptimizer extends DrupalCssOptimizer {
 
   /**
+   * The asset path.
+   *
+   * @var string|null
+   */
+  private ?string $assetPath;
+
+  /**
    * Constructs a new instance.
    *
-   * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
-   *   The proxy manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The config factory.
+   * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
+   *   The file url generator.
    */
   public function __construct(
-    private ProxyManagerInterface $proxyManager
+    ConfigFactoryInterface $configFactory,
+    FileUrlGeneratorInterface $fileUrlGenerator
   ) {
+    $this->assetPath = $configFactory->get('helfi_proxy.settings')
+      ->get('asset_path');
+
+    parent::__construct($fileUrlGenerator);
   }
 
   /**
    * {@inheritdoc}
    */
   public function rewriteFileURI($matches) : string { // phpcs:ignore
-    if (!$assetPath = $this->proxyManager->getAssetPath()) {
+    if (!$this->assetPath) {
       return parent::rewriteFileURI($matches);
     }
     // Prefix with base and remove '../' segments where possible.
@@ -37,10 +52,12 @@ final class CssOptimizer extends DrupalCssOptimizer {
       $last = $path;
       $path = preg_replace('`(^|/)(?!\.\./)([^/]+)/\.\./`', '$1', $path);
     }
-    $path = file_url_transform_relative(file_create_url($path));
+    $path = $this->fileUrlGenerator->transformRelative(
+      $this->fileUrlGenerator->generateAbsoluteString($path)
+    );
 
     // Prefix with /{asset-path}.
-    return sprintf('url(/%s/%s)', trim($assetPath, '/'), ltrim($path, '/'));
+    return sprintf('url(/%s/%s)', trim($this->assetPath, '/'), ltrim($path, '/'));
   }
 
 }

@@ -18,12 +18,16 @@ use Drupal\editor\Entity\Editor;
  *   The absolute url.
  */
 function helfi_proxy_absolute_url(string $uri) : string {
-  static $relative_path;
+  static $relative_path = '';
 
   if (!$relative_path) {
-    $relative_path = \Drupal::service('helfi_proxy.proxy_manager')->getAssetPath();
+    $relative_path = \Drupal::service('helfi_proxy.proxy_manager')->getConfig('asset_path');
   }
-  return '/' . $relative_path . file_url_transform_relative(file_create_url($uri));
+  /** @var \Drupal\Core\File\FileUrlGenerator $fileGenerator */
+  $fileGenerator = \Drupal::service('file_url_generator');
+  return '/' . $relative_path . $fileGenerator->transformRelative(
+      $fileGenerator->generateAbsoluteString($uri)
+    );
 }
 
 /**

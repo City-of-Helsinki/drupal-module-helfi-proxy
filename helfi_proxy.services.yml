@@ -45,4 +45,4 @@ services:
     public: false
     class: Drupal\helfi_proxy\Asset\CssOptimizer
     decorates: asset.css.optimizer
-    arguments: ['@helfi_proxy.proxy_manager']
+    arguments: ['@config.factory', '@file_url_generator']

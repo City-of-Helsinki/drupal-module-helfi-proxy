@@ -5,8 +5,10 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
-use Drupal\helfi_proxy\Selector\Selector;
+use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
+use Drupal\helfi_proxy\Selector\AttributeSelector;
+use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
+use Drupal\helfi_proxy\Selector\SelectorRepositoryTrait;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -15,13 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class ProxyManager implements ProxyManagerInterface {
 
   use ProxyTrait;
-
-  /**
-   * The config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected ImmutableConfig $config;
+  use SelectorRepositoryTrait;
 
   /**
    * Constructs a new instance.
@@ -29,8 +25,138 @@ final class ProxyManager implements ProxyManagerInterface {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
    */
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
+  public function __construct(private ConfigFactoryInterface $configFactory) {
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isConfigured(string $key) : bool {
+    return $this->getConfig($key) !== NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfig(string $key, mixed $defaultValue = NULL) : mixed {
+    $config = $this->configFactory->get('helfi_proxy.settings')
+      ->get($key);
+
+    return $config ?? $defaultValue;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processHtml(string $html, Request $request, array $selectors = []) : string {
+    $dom = new \DOMDocument();
+    $previousXmlErrorBehavior = libxml_use_internal_errors(TRUE);
+    $encoding = '<?xml encoding="utf-8" ?>';
+
+    @$dom->loadHTML(
+      $encoding . $html,
+      LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+    );
+    $dom->encoding = 'UTF-8';
+    $xpath = new \DOMXPath($dom);
+
+    foreach ($selectors ?: $this->getDefaultSelectors() as $selector) {
+      foreach ($xpath->query($selector->xpath) as $row) {
+        $value = $this
+          ->getAttributeValue(
+            $selector,
+            $request,
+            $row->getAttribute($selector->attribute),
+          );
+
+        if (!$value) {
+          continue;
+        }
+        $row->setAttribute($selector->attribute, $value);
+      }
+    }
+    $result = trim($dom->saveHTML());
+    libxml_use_internal_errors($previousXmlErrorBehavior);
+
+    // Remove the debug xml encoding.
+    return str_replace($encoding, '', $result);
+  }
+
+  /**
+   * Gets the attribute value.
+   *
+   * @param \Drupal\helfi_proxy\Selector\AttributeSelector $selector
+   *   The selector.
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request.
+   * @param string|null $value
+   *   The value.
+   *
+   * @return string|null
+   *   The attribute value.
+   */
+  private function getAttributeValue(AttributeSelector $selector, Request $request, ?string $value) : ? string {
+    // Skip if value is being served from CDN already.
+    if (!$value || $this->isCdnAddress($value)) {
+      return $value;
+    }
+
+    // Image styles need special handling because they need to be run through
+    // PHP before they are uploaded to CDN.
+    if (str_contains($value, '/files/styles/')) {
+      if ($selector instanceof MultiValueAttributeSelector) {
+        return $this->handleMultiValue($value, $selector->multivalueSeparator,
+          function (string $value): string {
+            return $this->addDomain($value);
+          });
+      }
+      return $this->addDomain($value);
+    }
+    // Certain elements might be absolute URLs already (such as og:image:url).
+    // Make sure locally hosted files are always served from correct domain.
+    if ($selector instanceof AbsoluteUriAttributeSelector) {
+      $parts = parse_url($value);
+
+      if (empty($parts['path'])) {
+        return $value;
+      }
+
+      // Skip non-local assets.
+      if (!$this->isLocalAsset($parts['path'])) {
+        return $value;
+      }
+
+      $value = $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
+      return sprintf('%s%s', $request->getSchemeAndHttpHost(), $this->addAssetPath($value));
+    }
+
+    // Ignore absolute URLs.
+    if ($this->isAbsoluteUri($value)) {
+      return $value;
+    }
+
+    if ($selector instanceof MultiValueAttributeSelector) {
+      return $this->handleMultiValue($value, $selector->multivalueSeparator,
+        function (string $value) : string {
+          return $this->addAssetPath($value);
+        }
+      );
+    }
+
+    return $this->addAssetPath($value);
+  }
+
+  /**
+   * Checks if URI is absolute.
+   *
+   * @param string $uri
+   *   The uri.
+   *
+   * @return bool
+   *   TRUE if given uri is absolute.
+   */
+  private function isAbsoluteUri(string $uri) : bool {
+    return str_starts_with($uri, 'http') || str_starts_with($uri, '//');
   }
 
   /**
@@ -79,45 +205,12 @@ final class ProxyManager implements ProxyManagerInterface {
    *   TRUE if asset is local.
    */
   private function isLocalAsset(string $value) : bool {
-    return match(TRUE) {
-      str_starts_with($value, '/sites'),
-      str_starts_with($value, '/core'),
-      str_starts_with($value, '/themes') => TRUE,
-      default => FALSE,
-    };
-  }
-
-  /**
-   * Handles tags with 'alwaysAbsolute' option.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   * @param string $value
-   *   The value to convert.
-   *
-   * @return string|null
-   *   The value.
-   */
-  private function handleAlwaysAbsolute(Request $request, string $value) : ? string {
-    if (!$value) {
-      return $value;
+    foreach (['/sites', '/core', '/themes'] as $path) {
+      if (str_starts_with($value, $path)) {
+        return TRUE;
+      }
     }
-    $parts = parse_url($value);
-
-    // Value is already relative.
-    if (empty($parts['host']) || empty($parts['path'])) {
-      return $value;
-    }
-
-    // Skip non-local assets.
-    if (!$this->isLocalAsset($parts['path'])) {
-      return $value;
-    }
-
-    if (isset($parts['path'])) {
-      $value = $parts['path'] . (isset($parts['query']) ? '?' . $parts['query'] : NULL);
-    }
-    return sprintf('%s%s', $request->getSchemeAndHttpHost(), $this->addAssetPath($value));
+    return FALSE;
   }
 
   /**
@@ -132,7 +225,7 @@ final class ProxyManager implements ProxyManagerInterface {
   private function addAssetPath(string $value) : ? string {
     // Serve element from same domain via relative asset URL. Like:
     // /assets/sites/default/files/js/{sha256}.js.
-    return sprintf('/%s/%s', $this->getAssetPath(), ltrim($value, '/'));
+    return sprintf('/%s/%s', $this->getConfig(self::ASSET_PATH), ltrim($value, '/'));
   }
 
   /**
@@ -157,66 +250,6 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
-   * Handles values with 'sitePrefix' option.
-   *
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   * @param string $value
-   *   The value.
-   *
-   * @return string|null
-   *   The value.
-   */
-  private function handleSitePrefix(Request $request, string $value) : ? string {
-    // Make sure we have active site prefix and the given URL is relative.
-    if ((!$prefix = $this->getActivePrefix($request->getPathInfo())) || !str_starts_with($value, '/')) {
-      return $value;
-    }
-
-    // Scan other languages as well.
-    foreach ($this->getInstancePrefixes() as $item) {
-      if (str_contains($value, $item)) {
-        return $value;
-      }
-    }
-    return sprintf('%s/%s', $prefix, ltrim($value, '/'));
-  }
-
-  /**
-   * Checks if the given value is an image style.
-   *
-   * @param string $value
-   *   The value.
-   *
-   * @return bool
-   *   TRUE if image is image style.
-   */
-  private function isImageStyle(string $value) : bool {
-    return str_contains($value, '/files/styles/');
-  }
-
-  /**
-   * Special handling for image styles.
-   *
-   * @param \Drupal\helfi_proxy\Selector\Selector $tag
-   *   The tag.
-   * @param string $value
-   *   The value with domain added to it.
-   *
-   * @return string|null
-   *   The image style url.
-   */
-  private function handleImageStyle(Selector $tag, string $value) : ? string {
-    if ($tag->multipleValues) {
-      return $this->handleMultiValue($value, $tag->multivalueSeparator,
-        function (string $value): string {
-          return $this->addDomain($value);
-        });
-    }
-    return $this->addDomain($value);
-  }
-
-  /**
    * Adds domain to relative URL.
    *
    * @param string $value
@@ -226,89 +259,50 @@ final class ProxyManager implements ProxyManagerInterface {
    *   The value with domain added to it.
    */
   private function addDomain(string $value) : string {
+    // Skip absolute uris.
+    if ($this->isAbsoluteUri($value)) {
+      return $value;
+    }
     return sprintf('//%s/%s', $this->getHostname(), ltrim($value, '/'));
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function getAttributeValue(Request $request, Selector $tag, ?string $value) : ? string {
-    // Skip if value is being served from CDN already.
-    if (!$value || $this->isCdnAddress($value)) {
-      return $value;
-    }
-
-    // Image styles need special handling because they need to be run through
-    // PHP before they are uploaded to CDN.
-    if ($this->isImageStyle($value)) {
-      return $this->handleImageStyle($tag, $value);
-    }
-    // Certain elements might be absolute URLs already (such as og:image:url).
-    // Make sure locally hosted files are always served from correct domain.
-    if ($tag->alwaysAbsolute) {
-      return $this->handleAlwaysAbsolute($request, $value);
-    }
-
-    // Ignore absolute URLs.
-    if (str_starts_with($value, 'http') || str_starts_with($value, '//')) {
-      return $value;
-    }
-
-    // Convert value to have a site prefix, like /fi/site-prefix/.
-    if ($tag->sitePrefix) {
-      return $this->handleSitePrefix($request, $value);
-    }
-
-    if ($tag->multipleValues) {
-      return $this->handleMultiValue($value, $tag->multivalueSeparator,
-        function (string $value) : string {
-          return $this->addAssetPath($value);
-        }
-      );
-    }
-
-    return $this->addAssetPath($value);
-  }
-
-  /**
-   * Gets the currently active site prefix.
+   * Gets the asset path.
+   *
+   * phpcs:ignore
+   * @deprecated in helfi_proxy:2.0.3 and is removed from helfi_proxy:3.0.0. Use ::getConfig() instead.
    *
    * @return string|null
-   *   The currently active prefix.
-   */
-  private function getActivePrefix(string $path) : ? string {
-    static $prefix;
-
-    if ($prefix === NULL) {
-      foreach ($this->getInstancePrefixes() as $langcode => $item) {
-        if (str_contains($path, $item)) {
-          $prefix = sprintf('/%s/%s', $langcode, $item);
-          break;
-        }
-      }
-    }
-    return $prefix;
-  }
-
-  /**
-   * {@inheritdoc}
+   *   The asset path.
    */
   public function getAssetPath() : ? string {
-    return $this->config->get('asset_path');
+    return $this->getConfig(self::ASSET_PATH);
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the configured prefixes.
+   *
+   * phpcs:ignore
+   * @deprecated in helfi_proxy:2.0.3 and is removed from helfi_proxy:3.0.0. Use ::getConfig() instead.
+   *
+   * @return array
+   *   The instance prefixes.
    */
   public function getInstancePrefixes() : array {
-    return $this->config->get('prefixes') ?? [];
+    return $this->getConfig(self::PREFIXES, []);
   }
 
   /**
-   * {@inheritdoc}
+   * Gets the tunnistamo return url.
+   *
+   * phpcs:ignore
+   * @deprecated in helfi_proxy:2.0.3 and is removed from helfi_proxy:3.0.0. Use ::getConfig() instead.
+   *
+   * @return string
+   *   The return url.
    */
   public function getTunnistamoReturnUrl() : ? string {
-    return $this->config->get('tunnistamo_return_url');
+    return $this->getConfig(self::TUNNISTAMO_RETURN_URL);
   }
 
 }

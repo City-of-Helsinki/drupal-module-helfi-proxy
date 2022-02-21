@@ -15,4 +15,3 @@ helfi_proxy.settings:
       type: sequence
       sequence:
         type: string
-
