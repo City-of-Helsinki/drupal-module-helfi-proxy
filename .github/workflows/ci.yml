@@ -53,7 +53,7 @@ jobs:
           cd $DRUPAL_ROOT
           vendor/bin/drush runserver $SIMPLETEST_BASE_URL > /dev/null 2>&1 &
           chromedriver --port=4444 > /dev/null 2>&1 &
-          vendor/bin/phpunit --bootstrap $DRUPAL_ROOT/public/core/tests/bootstrap.php -c public/modules/contrib/${{ secrets.MODULE_NAME }}/phpunit.xml
+          vendor/bin/phpunit --fail-on-skipped -c $DRUPAL_ROOT/phpunit.platform.xml --verbose --group ${{ secrets.MODULE_NAME }}
 
       - name: Create an artifact from test report
         uses: actions/upload-artifact@v2
