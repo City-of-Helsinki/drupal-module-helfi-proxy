@@ -101,17 +101,6 @@ final class ProxyManager implements ProxyManagerInterface {
       return $value;
     }
 
-    // Image styles need special handling because they need to be run through
-    // PHP before they are uploaded to CDN.
-    if (str_contains($value, '/files/styles/')) {
-      if ($selector instanceof MultiValueAttributeSelector) {
-        return $this->handleMultiValue($value, $selector->multivalueSeparator,
-          function (string $value): string {
-            return $this->addDomain($value);
-          });
-      }
-      return $this->addDomain($value);
-    }
     // Certain elements might be absolute URLs already (such as og:image:url).
     // Make sure locally hosted files are always served from correct domain.
     if ($selector instanceof AbsoluteUriAttributeSelector) {
@@ -138,6 +127,9 @@ final class ProxyManager implements ProxyManagerInterface {
     if ($selector instanceof MultiValueAttributeSelector) {
       return $this->handleMultiValue($value, $selector->multivalueSeparator,
         function (string $value) : string {
+          if ($this->isAbsoluteUri($value)) {
+            return $value;
+          }
           return $this->addAssetPath($value);
         }
       );

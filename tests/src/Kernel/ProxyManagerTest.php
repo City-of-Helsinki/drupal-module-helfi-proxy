@@ -265,12 +265,14 @@ class ProxyManagerTest extends KernelTestBase {
     $html = $this->createHtmlTag('source', ['srcset' => implode(', ', $values)]);
 
     $expectedValues = [
-      '//' . $this->getHostname() . '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
-      '//' . $this->getHostname() . '/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      '/test-assets/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
+      '/test-assets/sites/default/files/styles/test/public/image.png?h=948e8679&amp;itok=FwETi0jH 1x',
       // Make sure absolute uris are ignored.
       '//helfi-kymp.docker.so/sites/default/files/styles/3_2_xxs_2x/public/image%20%281%29.png?itok=pSa7Ws3i 2x',
     ];
-    $expected = $this->createHtmlTag('source', ['srcset' => implode(', ', $expectedValues)]);
+    $expected = $this->createHtmlTag('source', [
+      'srcset' => implode(', ', $expectedValues),
+    ]);
 
     $this->assertEquals(
       $expected,
