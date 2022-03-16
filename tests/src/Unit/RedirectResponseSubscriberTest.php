@@ -26,6 +26,7 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
    * Test response without proxy domains.
    *
    * @covers ::onResponse
+   * @covers ::__construct
    */
   public function testNoValidProxyDomains() : void {
     $proxyManagerMock = $this->prophesize(ProxyManagerInterface::class);
@@ -43,6 +44,7 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
    * Tests that response is intact when no proxy domain is set.
    *
    * @covers ::onResponse
+   * @covers ::__construct
    */
   public function testNoProxyDomain() : void {
     $proxyManagerMock = $this->prophesize(ProxyManagerInterface::class);
@@ -66,6 +68,7 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
    * @covers ::onResponse
    * @covers ::needsRedirect
    * @covers ::buildRedirectUrl
+   * @covers ::__construct
    */
   public function testRedirectResponse() : void {
     $proxyManagerMock = $this->prophesize(ProxyManagerInterface::class);
@@ -99,6 +102,7 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
    * @covers ::onResponse
    * @covers ::needsRedirect
    * @covers ::buildRedirectUrl
+   * @covers ::__construct
    */
   public function testResponseRedirect() : void {
     $proxyManagerMock = $this->prophesize(ProxyManagerInterface::class);

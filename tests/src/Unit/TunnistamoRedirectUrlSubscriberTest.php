@@ -54,6 +54,7 @@ class TunnistamoRedirectUrlSubscriberTest extends UnitTestCase {
    * Tests onRedirectUrlEvent().
    *
    * @covers ::onRedirectUrlEvent
+   * @covers ::__construct
    */
   public function testOnRedirectUrlEvent() : void {
     $url = '/fi/test';
