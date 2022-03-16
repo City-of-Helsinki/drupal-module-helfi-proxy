@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\HttpMiddleware;
 
-use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,12 +22,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *
    * @param \Symfony\Component\HttpKernel\HttpKernelInterface $httpKernel
    *   The http kernel.
-   * @param \Drupal\helfi_proxy\ProxyManager $proxyManager
+   * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
    *   The proxy manager.
    */
   public function __construct(
     private HttpKernelInterface $httpKernel,
-    private ProxyManager $proxyManager
+    private ProxyManagerInterface $proxyManager
   ) {
   }
 
@@ -91,14 +90,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   TRUE if response is XML
    */
   private function isXmlResponse(Response $response) : bool {
-    $contentType = $response->headers->get('content-type');
-    if ($contentType) {
-      return str_starts_with(
-        $contentType,
-        'application/xml',
-      );
+    if (!$response->headers->has('content-type')) {
+      return FALSE;
     }
-    return FALSE;
+    return str_starts_with(
+      $response->headers->get('content-type') ?: '',
+      'application/xml',
+    );
   }
 
   /**
@@ -111,6 +109,9 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) : Response {
     $response = $this->httpKernel->handle($request, $type, $catch);
 
+    if ($this->isXmlResponse($response)) {
+      return $response;
+    }
     // Nothing to do if asset path is not configured.
     if (!$this->proxyManager->isConfigured(ProxyManagerInterface::ASSET_PATH)) {
       return $response;
@@ -125,10 +126,6 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       if ($json = $this->processJson($content, $request)) {
         return $response->setContent($json);
       }
-      return $response;
-    }
-
-    if ($this->isXmlResponse($response)) {
       return $response;
     }
 
