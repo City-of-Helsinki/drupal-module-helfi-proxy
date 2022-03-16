@@ -91,10 +91,14 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    *   TRUE if response is XML
    */
   private function isXmlResponse(Response $response) : bool {
-    return str_starts_with(
-      strtolower($response->headers->get('content-type')),
-      'application/xml'
-    );
+    $contentType = $response->headers->get('content-type');
+    if ($contentType) {
+      return str_starts_with(
+        $contentType,
+        'application/xml',
+      );
+    }
+    return FALSE;
   }
 
   /**
