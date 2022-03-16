@@ -84,13 +84,13 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   /**
    * Checks for xml type mainly for sitemap.
    *
-   * @param Response $response
+   * @param \Symfony\Component\HttpFoundation\Response $response
    *   The response.
    *
    * @return bool
    *   TRUE if response is XML
    */
-  private function isXmlResponse(Response $response){
+  private function isXmlResponse(Response $response) : bool {
     return str_starts_with(
       strtolower($response->headers->get('content-type')),
       'application/xml'
@@ -102,8 +102,8 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
    */
   public function handle(
     Request $request,
-            $type = self::MASTER_REQUEST,
-            $catch = TRUE
+    $type = self::MASTER_REQUEST,
+    $catch = TRUE
   ) : Response {
     $response = $this->httpKernel->handle($request, $type, $catch);
 
