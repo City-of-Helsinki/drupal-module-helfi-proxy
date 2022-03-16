@@ -1,3 +1,8 @@
+parameters:
+  helfi_proxy.valid_proxy_domains:
+    - www.hel.fi
+    - www-test.hel.fi
+    - helfi-proxy.docker.so
 services:
   helfi_proxy.http_middleware:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
@@ -18,6 +23,12 @@ services:
       - { name: path_processor_inbound, priority: 201 }
       # Must be run after LanguageProcessorLanguage (100 weight).
       - { name: path_processor_outbound, priority: 99 }
+
+  helfi_proxy.redirect_subscriber:
+    class: Drupal\helfi_proxy\EventSubscriber\RedirectResponseSubscriber
+    arguments: ['@helfi_proxy.proxy_manager', '%helfi_proxy.valid_proxy_domains%']
+    tags:
+      - { name: event_subscriber, priority: 100 }
 
   cache_context.site_prefix:
     class: Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext

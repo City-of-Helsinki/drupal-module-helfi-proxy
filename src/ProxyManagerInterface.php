@@ -16,6 +16,7 @@ interface ProxyManagerInterface {
   public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
   public const ROBOTS_PATHS = 'robots_paths';
   public const FRONT_PAGE_TITLE = 'front_page_title';
+  public const DEFAULT_PROXY_DOMAIN = 'default_proxy_domain';
 
   /**
    * Manipulates the given attributes to have correct values.

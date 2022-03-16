@@ -82,6 +82,18 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
+   * Tests default proxy domain config.
+   */
+  public function testDefaultProxyDomain() : void {
+    $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN));
+
+    $this->config('helfi_proxy.settings')
+      ->set(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN, 'www.hel.fi')
+      ->save();
+    $this->assertEquals('www.hel.fi', $this->proxyManager()->getConfig(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN));
+  }
+
+  /**
    * Sets the asset path.
    *
    * @param string $path
