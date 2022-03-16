@@ -82,12 +82,29 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   }
 
   /**
+   * Checks for xml type mainly for sitemap.
+   *
+   * @param Response $response
+   *   The response.
+   *
+   * @return bool
+   *   TRUE if response is XML
+   */
+  private function isXmlResponse(Response $response){
+    $contentTypes = [
+      'application/xml',
+      'application/xml; charset=utf-8'
+    ];
+    return in_array($response->headers->get('content-type'), $contentTypes);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function handle(
     Request $request,
-    $type = self::MASTER_REQUEST,
-    $catch = TRUE
+            $type = self::MASTER_REQUEST,
+            $catch = TRUE
   ) : Response {
     $response = $this->httpKernel->handle($request, $type, $catch);
 
@@ -107,6 +124,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       }
       return $response;
     }
+
+    if ($this->isXmlResponse($response)) {
+      return $response;
+    }
+
     $content = $this->proxyManager
       ->processHtml($content, $request);
 
