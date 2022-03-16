@@ -9,6 +9,7 @@
         "drupal/purge": "^3.0",
         "drupal/varnish_purge": "^2.1",
         "drupal/helfi_api_base": "*",
+        "drupal/redirect": "^1.0",
         "ext-libxml": "*",
         "ext-dom": "*"
     },

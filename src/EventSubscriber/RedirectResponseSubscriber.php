@@ -43,6 +43,15 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
     return !in_array(parse_url($url, PHP_URL_HOST), $this->validProxyDomains);
   }
 
+  /**
+   * Builds the redirect url.
+   *
+   * @param string $url
+   *   The URL to parse.
+   *
+   * @return string
+   *   The redirect URL.
+   */
   private function buildRedirectUrl(string $url) : string {
     $uriParts = parse_url($url);
 
@@ -66,27 +75,31 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
   public function onResponse(ResponseEvent $event) : void {
     if (
       !$this->validProxyDomains ||
-      $this->proxyManager->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN)
+      !$this->proxyManager->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN)
     ) {
       // Nothing to do if default proxy domain is not defined.
       return;
     }
     $response = $event->getResponse();
 
-    $url = vsprintf('%s%s', [
-      $event->getRequest()->getSchemeAndHttpHost(),
-      $event->getRequest()->getRequestUri(),
-    ]);
-
     if ($response instanceof RedirectResponse) {
       $url = $response->getTargetUrl();
+    }
+    else {
+      $request = $event->getRequest();
+
+      $url = vsprintf('%s%s', [
+        $request->getSchemeAndHttpHost(),
+        $request->getRequestUri(),
+      ]);
     }
 
     if (!$this->needsRedirect($url)) {
       return;
     }
+    $redirect = new TrustedRedirectResponse($this->buildRedirectUrl($url));
     $event->setResponse(
-      new TrustedRedirectResponse($this->buildRedirectUrl($url))
+      $redirect
     );
   }
 

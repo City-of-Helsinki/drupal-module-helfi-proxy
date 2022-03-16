@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Contains helfi_proxy installation procedure.
+ */
+
+declare(strict_types = 1);
+
+/**
+ * Implements hook_install().
+ */
+function helfi_proxy_install() {
+  \Drupal::service('module_installer')->install(['redirect']);
+  \Drupal::configFactory()
+    ->getEditable('redirect.settings')
+    // Make sure route normalizer is enabled.
+    ->set('route_normalizer_enabled', TRUE)
+    ->save();
+}
+
+/**
+ * Enable and configure 'redirect' module.
+ */
+function helfi_proxy_update_9001() : void {
+  helfi_proxy_install();
+}
