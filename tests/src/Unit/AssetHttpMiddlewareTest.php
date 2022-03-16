@@ -73,6 +73,8 @@ class AssetHttpMiddlewareTest extends UnitTestCase {
 
   /**
    * Tests that response is intact when no asset path is configured.
+   *
+   * @covers ::handle
    */
   public function testNoAssetPathConfigured() : void {
     $headers = $this->prophesize(ParameterBag::class);
