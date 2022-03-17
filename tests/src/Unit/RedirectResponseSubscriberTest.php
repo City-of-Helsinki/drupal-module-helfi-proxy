@@ -35,7 +35,7 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
     $event = $this->prophesize(ResponseEvent::class);
     $event->getResponse()
       ->shouldNotBeCalled();
-    // Make sure response stays instact when no valid proxy domains are set.
+    // Make sure response stays intact when no valid proxy domains are set.
     $sut = new RedirectResponseSubscriber($proxyManagerMock->reveal(), []);
     $sut->onResponse($event->reveal());
   }

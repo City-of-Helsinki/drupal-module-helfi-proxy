@@ -13,10 +13,17 @@ interface ProxyManagerInterface {
 
   public const PREFIXES = 'prefixes';
   public const ASSET_PATH = 'asset_path';
-  public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
   public const ROBOTS_PATHS = 'robots_paths';
   public const FRONT_PAGE_TITLE = 'front_page_title';
   public const DEFAULT_PROXY_DOMAIN = 'default_proxy_domain';
+
+  /**
+   * The tunnistamo return url config name.
+   *
+   * @phpcs:ignore
+   * @deprecated in helfi_proxy:2.1.2 and is removed from helfi_proxy:3.0.0.
+   */
+  public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
 
   /**
    * Manipulates the given attributes to have correct values.

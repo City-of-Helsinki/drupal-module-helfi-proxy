@@ -11,15 +11,11 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Tunnistamo redirect url subscriber.
+ *
+ * @phpcs:ignore
+ * @deprecated in helfi_proxy:2.1.2 and is removed from helfi_proxy:3.0.0.
  */
 final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface {
-
-  /**
-   * The proxy manager.
-   *
-   * @var \Drupal\helfi_proxy\ProxyManagerInterface
-   */
-  private ProxyManagerInterface $proxyManager;
 
   /**
    * Constructs a new instance.
@@ -28,9 +24,8 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
    *   The proxy manager.
    */
   public function __construct(
-    ProxyManagerInterface $proxyManager
+    private ProxyManagerInterface $proxyManager
   ) {
-    $this->proxyManager = $proxyManager;
   }
 
   /**

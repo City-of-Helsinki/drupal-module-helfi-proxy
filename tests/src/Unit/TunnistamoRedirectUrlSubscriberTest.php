@@ -12,6 +12,7 @@ use Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_tunnistamo\Event\RedirectUrlEvent;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -51,13 +52,12 @@ class TunnistamoRedirectUrlSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * Tests onRedirectUrlEvent().
+   * Creates a new url stub.
    *
-   * @covers ::onRedirectUrlEvent
-   * @covers ::__construct
+   * @param string $url
+   *   The url.
    */
-  public function testOnRedirectUrlEvent() : void {
-    $url = '/fi/test';
+  private function createUrlStub(string $url) {
     $container = new ContainerBuilder();
     $unrouted_url_assembler = $this->createMock(UnroutedUrlAssemblerInterface::class);
     $unrouted_url_assembler->method('assemble')
@@ -66,7 +66,36 @@ class TunnistamoRedirectUrlSubscriberTest extends UnitTestCase {
     $container->set('path.validator', $this->createMock(PathValidatorInterface::class));
     $container->set('router.no_access_checks', $this->createMock(PathValidatorInterface::class));
     \Drupal::setContainer($container);
+  }
 
+  /**
+   * Make sure we do nothing when no return url is configured.
+   *
+   * @covers ::onRedirectUrlEvent
+   * @covers ::__construct
+   */
+  public function testReturnUrlDisabled() : void {
+    $proxyManager = $this->prophesize(ProxyManagerInterface::class);
+    $proxyManager->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL)
+      ->shouldBeCalled()
+      ->willReturn(FALSE);
+
+    $event = $this->prophesize(RedirectUrlEvent::class);
+    $event->setRedirectUrl(Argument::any())
+      ->shouldNotBeCalled();
+    $subscriber = new TunnistamoRedirectUrlSubscriber($proxyManager->reveal());
+    $subscriber->onRedirectUrlEvent($event->reveal());
+  }
+
+  /**
+   * Tests onRedirectUrlEvent().
+   *
+   * @covers ::onRedirectUrlEvent
+   * @covers ::__construct
+   */
+  public function testOnRedirectUrlEvent() : void {
+    $url = '/fi/test';
+    $this->createUrlStub($url);
     $proxyManager = $this->prophesize(ProxyManagerInterface::class);
     $proxyManager->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL)->willReturn($url);
 
