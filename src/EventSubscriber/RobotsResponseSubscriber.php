@@ -73,6 +73,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
     if ($value !== NULL) {
       return (bool) $value;
     }
+    // @todo Remove this in 3.0.0 release.
     return (bool) getenv(self::X_ROBOTS_TAG_HEADER_NAME);
   }
 

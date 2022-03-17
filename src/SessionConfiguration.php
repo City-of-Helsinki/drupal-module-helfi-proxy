@@ -42,6 +42,7 @@ final class SessionConfiguration extends CoreSessionConfiguration {
       return $this->proxyManager->getConfig(ProxyManagerInterface::SESSION_SUFFIX);
     }
 
+    // @todo Remove this in 3.0.0 release.
     if (!$suffix = getenv('DRUPAL_SESSION_SUFFIX')) {
       return $this->getCleanHostname();
     }
