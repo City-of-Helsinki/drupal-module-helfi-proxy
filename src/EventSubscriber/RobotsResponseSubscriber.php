@@ -62,6 +62,21 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Checks whether robots header should be present.
+   *
+   * @return bool
+   *   TRUE if robots header is enabled for all pages.
+   */
+  private function robotsHeaderEnabled() : bool {
+    $value = $this->config->get(ProxyManagerInterface::ROBOTS_HEADER_ENABLED);
+
+    if ($value !== NULL) {
+      return (bool) $value;
+    }
+    return (bool) getenv(self::X_ROBOTS_TAG_HEADER_NAME);
+  }
+
+  /**
    * Adds a X-Robots-Tag response header.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
@@ -74,7 +89,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
       $response->addCacheableDependency($this->config);
     }
 
-    if (getenv(self::X_ROBOTS_TAG_HEADER_NAME)) {
+    if ($this->robotsHeaderEnabled()) {
       $this->addRobotHeader($response);
       // No need to check individual paths if robots header should be
       // added for every page.

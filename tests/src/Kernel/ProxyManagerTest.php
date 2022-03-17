@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Tests Proxy manager.
  *
+ * @coversDefaultClass \Drupal\helfi_proxy\ProxyManager
  * @group helfi_proxy
  */
 class ProxyManagerTest extends KernelTestBase {
@@ -62,8 +63,13 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests instance prefixes.
+   *
+   * @covers ::getConfig
+   * @covers ::isConfigured
+   * @covers ::__construct
    */
   public function testPrefixes() : void {
+    $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::PREFIXES));
     $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::PREFIXES));
 
     $this->config('helfi_proxy.settings')
@@ -83,8 +89,13 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests default proxy domain config.
+   *
+   * @covers ::getConfig
+   * @covers ::isConfigured
+   * @covers ::__construct
    */
   public function testDefaultProxyDomain() : void {
+    $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN));
     $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN));
 
     $this->config('helfi_proxy.settings')
@@ -107,8 +118,13 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests tunnistamo return url.
+   *
+   * @covers ::getConfig
+   * @covers ::isConfigured
+   * @covers ::__construct
    */
   public function testTunnistamoReturnUrl() : void {
+    $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
     $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
 
     $prefix = '/fi/site-prefix';
@@ -121,8 +137,13 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests asset path.
+   *
+   * @covers ::getConfig
+   * @covers ::isConfigured
+   * @covers ::__construct
    */
   public function testAssetPath() : void {
+    $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::ASSET_PATH));
     $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::ASSET_PATH));
     $this->setAssetPath('test-assets');
 
@@ -162,6 +183,13 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests script tag attribute value.
+   *
+   * @covers ::processHtml
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isAbsoluteUri
+   * @covers ::addAssetPath
+   * @covers ::__construct
    */
   public function testAttributeSelector() : void {
     $this->setAssetPath('test-assets');
@@ -170,12 +198,22 @@ class ProxyManagerTest extends KernelTestBase {
     $expected = $this->createHtmlTag('script', ['src' => '/test-assets/core/modules/system/test.js']);
     $html = $this->createHtmlTag('script', ['src' => '/core/modules/system/test.js']);
 
-    $processed = $this->proxyManager()->processHtml($html, $request, [new AttributeSelector('//script', 'src')]);
+    $processed = $this->proxyManager()
+      ->processHtml($html, $request, [new AttributeSelector('//script', 'src')]);
     $this->assertEquals($expected, $processed);
   }
 
   /**
    * Tests AbsoluteUriAttributeSelector() object.
+   *
+   * @covers ::processHtml
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isAbsoluteUri
+   * @covers ::addAssetPath
+   * @covers ::isLocalAsset
+   * @covers ::isCdnAddress
+   * @covers ::__construct
    */
   public function testAbsoluteUriAttributeSelector() : void {
     $request = $this->createRequest();
@@ -220,6 +258,14 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests blob storage url when blob storage name is set.
+   *
+   * @covers ::processHtml
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isCdnAddress
+   * @covers ::addAssetPath
+   * @covers ::isLocalAsset
+   * @covers ::__construct
    */
   public function testBlobStorageUrlWithStorage() : void {
     putenv('STAGE_FILE_PROXY_ORIGIN=');
@@ -242,6 +288,14 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests blob storage url when STAGE_FILE_PROXY_ORIGIN is set.
+   *
+   * @covers ::processHtml
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isCdnAddress
+   * @covers ::addAssetPath
+   * @covers ::isLocalAsset
+   * @covers ::__construct
    */
   public function testBlobStorageUrlWithStageFileProxy() : void {
     putenv('STAGE_FILE_PROXY_ORIGIN=https://kymp.blob.core.windows.net');
@@ -264,6 +318,15 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests source srcset.
+   *
+   * @covers ::processHtml
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isCdnAddress
+   * @covers ::addAssetPath
+   * @covers ::isAbsoluteUri
+   * @covers ::handleMultiValue
+   * @covers ::__construct
    */
   public function testMultivalueAttributeSelector() : void {
     $request = $this->createRequest();
