@@ -53,10 +53,22 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
     );
   }
 
+  /**
+   * Asserts that response has x-robots-tag header.
+   *
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
+   *   The event.
+   */
   private function assertResponseEventHasHeader(ResponseEvent $event) {
     $this->assertEquals('noindex, nofollow', $event->getResponse()->headers->get('X-Robots-Tag'));
   }
 
+  /**
+   * Asserts that response has no x-robots-tag header.
+   *
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
+   *   The event.
+   */
   private function assertResponseEventNoHeader(ResponseEvent $event) : void {
     $this->assertNotContains('X-Robots-Tag', $event->getResponse()->headers);
   }
