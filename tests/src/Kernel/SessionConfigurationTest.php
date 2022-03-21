@@ -4,12 +4,16 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
+use Drupal\Core\Session\SessionConfigurationInterface;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\KernelTests\KernelTestBase;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Tests session configuration.
  *
+ * @coversDefaultClass \Drupal\helfi_proxy\SessionConfiguration
  * @group helfi_proxy
  */
 class SessionConfigurationTest extends KernelTestBase {
@@ -17,11 +21,18 @@ class SessionConfigurationTest extends KernelTestBase {
   use ProxyTrait;
 
   /**
-   * The session configuration.
+   * The session configuration service.
    *
-   * @var \Drupal\Core\Session\SessionConfigurationInterface
+   * @var \Drupal\Core\Session\SessionConfigurationInterface|null
    */
-  protected $configuration;
+  protected ?SessionConfigurationInterface $configuration;
+
+  /**
+   * The request stack service.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack|null
+   */
+  protected ?RequestStack $requestStack;
 
   /**
    * {@inheritdoc}
@@ -35,18 +46,55 @@ class SessionConfigurationTest extends KernelTestBase {
     parent::setUp();
 
     $this->configuration = $this->container->get('session_configuration');
+    $this->requestStack = $this->container->get('request_stack');
   }
 
   /**
-   * Tests that session gets prefixed with hostname.
+   * Tests session suffix from configuration.
+   *
+   * @covers ::getOptions
+   * @covers ::getName
+   * @covers ::getSuffix
+   * @covers ::__construct
    */
-  public function testSessionName() : void {
-    /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
-    $requestStack = $this->container->get('request_stack');
-    $options = $this->configuration->getOptions($requestStack->getCurrentRequest());
+  public function testSessionNameConfig() : void {
+    $this->config('helfi_proxy.settings')
+      ->set(ProxyManagerInterface::SESSION_SUFFIX, 'testdev')
+      ->save();
+    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
+
+    $this->assertTrue(str_ends_with($options['name'], 'testdev'));
+  }
+
+  /**
+   * Tests session suffix from DRUPAL_SESSION_SUFFIX env variable.
+   *
+   * @covers ::getOptions
+   * @covers ::getName
+   * @covers ::getSuffix
+   * @covers ::__construct
+   */
+  public function testSessionNameEnvVariable() : void {
+    putenv('DRUPAL_SESSION_SUFFIX=testlocal');
+    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
+
+    $this->assertTrue(str_ends_with($options['name'], 'testlocal'));
+  }
+
+  /**
+   * Tests session suffix fallback.
+   *
+   * @covers ::getCleanHostname
+   * @covers ::getOptions
+   * @covers ::getName
+   * @covers ::getSuffix
+   * @covers ::__construct
+   */
+  public function testSessionNameFallback() : void {
+    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
 
     $this->assertNotEmpty($this->getCleanHostname());
-    $this->assertStringContainsString($this->getCleanHostname(), $options['name']);
+    $this->assertTrue(str_ends_with($options['name'], $this->getCleanHostname()));
   }
 
 }

@@ -242,23 +242,6 @@ final class ProxyManager implements ProxyManagerInterface {
   }
 
   /**
-   * Adds domain to relative URL.
-   *
-   * @param string $value
-   *   The value.
-   *
-   * @return string
-   *   The value with domain added to it.
-   */
-  private function addDomain(string $value) : string {
-    // Skip absolute uris.
-    if ($this->isAbsoluteUri($value)) {
-      return $value;
-    }
-    return sprintf('//%s/%s', $this->getHostname(), ltrim($value, '/'));
-  }
-
-  /**
    * Gets the asset path.
    *
    * phpcs:ignore

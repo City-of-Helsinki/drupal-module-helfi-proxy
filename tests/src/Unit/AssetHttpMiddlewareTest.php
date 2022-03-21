@@ -25,6 +25,7 @@ class AssetHttpMiddlewareTest extends UnitTestCase {
    *
    * @covers ::handle
    * @covers ::isXmlResponse
+   * @covers ::__construct
    * @dataProvider xmlResponseProvider
    */
   public function testXmlResponse(?string $contentType) : void {
@@ -75,6 +76,8 @@ class AssetHttpMiddlewareTest extends UnitTestCase {
    * Tests that response is intact when no asset path is configured.
    *
    * @covers ::handle
+   * @covers ::__construct
+   * @covers ::isXmlResponse
    */
   public function testNoAssetPathConfigured() : void {
     $headers = $this->prophesize(ParameterBag::class);
