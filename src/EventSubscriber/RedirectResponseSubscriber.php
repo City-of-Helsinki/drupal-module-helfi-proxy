@@ -107,9 +107,9 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() : array {
-    // This must be run after core's RedirectResponseSubscriber, so we
-    // can be sure path processor has been run.
-    $events[KernelEvents::RESPONSE][] = ['onResponse', -1];
+    // This must be before core's RedirectResponseSubscriber, so we don't break
+    // any other redirects made by other modules, like ?destination.
+    $events[KernelEvents::RESPONSE][] = ['onResponse', 1];
 
     return $events;
   }
