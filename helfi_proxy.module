@@ -90,7 +90,7 @@ function helfi_proxy_editor_js_settings_alter(array &$settings) {
       $editor = Editor::load($format);
       // @see \Drupal\ckeditor\Plugin\Editor\CKEditor::getJSSettings()
       $external_plugin_files = $ckeditor_plugin_manager->getEnabledPluginFiles($editor);
-      // Convert editor css and plugin js to use absolute path.
+      // Convert editor css and plugin js to use absolute asset path.
       $format_settings['editorSettings']['drupalExternalPlugins'] = array_map('helfi_proxy_absolute_url', $external_plugin_files);
       $format_settings['editorSettings']['contentsCss'] = array_map('helfi_proxy_absolute_url', $format_settings['editorSettings']['contentsCss'] ?? []);
     }
