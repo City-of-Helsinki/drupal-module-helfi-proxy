@@ -23,7 +23,7 @@ A "prefix" will be added to all URLs. This prefix should be same as the `<projec
 
 These can be configured by creating a `conf/cmi/helfi_proxy.settings.yml` file containing:
 
-```
+```yaml
 prefixes:
   en: maps-and-transport
   fi: kartat-ja-liikenne
@@ -32,7 +32,7 @@ prefixes:
 ```
 or by adding them to your settings.php:
 
-```
+```php
 $config['helfi_proxy.settings']['prefixes'] = [
   'en' => 'test-maps-and-transport',
   'fi' => 'test-kartat-ja-liikenne',
@@ -45,15 +45,23 @@ $config['helfi_proxy.settings']['prefixes'] = [
 
 All assets (`script[src]`, `source[srcset]`, `img[src]` etc.) are served from the path configured in (`helfi_proxy.settings`) `asset-path` setting. For example `liikenne-assets`.
 
-This ensures that all local assets are served directly from the asset path (`<proxy url>/<asset path>/<path to asset>`) instead of `<proxy url>/<project prefix>/<path to asset>`.
+This ensures that all local assets are served directly from the asset path (`<proxy url>/<asset path>/<path to asset>`) instead of `<proxy url>/<path to asset>`.
 
 ### Disallow search engines/robots from indexing the site
 
-Add an environment variable `DRUPAL_X_ROBOTS_TAG_HEADER` with any value to insert a `X-Robots-Tag: noindex, nofollow` header to every response.
+Set `helfi_proxy.settings.robots_header_enabled` configuration to `TRUE`.
+
+```php
+if ($robots_header_enabled = getenv('DRUPAL_X_ROBOTS_TAG_HEADER')) {
+  $config['helfi_proxy.settings']['robots_header_enabled'] = (bool) $robots_header_enabled;
+}
+```
+
+This will insert a `X-Robots-Tag: noindex, nofollow` header to every response, effectively blocking search engines from indexing the site.
 
 You can use `helfi_proxy.settings` configuration to only ignore certain paths:
 
-```
+```yaml
 robots_paths:
   - '/user/login'
   - '/residential-*'
@@ -67,7 +75,7 @@ Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder 
 
 Add these to your settings.php to use varnish cache:
 
-```
+```php
 if ($varnish_host = getenv('DRUPAL_VARNISH_HOST')) {
   $config['varnish_purger.settings.default']['hostname'] = $varnish_host;
   $config['varnish_purger.settings.varnish_purge_all']['hostname'] = $varnish_host;
