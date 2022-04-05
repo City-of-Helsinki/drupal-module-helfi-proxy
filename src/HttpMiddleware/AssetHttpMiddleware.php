@@ -77,7 +77,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       return TRUE;
     }
 
-    return $response->headers->get('content-type') === 'application/json';
+    $jsonTypes = [
+      'application/json',
+      'application/vnd.api+json',
+    ];
+    return in_array($response->headers->get('content-type'), $jsonTypes);
   }
 
   /**
