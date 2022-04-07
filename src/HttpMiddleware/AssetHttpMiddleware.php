@@ -113,14 +113,15 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
   ) : Response {
     $response = $this->httpKernel->handle($request, $type, $catch);
 
+    if ($this->isXmlResponse($response)) {
+      return $response;
+    }
+
     // Nothing to do if asset path is not configured.
     if (!$this->proxyManager->isConfigured(ProxyManagerInterface::ASSET_PATH)) {
       return $response;
     }
 
-    if ($this->isXmlResponse($response)) {
-      return $response;
-    }
     $content = $response->getContent();
 
     if (!is_string($content)) {
