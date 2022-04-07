@@ -75,9 +75,11 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
   public function onResponse(ResponseEvent $event) : void {
     if (
       !$this->validProxyDomains ||
-      !$this->proxyManager->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN)
+      !$this->proxyManager->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN) ||
+      $event->getRequest()->isMethod('GET')
     ) {
       // Nothing to do if default proxy domain is not defined.
+      // Only redirect on GET requests as well.
       return;
     }
     $response = $event->getResponse();
