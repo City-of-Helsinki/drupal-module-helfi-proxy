@@ -75,6 +75,8 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
       ->willReturn(FALSE);
 
     $response = $this->prophesize(RedirectResponse::class);
+    $response->getTargetUrl()
+      ->shouldNotBeCalled();
     $event = new ResponseEvent(
       $this->createMock(HttpKernelInterface::class),
       $request->reveal(),
