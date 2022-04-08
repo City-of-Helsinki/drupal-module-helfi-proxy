@@ -77,7 +77,11 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       return TRUE;
     }
 
-    return $response->headers->get('content-type') === 'application/json';
+    $jsonTypes = [
+      'application/json',
+      'application/vnd.api+json',
+    ];
+    return in_array($response->headers->get('content-type'), $jsonTypes);
   }
 
   /**
@@ -112,10 +116,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     if ($this->isXmlResponse($response)) {
       return $response;
     }
+
     // Nothing to do if asset path is not configured.
     if (!$this->proxyManager->isConfigured(ProxyManagerInterface::ASSET_PATH)) {
       return $response;
     }
+
     $content = $response->getContent();
 
     if (!is_string($content)) {

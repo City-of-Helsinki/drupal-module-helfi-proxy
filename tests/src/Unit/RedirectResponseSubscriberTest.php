@@ -60,6 +60,35 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
   }
 
   /**
+   * Tests that response stays intact for non-get requests.
+   *
+   * @covers ::onResponse
+   * @covers ::__construct
+   */
+  public function testPostRequestResponse() : void {
+    $proxyManagerMock = $this->prophesize(ProxyManagerInterface::class);
+    $proxyManagerMock->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN)
+      ->shouldBeCalled()
+      ->willReturn(TRUE);
+    $request = $this->prophesize(Request::class);
+    $request->isMethod('GET')
+      ->willReturn(FALSE);
+
+    $response = $this->prophesize(RedirectResponse::class);
+    $response->getTargetUrl()
+      ->shouldNotBeCalled();
+    $event = new ResponseEvent(
+      $this->createMock(HttpKernelInterface::class),
+      $request->reveal(),
+      HttpKernelInterface::MASTER_REQUEST,
+      $response->reveal()
+    );
+    // Make sure response stays intact when the request method is not GET.
+    $sut = new RedirectResponseSubscriber($proxyManagerMock->reveal(), ['www.hel.fi']);
+    $sut->onResponse($event);
+  }
+
+  /**
    * Tests onResponse() with RedirectResponse.
    *
    * Make sure we get redirected to proxy and request data is carried over
@@ -83,9 +112,13 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
     $response->getTargetUrl()
       ->willReturn('http://localhost:8888/test?x=1');
 
+    $request = $this->prophesize(Request::class);
+    $request->isMethod('GET')
+      ->willReturn(TRUE);
+
     $event = new ResponseEvent(
       $this->createMock(HttpKernelInterface::class),
-      $this->createMock(Request::class),
+      $request->reveal(),
       HttpKernelInterface::MASTER_REQUEST,
       $response->reveal()
     );
@@ -118,6 +151,9 @@ class RedirectResponseSubscriberTest extends UnitTestCase {
     $request->getSchemeAndHttpHost()
       ->shouldBeCalled()
       ->willReturn('http://localhost:8888');
+    $request->isMethod('GET')
+      ->shouldBeCalled()
+      ->willReturn(TRUE);
     $request->getRequestUri()
       ->shouldBeCalled()
       ->willReturn('/test?x=1');
