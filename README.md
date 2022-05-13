@@ -13,10 +13,6 @@ Provides various fixes to allow multiple Drupal instances to be served from one 
 
 All these features are made to ensure that the instance can be served from `<proxy url>/<project prefix>`.
 
-### Cookie name suffix
-
-Cookie name will be suffixed with the site's hostname. For example `SSID{sha256}helfi-docker-so`.
-
 ### Site prefix
 
 A "prefix" will be added to all URLs. This prefix should be same as the `<project prefix>` in `<proxy url>/<project prefix>`.
@@ -40,6 +36,9 @@ $config['helfi_proxy.settings']['prefixes'] = [
   'ru' => 'test-maps',
 ];
 ```
+### Cookie name suffix
+
+Cookie name will be suffixed with the value configured in (`helfi_proxy.settings`) `session_suffix` setting. The value will default to site's hostname if not configured. For example `SSID{sha256}helfi-docker-so`.
 
 ### Serve assets from asset path
 
