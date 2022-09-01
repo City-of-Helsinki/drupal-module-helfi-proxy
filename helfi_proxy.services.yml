@@ -52,6 +52,11 @@ services:
     tags:
       - { name: event_subscriber }
 
+  helfi_proxy.cors_subscriber:
+    class: Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber
+    tags:
+      - { name: event_subscriber }
+
   helfi_proxy.asset.css.optimizer:
     public: false
     class: Drupal\helfi_proxy\Asset\CssOptimizer
