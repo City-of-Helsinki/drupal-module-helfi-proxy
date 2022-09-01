@@ -26,6 +26,10 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
    */
   public function onResponse(ResponseEvent $event) : void {
     $requestDomain = $event->getRequest()->headers->get('Origin');
+
+    if (!$requestDomain) {
+      return;
+    }
     $validHost = FALSE;
 
     foreach (self::ALLOWED_DOMAINS as $domain) {
