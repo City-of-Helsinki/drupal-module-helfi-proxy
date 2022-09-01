@@ -28,7 +28,7 @@ class CorsResponseSubscriberTest extends KernelTestBase {
    *
    * @dataProvider corsTestData
    */
-  public function testCors(string $domain, bool $expected) : void {
+  public function testCors(mixed $domain, bool $expected) : void {
     $request = Request::create('/', server: [
       'HTTP_HOST' => 'localhost:8888',
     ]);
@@ -52,6 +52,7 @@ class CorsResponseSubscriberTest extends KernelTestBase {
       ['docker.so', TRUE],
       ['helfi-kymp.docker.so', TRUE],
       ['testdocker.so', FALSE],
+      [NULL, FALSE],
     ];
   }
 
