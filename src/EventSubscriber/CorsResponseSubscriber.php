@@ -9,7 +9,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Adds required CORS headers.
+ * Adds required CORS headers to a response.
  */
 final class CorsResponseSubscriber implements EventSubscriberInterface {
 
@@ -19,7 +19,7 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
   ];
 
   /**
-   * Adds CORS headers.
+   * Adds cors headers to a response.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to respond to.
@@ -33,6 +33,7 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
         $validHost = TRUE;
       }
 
+      // Allow subdomains as well.
       if (str_ends_with($requestDomain, '.' . $domain)) {
         $validHost = TRUE;
       }
