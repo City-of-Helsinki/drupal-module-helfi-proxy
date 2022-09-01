@@ -3,6 +3,9 @@ parameters:
     - www.hel.fi
     - www-test.hel.fi
     - helfi-proxy.docker.so
+  helfi_proxy.valid_origin_domains:
+    - hel.fi
+    - docker.so
 services:
   helfi_proxy.http_middleware:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
@@ -54,6 +57,8 @@ services:
 
   helfi_proxy.cors_subscriber:
     class: Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber
+    arguments:
+      - '%helfi_proxy.valid_origin_domains%'
     tags:
       - { name: event_subscriber }
 

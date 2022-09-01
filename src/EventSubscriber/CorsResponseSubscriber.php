@@ -13,10 +13,16 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class CorsResponseSubscriber implements EventSubscriberInterface {
 
-  private const ALLOWED_DOMAINS = [
-    'hel.fi',
-    'docker.so',
-  ];
+  /**
+   * Constructs a new instance.
+   *
+   * @param array $validOriginDomains
+   *   An array of domains.
+   */
+  public function __construct(
+    private array $validOriginDomains
+  ) {
+  }
 
   /**
    * Adds cors headers to a response.
@@ -32,7 +38,7 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
     }
     $validHost = FALSE;
 
-    foreach (self::ALLOWED_DOMAINS as $domain) {
+    foreach ($this->validOriginDomains as $domain) {
       if ($requestDomain === $domain) {
         $validHost = TRUE;
       }
