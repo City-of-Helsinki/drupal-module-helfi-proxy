@@ -21,7 +21,7 @@ class Robots extends DebugDataItemPluginBase {
    * {@inheritdoc}
    */
   public function collect(): array {
-    $data['DRUPAL_X_ROBOTS_TAG_HEADER'] = (bool)getenv('DRUPAL_X_ROBOTS_TAG_HEADER');
+    $data['DRUPAL_X_ROBOTS_TAG_HEADER'] = (bool) getenv('DRUPAL_X_ROBOTS_TAG_HEADER');
     return $data;
   }
 
