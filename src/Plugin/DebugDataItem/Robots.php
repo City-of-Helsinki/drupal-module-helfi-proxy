@@ -19,7 +19,12 @@ use Psr\Container\ContainerInterface;
  */
 class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginInterface {
 
-  protected bool $robots_header;
+  /**
+   * Robots header enabled settings value.
+   *
+   * @var bool
+   */
+  protected bool $robotsHeader;
 
   /**
    * {@inheritdoc}
@@ -28,12 +33,12 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
     $instance = new static($configuration, $plugin_id, $plugin_definition);
 
     try {
-      $instance->robots_header = (bool) $container->get('config.factory')
+      $instance->robotsHeader = (bool) $container->get('config.factory')
         ->get('helfi_proxy.settings')
         ->get('robots_header_enabled');
     }
     catch (\Exception $e) {
-      $instance->robots_header = FALSE;
+      $instance->robotsHeader = FALSE;
     }
 
     return $instance;
@@ -43,7 +48,7 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
    * {@inheritdoc}
    */
   public function collect(): array {
-    $data['DRUPAL_X_ROBOTS_TAG_HEADER'] = $this->robots_header;
+    $data['DRUPAL_X_ROBOTS_TAG_HEADER'] = $this->robotsHeader;
     return $data;
   }
 
