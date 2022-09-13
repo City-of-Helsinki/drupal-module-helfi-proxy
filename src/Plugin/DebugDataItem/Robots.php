@@ -32,13 +32,9 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = new static($configuration, $plugin_id, $plugin_definition);
 
-    try {
-      $instance->robotsHeader = (bool) $container->get('config.factory')
-        ->get('helfi_proxy.settings')
-        ->get('robots_header_enabled');
-    }
-    catch (\Exception) {
-    }
+    $instance->robotsHeader = (bool) $container->get('config.factory')
+      ->get('helfi_proxy.settings')
+      ->get('robots_header_enabled');
 
     return $instance;
   }
