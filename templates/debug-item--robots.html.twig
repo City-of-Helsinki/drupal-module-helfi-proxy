@@ -19,17 +19,17 @@
 #}
 
 <h2>Robots</h2>
-<table style="width:auto;">
+<table aria-label="robots table" style="width:auto;">
   <thead>
   <tr>
-    <th>Key</th>
-    <th>Status</th>
+    <th id="robot-header-key">Key</th>
+    <th id="robot-header-status">Status</th>
   </tr>
   </thead>
   <tbody>
   {% for key, value in data %}
     <tr>
-      <th>
+      <th id="robot-key">
         {{ key }}
       </th>
       <td>
