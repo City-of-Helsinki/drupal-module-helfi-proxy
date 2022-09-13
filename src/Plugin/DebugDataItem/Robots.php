@@ -24,7 +24,7 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
    *
    * @var bool
    */
-  protected bool $robotsHeader;
+  protected bool $robotsHeader = FALSE;
 
   /**
    * {@inheritdoc}
@@ -37,8 +37,7 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
         ->get('helfi_proxy.settings')
         ->get('robots_header_enabled');
     }
-    catch (\Exception $e) {
-      $instance->robotsHeader = FALSE;
+    catch (\Exception) {
     }
 
     return $instance;
