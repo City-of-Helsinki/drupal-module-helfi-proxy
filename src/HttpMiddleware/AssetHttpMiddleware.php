@@ -97,10 +97,12 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     if (!$response->headers->has('content-type')) {
       return FALSE;
     }
-    return str_starts_with(
-      $response->headers->get('content-type') ?: '',
-      'application/xml',
-    );
+    foreach (['application/xml', 'application/rss+xml'] as $type) {
+      if (str_starts_with($response->headers->get('content-type'), $type)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**

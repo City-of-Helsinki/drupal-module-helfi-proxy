@@ -69,6 +69,7 @@ class AssetHttpMiddlewareTest extends UnitTestCase {
     return [
       ['application/xml'],
       ['application/xml; charset=utf-8'],
+      ['application/rss+xml; charset=utf-8'],
     ];
   }
 
