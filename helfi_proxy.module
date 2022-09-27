@@ -6,8 +6,10 @@
  */
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\editor\Entity\Editor;
 use Drupal\helfi_proxy\ProxyManagerInterface;
+
 
 /**
  * Converts uri to absolute.
@@ -101,8 +103,7 @@ function helfi_proxy_editor_js_settings_alter(array &$settings) {
 /**
  * Implements hook_page_attachments_alter().
  */
-function helfi_proxy_page_attachments_alter(array &$attachments)
-{
+function helfi_proxy_page_attachments_alter(array &$attachments) {
   // Set custom content type metatag on all content pages.
   if (empty($attachments['#attached']['html_head'])) {
     return;
@@ -111,7 +112,7 @@ function helfi_proxy_page_attachments_alter(array &$attachments)
   $entities = array_filter(
     \Drupal::routeMatch()->getParameters()->all(),
     function ($param) {
-      return $param instanceof \Drupal\Core\Entity\EntityInterface;
+      return $param instanceof EntityInterface;
     }
   );
 
