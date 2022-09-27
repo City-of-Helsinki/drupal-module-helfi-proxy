@@ -12,17 +12,15 @@ class CustomMetatagTest extends BrowserTestBase  {
   /**
    * {@inheritdoc}
    */
-  protected $defaultTheme = 'claro';
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = [
-    'filter',
     'node',
     'language',
     'helfi_proxy',
-    'content_translation',
   ];
 
   public function setUp(): void {
@@ -43,6 +41,13 @@ class CustomMetatagTest extends BrowserTestBase  {
     $this->drupalGet($this->node->toUrl('canonical'));
     $this->assertSession()
       ->elementAttributeContains('css', 'meta[name="helfi_content_type"]', 'content', 'page');
+
+    $this->drupalGet('<front>');
+    $this->assertSession()
+      ->statusCodeEquals(200);
+
+    $this->assertSession()
+      ->elementNotExists('css', 'meta[name="helfi_content_type"]');
   }
 
 }
