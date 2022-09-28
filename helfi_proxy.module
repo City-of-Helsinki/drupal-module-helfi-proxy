@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\editor\Entity\Editor;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 
@@ -96,4 +97,35 @@ function helfi_proxy_editor_js_settings_alter(array &$settings) {
     }
   }
 
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ */
+function helfi_proxy_page_attachments_alter(array &$attachments) {
+  // Set custom content type metatag on all content pages.
+  if (empty($attachments['#attached']['html_head'])) {
+    return;
+  }
+
+  $entities = array_filter(
+    \Drupal::routeMatch()->getParameters()->all(),
+    function ($param) {
+      return $param instanceof EntityInterface;
+    }
+  );
+
+  $entity = !empty($entities) ? reset($entities) : NULL;
+  if ($entity) {
+    $tag_name = 'helfi_content_type';
+
+    $helfi_content_type = [
+      '#tag' => 'meta',
+      '#attributes' => [
+        'name' => $tag_name,
+        'content' => $entity->bundle(),
+      ],
+    ];
+    $attachments['#attached']['html_head'][] = [$helfi_content_type, $tag_name];
+  }
 }
