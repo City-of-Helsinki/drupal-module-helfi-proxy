@@ -7,7 +7,12 @@ namespace Drupal\Tests\helfi_proxy\Functional;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 
-class CustomMetatagTest extends BrowserTestBase  {
+/**
+ * Custom metatag test class.
+ *
+ * @group helfi_proxy
+ */
+class CustomMetatagTest extends BrowserTestBase {
 
   /**
    * {@inheritdoc}
@@ -23,6 +28,9 @@ class CustomMetatagTest extends BrowserTestBase  {
     'helfi_proxy',
   ];
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp(): void {
     parent::setUp();
     FilterFormat::load('full_html');
@@ -35,7 +43,7 @@ class CustomMetatagTest extends BrowserTestBase  {
   }
 
   /**
-   * Test that custom header metatag is set on page
+   * Test that custom header metatag is set on page correctly.
    */
   public function testMetatag() : void {
     $this->drupalGet($this->node->toUrl('canonical'));
