@@ -48,38 +48,48 @@ final class ProxyManager implements ProxyManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processHtml(string $html, Request $request, array $selectors = []) : string {
-    $dom = new \DOMDocument();
-    $previousXmlErrorBehavior = libxml_use_internal_errors(TRUE);
-    $encoding = '<?xml encoding="utf-8" ?>';
+  public function process(string $content, Request $request, array $selectors = []) : string {
+    $content = trim($content);
 
-    @$dom->loadHTML(
-      $encoding . $html,
-      LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
-    );
-    $dom->encoding = 'UTF-8';
-    $xpath = new \DOMXPath($dom);
+    // Handle raw html.
+    if (str_starts_with('<!DOCTYPE', $content)) {
+      $dom = new \DOMDocument();
+      $previousXmlErrorBehavior = libxml_use_internal_errors(TRUE);
+      $encoding = '<?xml encoding="utf-8" ?>';
 
-    foreach ($selectors ?: $this->getDefaultSelectors() as $selector) {
-      foreach ($xpath->query($selector->xpath) as $row) {
-        $value = $this
-          ->getAttributeValue(
-            $selector,
-            $request,
-            $row->getAttribute($selector->attribute),
-          );
+      @$dom->loadHTML(
+        $encoding . $content,
+        LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+      );
+      $dom->encoding = 'UTF-8';
+      $xpath = new \DOMXPath($dom);
 
-        if (!$value) {
-          continue;
+      foreach ($selectors ?: $this->getDefaultSelectors() as $selector) {
+        foreach ($xpath->query($selector->xpath) as $row) {
+          $value = $this
+            ->getAttributeValue(
+              $selector,
+              $request,
+              $row->getAttribute($selector->attribute),
+            );
+
+          if (!$value) {
+            continue;
+          }
+          $row->setAttribute($selector->attribute, $value);
         }
-        $row->setAttribute($selector->attribute, $value);
       }
-    }
-    $result = trim($dom->saveHTML());
-    libxml_use_internal_errors($previousXmlErrorBehavior);
+      $result = trim($dom->saveHTML());
+      libxml_use_internal_errors($previousXmlErrorBehavior);
 
-    // Remove the debug xml encoding.
-    return str_replace($encoding, '', $result);
+      // Remove the debug xml encoding.
+      return str_replace($encoding, '', $result);
+    }
+
+    foreach ($selectors as $selector) {
+      $content = $this->getAttributeValue($selector, $request, $content);
+    }
+    return $content;
   }
 
   /**

@@ -30,7 +30,7 @@ interface ProxyManagerInterface {
   /**
    * Manipulates the given attributes to have correct values.
    *
-   * @param string $html
+   * @param string $content
    *   The html to manipulate.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
@@ -40,7 +40,7 @@ interface ProxyManagerInterface {
    * @return \Symfony\Component\HttpFoundation\Response
    *   The manipulated response.
    */
-  public function processHtml(string $html, Request $request, array $selectors = []) : string;
+  public function process(string $content, Request $request, array $selectors = []) : string;
 
   /**
    * Whether the proxy is configured or not.

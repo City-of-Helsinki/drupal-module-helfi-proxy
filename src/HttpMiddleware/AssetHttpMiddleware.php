@@ -58,7 +58,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
       $hasChanges = TRUE;
 
       $content[$key]['data'] = $this->proxyManager
-        ->processHtml($value['data'], $request);
+        ->process($value['data'], $request);
     }
     return $hasChanges ? json_encode($content) : NULL;
   }
@@ -138,7 +138,7 @@ final class AssetHttpMiddleware implements HttpKernelInterface {
     }
 
     $content = $this->proxyManager
-      ->processHtml($content, $request);
+      ->process($content, $request);
 
     return $response->setContent($content);
   }

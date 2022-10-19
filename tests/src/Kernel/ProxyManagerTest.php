@@ -184,7 +184,7 @@ class ProxyManagerTest extends KernelTestBase {
   /**
    * Tests script tag attribute value.
    *
-   * @covers ::processHtml
+   * @covers ::process
    * @covers ::getAttributeValue
    * @covers ::getDefaultSelectors
    * @covers ::isAbsoluteUri
@@ -199,14 +199,14 @@ class ProxyManagerTest extends KernelTestBase {
     $html = $this->createHtmlTag('script', ['src' => '/core/modules/system/test.js']);
 
     $processed = $this->proxyManager()
-      ->processHtml($html, $request, [new AttributeSelector('//script', 'src')]);
+      ->process($html, $request, [new AttributeSelector('//script', 'src')]);
     $this->assertEquals($expected, $processed);
   }
 
   /**
    * Tests AbsoluteUriAttributeSelector() object.
    *
-   * @covers ::processHtml
+   * @covers ::process
    * @covers ::getAttributeValue
    * @covers ::getDefaultSelectors
    * @covers ::isAbsoluteUri
@@ -240,7 +240,7 @@ class ProxyManagerTest extends KernelTestBase {
 
       $this->assertEquals(
         $expected,
-        $this->proxyManager()->processHtml($html, $request, [$attributeSelector])
+        $this->proxyManager()->process($html, $request, [$attributeSelector])
       );
 
       // Make sure the domain is converted to correct one.
@@ -251,7 +251,7 @@ class ProxyManagerTest extends KernelTestBase {
 
       $this->assertEquals(
         $expected,
-        $this->proxyManager()->processHtml($html, $request, [$attributeSelector])
+        $this->proxyManager()->process($html, $request, [$attributeSelector])
       );
     }
   }
@@ -259,7 +259,7 @@ class ProxyManagerTest extends KernelTestBase {
   /**
    * Tests blob storage url when blob storage name is set.
    *
-   * @covers ::processHtml
+   * @covers ::process
    * @covers ::getAttributeValue
    * @covers ::getDefaultSelectors
    * @covers ::isCdnAddress
@@ -280,7 +280,7 @@ class ProxyManagerTest extends KernelTestBase {
     // is set.
     $this->assertEquals(
       $html,
-      $this->proxyManager()->processHtml($html, $request, [
+      $this->proxyManager()->process($html, $request, [
         new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content'),
       ])
     );
@@ -289,7 +289,7 @@ class ProxyManagerTest extends KernelTestBase {
   /**
    * Tests blob storage url when STAGE_FILE_PROXY_ORIGIN is set.
    *
-   * @covers ::processHtml
+   * @covers ::process
    * @covers ::getAttributeValue
    * @covers ::getDefaultSelectors
    * @covers ::isCdnAddress
@@ -310,7 +310,7 @@ class ProxyManagerTest extends KernelTestBase {
 
     $this->assertEquals(
       $html,
-      $this->proxyManager()->processHtml($html, $request, [
+      $this->proxyManager()->process($html, $request, [
         new AbsoluteUriAttributeSelector('//meta[@property="og:image:url"]', 'content'),
       ])
     );
@@ -319,7 +319,7 @@ class ProxyManagerTest extends KernelTestBase {
   /**
    * Tests source srcset.
    *
-   * @covers ::processHtml
+   * @covers ::process
    * @covers ::getAttributeValue
    * @covers ::getDefaultSelectors
    * @covers ::isCdnAddress
@@ -351,7 +351,7 @@ class ProxyManagerTest extends KernelTestBase {
 
     $this->assertEquals(
       $expected,
-      $this->proxyManager()->processHtml($html, $request, [
+      $this->proxyManager()->process($html, $request, [
         new MultiValueAttributeSelector('//source', 'srcset', ', '),
       ])
     );
