@@ -6,10 +6,10 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
-use Drupal\helfi_proxy\Selector\AttributeSelector;
 use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
 use Drupal\helfi_proxy\Selector\SelectorInterface;
 use Drupal\helfi_proxy\Selector\SelectorRepositoryTrait;
+use Drupal\helfi_proxy\Selector\StringValue;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -49,7 +49,7 @@ final class ProxyManager implements ProxyManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processHtml(string $html, Request $request, array $selectors = []) : string {
+  public function processHtml(string $html, Request $request = NULL, array $selectors = []) : string {
     $dom = new \DOMDocument();
     $previousXmlErrorBehavior = libxml_use_internal_errors(TRUE);
     $encoding = '<?xml encoding="utf-8" ?>';
@@ -66,8 +66,8 @@ final class ProxyManager implements ProxyManagerInterface {
         $value = $this
           ->getAttributeValue(
             $selector,
-            $request,
             $row->getAttribute($selector->attribute),
+            $request
           );
 
         if (!$value) {
@@ -86,11 +86,14 @@ final class ProxyManager implements ProxyManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function processValue(string $value, Request $request, array $selectors = []) : string {
+  public function processValue(string $value, Request $request = NULL, array $selectors = []) : string {
     $value = trim($value);
 
+    if (!$selectors) {
+      $selectors[] = new StringValue();
+    }
     foreach ($selectors as $selector) {
-      $value = $this->getAttributeValue($selector, $request, $value);
+      $value = $this->getAttributeValue($selector, $value, $request);
     }
     return $value;
   }
@@ -100,15 +103,15 @@ final class ProxyManager implements ProxyManagerInterface {
    *
    * @param \Drupal\helfi_proxy\Selector\SelectorInterface $selector
    *   The selector.
-   * @param \Symfony\Component\HttpFoundation\Request $request
-   *   The request.
    * @param string|null $value
    *   The value.
+   * @param null|\Symfony\Component\HttpFoundation\Request $request
+   *   The request.
    *
    * @return string|null
    *   The attribute value.
    */
-  private function getAttributeValue(SelectorInterface $selector, Request $request, ?string $value) : ? string {
+  private function getAttributeValue(SelectorInterface $selector, ?string $value, Request $request = NULL) : ? string {
     // Skip if value is being served from CDN already.
     if (!$value || $this->isCdnAddress($value)) {
       return $value;
@@ -117,6 +120,9 @@ final class ProxyManager implements ProxyManagerInterface {
     // Certain elements might be absolute URLs already (such as og:image:url).
     // Make sure locally hosted files are always served from correct domain.
     if ($selector instanceof AbsoluteUriAttributeSelector) {
+      if (!$request) {
+        throw new \LogicException('Missing required Request $request.');
+      }
       $parts = parse_url($value);
 
       if (empty($parts['path'])) {

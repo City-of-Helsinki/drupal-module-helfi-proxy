@@ -32,7 +32,7 @@ interface ProxyManagerInterface {
    *
    * @param string $html
    *   The html to manipulate.
-   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param null|\Symfony\Component\HttpFoundation\Request $request
    *   The request.
    * @param array $selectors
    *   The selectors.
@@ -40,14 +40,14 @@ interface ProxyManagerInterface {
    * @return \Symfony\Component\HttpFoundation\Response
    *   The manipulated response.
    */
-  public function processHtml(string $html, Request $request, array $selectors = []) : string;
+  public function processHtml(string $html, Request $request = NULL, array $selectors = []) : string;
 
   /**
    * Processes a string value.
    *
    * @param string $value
    *   The value.
-   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param null|\Symfony\Component\HttpFoundation\Request $request
    *   The request.
    * @param array $selectors
    *   The selectors.
@@ -55,7 +55,7 @@ interface ProxyManagerInterface {
    * @return string
    *   The processed value.
    */
-  public function processValue(string $value, Request $request, array $selectors = []) : string;
+  public function processValue(string $value, Request $request = NULL, array $selectors = []) : string;
 
   /**
    * Whether the proxy is configured or not.

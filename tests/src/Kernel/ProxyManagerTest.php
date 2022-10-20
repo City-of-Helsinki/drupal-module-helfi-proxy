@@ -216,11 +216,8 @@ class ProxyManagerTest extends KernelTestBase {
    */
   public function testStringValueSelector() : void {
     $this->setAssetPath('test-assets');
-    $request = $this->createRequest();
 
-    $processed = $this->proxyManager()->processValue('/core/modules/system/test.js', $request, [
-      new StringValue(),
-    ]);
+    $processed = $this->proxyManager()->processValue('/core/modules/system/test.js');
     $this->assertEquals('/test-assets/core/modules/system/test.js', $processed);
   }
 
