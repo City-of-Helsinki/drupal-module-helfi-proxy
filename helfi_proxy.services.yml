@@ -7,6 +7,10 @@ parameters:
     - hel.fi
     - docker.so
 services:
+  helfi_proxy.active_prefix:
+    class: Drupal\helfi_proxy\ActiveSitePrefix
+    arguments: ['@language_manager', '@config.factory']
+
   helfi_proxy.http_middleware:
     class: Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware
     arguments: ['@helfi_proxy.proxy_manager']
@@ -20,7 +24,7 @@ services:
 
   helfi_proxy.path_processor:
     class: Drupal\helfi_proxy\PathProcessor\SitePrefixPathProcessor
-    arguments: ['@config.factory']
+    arguments: ['@helfi_proxy.active_prefix']
     tags:
       # Must be run before PathProcessorFront (200 weight).
       - { name: path_processor_inbound, priority: 201 }
@@ -35,7 +39,7 @@ services:
 
   cache_context.site_prefix:
     class: Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext
-    arguments: ['@config.factory']
+    arguments: ['@helfi_proxy.active_prefix']
     tags:
       - { name: cache.context }
 

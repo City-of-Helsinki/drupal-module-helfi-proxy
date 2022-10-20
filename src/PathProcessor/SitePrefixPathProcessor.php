@@ -4,12 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\PathProcessor;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
-use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\helfi_proxy\ActiveSitePrefix;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -20,30 +18,22 @@ use Symfony\Component\HttpFoundation\Request;
 final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, InboundPathProcessorInterface {
 
   /**
-   * The config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  private ImmutableConfig $config;
-
-  /**
    * Constructs a new instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * @param \Drupal\helfi_proxy\ActiveSitePrefix $sitePrefix
+   *   The site prefix service.
    */
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
+  public function __construct(private ActiveSitePrefix $sitePrefix) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function processInbound($path, Request $request) {
+  public function processInbound($path, Request $request) : string {
     $parts = explode('/', trim($path, '/'));
     $prefix = array_shift($parts);
 
-    if (in_array($prefix, $this->config->get('prefixes') ?? [])) {
+    if ($prefix === $this->sitePrefix->getPrefix()) {
       $path = '/' . implode('/', $parts);
     }
 
@@ -63,16 +53,10 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     if (!isset($options['language'])) {
       return $path;
     }
-
-    $language = $options['language'];
-
-    if ($options['language'] instanceof LanguageInterface) {
-      $language = $options['language']->getId();
-    }
-    $prefix = $this->config->get('prefixes')[$language] ?? NULL;
+    $prefix = $this->sitePrefix->getPrefix();
 
     $bubbleable_metadata?->addCacheContexts(['site_prefix:' . $prefix])
-      ->addCacheableDependency($this->config);
+      ->addCacheableDependency($this->sitePrefix);
 
     if ($prefix) {
       $options['prefix'] .= $prefix . '/';
