@@ -10,6 +10,7 @@ use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
 use Drupal\helfi_proxy\Selector\AttributeSelector;
 use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
+use Drupal\helfi_proxy\Selector\StringValue;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -201,6 +202,26 @@ class ProxyManagerTest extends KernelTestBase {
     $processed = $this->proxyManager()
       ->processHtml($html, $request, [new AttributeSelector('//script', 'src')]);
     $this->assertEquals($expected, $processed);
+  }
+
+  /**
+   * Tests string value processing.
+   *
+   * @covers ::processValue
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isAbsoluteUri
+   * @covers ::addAssetPath
+   * @covers ::__construct
+   */
+  public function testStringValueSelector() : void {
+    $this->setAssetPath('test-assets');
+    $request = $this->createRequest();
+
+    $processed = $this->proxyManager()->processValue('/core/modules/system/test.js', $request, [
+      new StringValue(),
+    ]);
+    $this->assertEquals('/test-assets/core/modules/system/test.js', $processed);
   }
 
   /**

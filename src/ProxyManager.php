@@ -8,6 +8,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
 use Drupal\helfi_proxy\Selector\AttributeSelector;
 use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
+use Drupal\helfi_proxy\Selector\SelectorInterface;
 use Drupal\helfi_proxy\Selector\SelectorRepositoryTrait;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -97,7 +98,7 @@ final class ProxyManager implements ProxyManagerInterface {
   /**
    * Gets the attribute value.
    *
-   * @param \Drupal\helfi_proxy\Selector\AttributeSelector $selector
+   * @param \Drupal\helfi_proxy\Selector\SelectorInterface $selector
    *   The selector.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
@@ -107,7 +108,7 @@ final class ProxyManager implements ProxyManagerInterface {
    * @return string|null
    *   The attribute value.
    */
-  private function getAttributeValue(AttributeSelector $selector, Request $request, ?string $value) : ? string {
+  private function getAttributeValue(SelectorInterface $selector, Request $request, ?string $value) : ? string {
     // Skip if value is being served from CDN already.
     if (!$value || $this->isCdnAddress($value)) {
       return $value;
