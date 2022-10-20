@@ -80,7 +80,8 @@ function helfi_proxy_js_settings_alter(
     $service = \Drupal::service('helfi_proxy.active_prefix');
 
     if (!$prefix = $service->getPrefix()) {
-      // Fallback to /en if site has no prefixes configured, like Etusivu for example.
+      // Fallback to /en if site has no prefixes configured, like Etusivu
+      // for example.
       $prefix = '/en';
     }
     $settings['radioactivity']['endpoint'] = sprintf('%s/radioactivity/emit', $prefix);
