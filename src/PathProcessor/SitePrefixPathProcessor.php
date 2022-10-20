@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy\PathProcessor;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\PathProcessor\InboundPathProcessorInterface;
 use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
@@ -33,7 +34,7 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     $parts = explode('/', trim($path, '/'));
     $prefix = array_shift($parts);
 
-    if ($prefix === $this->sitePrefix->getPrefix()) {
+    if (in_array($prefix, $this->sitePrefix->getPrefixes())) {
       $path = '/' . implode('/', $parts);
     }
 
@@ -53,7 +54,14 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     if (!isset($options['language'])) {
       return $path;
     }
-    $prefix = $this->sitePrefix->getPrefix();
+    $language = $options['language'];
+
+    if ($options['language'] instanceof LanguageInterface) {
+      $language = $options['language']->getId();
+    }
+    // Use already resolved language to figure out active prefix
+    // since it might be different from content language.
+    $prefix = $this->sitePrefix->getPrefix($language);
 
     $bubbleable_metadata?->addCacheContexts(['site_prefix:' . $prefix])
       ->addCacheableDependency($this->sitePrefix);

@@ -60,12 +60,15 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
    * @return string|null
    *   The active prefix.
    */
-  public function getPrefix() : ? string {
+  public function getPrefix(string $langcode = NULL) : ? string {
     $prefixes = $this->getPrefixes();
-    $langCode = $this->languageManager
-      ->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)
-      ->getId();
-    return $prefixes[$langCode] ?? NULL;
+
+    if (!$langcode) {
+      $langcode = $this->languageManager
+        ->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)
+        ->getId();
+    }
+    return $prefixes[$langcode] ?? NULL;
   }
 
 }
