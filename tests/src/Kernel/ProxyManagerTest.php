@@ -10,7 +10,6 @@ use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
 use Drupal\helfi_proxy\Selector\AttributeSelector;
 use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
-use Drupal\helfi_proxy\Selector\StringValue;
 use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 
