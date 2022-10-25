@@ -25,10 +25,12 @@ class SitePrefixPathProcessorTest extends SitePrefixTestBase {
 
       $this->drupalGet($this->node->toUrl('canonical', ['language' => $language]));
       $this->assertSession()->addressEquals("/{$langPrefix}prefix-$langcode/node/" . $this->node->id());
+      $this->assertSession()->statusCodeEquals(200);
       $this->assertCacheContext('site_prefix:prefix-' . $langcode);
 
       $this->drupalGet('/admin/content', ['language' => $language]);
       $this->assertSession()->addressEquals("/{$langPrefix}prefix-$langcode/admin/content");
+      $this->assertSession()->statusCodeEquals(200);
 
       // Admin page should have currrently active and en cache contexts.
       foreach ([$langcode, 'en'] as $context) {

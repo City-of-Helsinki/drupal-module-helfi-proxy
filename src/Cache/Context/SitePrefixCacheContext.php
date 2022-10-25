@@ -6,8 +6,8 @@ namespace Drupal\helfi_proxy\Cache\Context;
 
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Cache\Context\CalculatedCacheContextInterface;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\helfi_proxy\ActiveSitePrefix;
 
 /**
  * Defines the SitePrefixCacheContext service, for "per site prefix" caching.
@@ -17,34 +17,26 @@ use Drupal\Core\Config\ImmutableConfig;
 final class SitePrefixCacheContext implements CalculatedCacheContextInterface {
 
   /**
-   * The config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  private ImmutableConfig $config;
-
-  /**
    * Constructs a new instance.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * @param \Drupal\helfi_proxy\ActiveSitePrefix $sitePrefix
+   *   The active site prefix service.
    */
-  public function __construct(ConfigFactoryInterface $configFactory) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
+  public function __construct(private ActiveSitePrefix $sitePrefix) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function getLabel() {
-    return t('Site prefix');
+  public static function getLabel() : string {
+    return (string) new TranslatableMarkup('Site prefix');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getContext($prefix = NULL) {
-    $prefixes = $this->config->get('prefixes') ?? [];
+  public function getContext($prefix = NULL) : string {
+    $prefixes = $this->sitePrefix->getPrefixes();
 
     if ($prefix === NULL) {
       return implode(',', $prefixes);

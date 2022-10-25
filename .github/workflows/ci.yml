@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-versions: ['8.0']
+        php-versions: ['8.0', '8.1']
     container:
       image: ghcr.io/city-of-helsinki/drupal-php-docker:${{ matrix.php-versions }}-alpine
 
@@ -83,7 +83,7 @@ jobs:
 
       - name: Create an artifact from test report
         uses: actions/upload-artifact@v2
-        if: always()
+        if: failure()
         with:
           name: results
           path: |

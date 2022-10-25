@@ -204,6 +204,23 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
+   * Tests string value processing.
+   *
+   * @covers ::processValue
+   * @covers ::getAttributeValue
+   * @covers ::getDefaultSelectors
+   * @covers ::isAbsoluteUri
+   * @covers ::addAssetPath
+   * @covers ::__construct
+   */
+  public function testStringValueSelector() : void {
+    $this->setAssetPath('test-assets');
+
+    $processed = $this->proxyManager()->processValue('/core/modules/system/test.js');
+    $this->assertEquals('/test-assets/core/modules/system/test.js', $processed);
+  }
+
+  /**
    * Tests AbsoluteUriAttributeSelector() object.
    *
    * @covers ::processHtml

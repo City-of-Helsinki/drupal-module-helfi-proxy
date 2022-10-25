@@ -16,6 +16,7 @@ trait SelectorRepositoryTrait {
    *   The default selectors.
    */
   protected function getDefaultSelectors() : array {
+    // @todo Refactor these to PHP attributes.
     return [
       new AttributeSelector('//input[@type="image"]', 'src'),
       new MultiValueAttributeSelector('//source', 'srcset', ', '),
