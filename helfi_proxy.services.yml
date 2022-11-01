@@ -27,6 +27,12 @@ services:
       # Must be run after LanguageProcessorLanguage (100 weight).
       - { name: path_processor_outbound, priority: 99 }
 
+  helfi_proxy.redirect_subscriber:
+    class: Drupal\helfi_proxy\EventSubscriber\RedirectResponseSubscriber
+    arguments: ['@helfi_proxy.proxy_manager']
+    tags:
+      - { name: event_subscriber, priority: 100 }
+
   cache_context.site_prefix:
     class: Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext
     arguments: ['@helfi_proxy.active_prefix']

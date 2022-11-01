@@ -4,7 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy;
 
+use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
+use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\helfi_proxy\Selector\AbsoluteUriAttributeSelector;
 use Drupal\helfi_proxy\Selector\MultiValueAttributeSelector;
 use Drupal\helfi_proxy\Selector\SelectorInterface;
@@ -15,10 +18,18 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * A class to determine sites hostname.
  */
-final class ProxyManager implements ProxyManagerInterface {
+final class ProxyManager implements ProxyManagerInterface, RefinableCacheableDependencyInterface {
 
   use ProxyTrait;
   use SelectorRepositoryTrait;
+  use RefinableCacheableDependencyTrait;
+
+  /**
+   * The config.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  private ImmutableConfig $config;
 
   /**
    * Constructs a new instance.
@@ -26,7 +37,9 @@ final class ProxyManager implements ProxyManagerInterface {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The config factory.
    */
-  public function __construct(private ConfigFactoryInterface $configFactory) {
+  public function __construct(ConfigFactoryInterface $configFactory) {
+    $this->config = $configFactory->get('helfi_proxy.settings');
+    $this->addCacheableDependency($this->config);
   }
 
   /**
@@ -40,7 +53,7 @@ final class ProxyManager implements ProxyManagerInterface {
    * {@inheritdoc}
    */
   public function getConfig(string $key, mixed $defaultValue = NULL) : mixed {
-    $config = $this->configFactory->get('helfi_proxy.settings')
+    $config = $this->config
       ->get($key);
 
     return $config ?? $defaultValue;
