@@ -103,17 +103,6 @@ class RedirectResponseSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Test expected default values.
-   */
-  public function testDefaults() : void {
-    $this->assertEquals([
-      'www.hel.fi',
-      'www-test.hel.fi',
-      'helfi-proxy.docker.so',
-    ], $this->container->getParameter('helfi_proxy.valid_proxy_domains'));
-  }
-
-  /**
    * Make sure we get an HTTP 200 response when proxy is not enabled.
    *
    * @covers ::onResponse
@@ -127,7 +116,7 @@ class RedirectResponseSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Tests that existing response url is used for redirect responses.
+   * Tests redirects.
    *
    * @covers ::getSubscribedEvents
    * @covers ::onResponse
@@ -137,39 +126,16 @@ class RedirectResponseSubscriberTest extends KernelTestBase {
     $request = $this->createRequest('/user');
     $response = $this->getHttpKernelResponse($request);
 
+    // Make sure other redirects are dealt first, like /user -> /en/user/login
+    // before redirecting to proxy domain.
+    $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
+    $this->assertEquals('http://localhost:8888/en/user/login', $response->headers->get('location'));
+
+    // Make sure we get redirected to proxy domain after other redirects.
+    $request = $this->createRequest('/en/user/login');
+    $response = $this->getHttpKernelResponse($request);
     $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
     $this->assertEquals('https://www.hel.fi/en/user/login', $response->headers->get('location'));
-  }
-
-  /**
-   * Make sure we always get redirected to proxy path.
-   *
-   * @covers ::onResponse
-   * @covers ::getSubscribedEvents
-   */
-  public function testRedirectProxyPaths() : void {
-    $prefixes = [
-      'fi' => 'test-fi',
-      'sv' => 'test-sv',
-      'en' => 'test-en',
-    ];
-    $this->setProxyDomain('www.hel.fi');
-    $this->config('helfi_proxy.settings')
-      ->set(ProxyManagerInterface::PREFIXES, $prefixes)
-      ->save();
-
-    $expectedPaths = ['user' => 'user/login', 'user/login' => 'user/login'];
-
-    foreach ($expectedPaths as $path => $expectedPath) {
-      foreach ($prefixes as $language => $prefix) {
-        $request = $this->createRequest(sprintf('/%s/%s', $language, $path));
-        $response = $this->getHttpKernelResponse($request);
-
-        $expectedUrl = sprintf('https://www.hel.fi/%s/%s/%s', $language, $prefix, $expectedPath);
-        $this->assertEquals(Response::HTTP_FOUND, $response->getStatusCode());
-        $this->assertEquals($expectedUrl, $response->headers->get('location'));
-      }
-    }
   }
 
 }

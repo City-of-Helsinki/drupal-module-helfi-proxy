@@ -7,6 +7,7 @@ namespace Drupal\Tests\helfi_proxy\Unit;
 use Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  * @group helfi_proxy
  */
 class AssetHttpMiddlewareTest extends UnitTestCase {
+
+  use ProphecyTrait;
 
   /**
    * Tests that XML response stays intact.

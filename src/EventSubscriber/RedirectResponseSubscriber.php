@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\helfi_proxy\EventSubscriber;
 
 use Drupal\Core\Routing\TrustedRedirectResponse;
+use Drupal\Core\Url;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -21,49 +22,10 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
    *
    * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
    *   The proxy manager.
-   * @param array $validProxyDomains
-   *   The valid proxy domains.
    */
   public function __construct(
     private ProxyManagerInterface $proxyManager,
-    private array $validProxyDomains
   ) {
-  }
-
-  /**
-   * Checks whether we need to perform a redirect.
-   *
-   * @param string $url
-   *   The url to check.
-   *
-   * @return bool
-   *   TRUE if page should be redirected.
-   */
-  private function needsRedirect(string $url) : bool {
-    return !in_array(parse_url($url, PHP_URL_HOST), $this->validProxyDomains);
-  }
-
-  /**
-   * Builds the redirect url.
-   *
-   * @param string $url
-   *   The URL to parse.
-   *
-   * @return string
-   *   The redirect URL.
-   */
-  private function buildRedirectUrl(string $url) : string {
-    $uriParts = parse_url($url);
-
-    $responseUrl = vsprintf('https://%s/%s', [
-      $this->proxyManager->getConfig(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN),
-      ltrim($uriParts['path'], '/'),
-    ]);
-
-    if (isset($uriParts['query'])) {
-      $responseUrl = sprintf('%s?%s', $responseUrl, $uriParts['query']);
-    }
-    return $responseUrl;
   }
 
   /**
@@ -74,32 +36,31 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
    */
   public function onResponse(ResponseEvent $event) : void {
     if (
-      !$this->validProxyDomains ||
       !$this->proxyManager->isConfigured(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN) ||
-      !$event->getRequest()->isMethod('GET')
+      $event->getResponse() instanceof RedirectResponse
     ) {
-      // Nothing to do if default proxy domain is not defined.
-      // Only redirect on GET requests as well.
+      // Nothing to do if default proxy domain is not defined or the response is
+      // a redirect response already.
       return;
     }
-    $response = $event->getResponse();
+    $request = $event->getRequest();
+    $proxyDomain = $this->proxyManager->getConfig(ProxyManagerInterface::DEFAULT_PROXY_DOMAIN);
 
-    if ($response instanceof RedirectResponse) {
-      $url = $response->getTargetUrl();
-    }
-    else {
-      $request = $event->getRequest();
-
-      $url = vsprintf('%s%s', [
-        $request->getSchemeAndHttpHost(),
-        $request->getRequestUri(),
-      ]);
-    }
-
-    if (!$this->needsRedirect($url)) {
+    if ($request->getHttpHost() === $proxyDomain) {
+      // The host matches proxy domain already.
       return;
     }
-    $redirect = new TrustedRedirectResponse($this->buildRedirectUrl($url));
+    $uriParts = parse_url($request->getRequestUri());
+    $options = [];
+
+    if (isset($uriParts['query'])) {
+      $options['query'] = $uriParts['query'];
+    }
+    $url = Url::fromUri(sprintf('https://%s/%s', $proxyDomain, ltrim($uriParts['path'], '/')), $options);
+
+    $redirect = new TrustedRedirectResponse($url->toString(TRUE)->getGeneratedUrl());
+    $redirect->addCacheableDependency($url)
+      ->addCacheableDependency($this->proxyManager);
     $event->setResponse(
       $redirect
     );
@@ -109,9 +70,7 @@ final class RedirectResponseSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() : array {
-    // This must be before core's RedirectResponseSubscriber, so we don't break
-    // any other redirects made by other modules, like ?destination.
-    $events[KernelEvents::RESPONSE][] = ['onResponse', 1];
+    $events[KernelEvents::RESPONSE][] = ['onResponse'];
 
     return $events;
   }
