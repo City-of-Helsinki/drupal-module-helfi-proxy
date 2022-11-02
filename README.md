@@ -13,6 +13,14 @@ Provides various fixes to allow multiple Drupal instances to be served from one 
 
 All these features are made to ensure that the instance can be served from `<proxy url>/<project prefix>`.
 
+### Default proxy domain
+
+Allows multiple domains to be redirected to one domain. See [src/EventSubscriber/RedirectResponseSubscriber.php](/src/EventSubscriber/RedirectResponseSubscriber.php).
+
+Populate `helfi_proxy.settings.default_proxy_domain` settings:
+
+`$config['helfi_proxy.settings']['default_proxy_domain'] = 'helfi-proxy.docker.so';`
+
 ### Site prefix
 
 A "prefix" will be added to all URLs. This prefix should be same as the `<project prefix>` in `<proxy url>/<project prefix>`.
@@ -68,7 +76,7 @@ robots_paths:
 
 ### Varnish support
 
-Enable modules with `drush en varnish_purger varnish_purge_tags purge_drush purge_processor_cron purge_queuer_coretags purge_tokens`.
+Enable required modules: `drush en varnish_purger varnish_purge_tags purge_drush purge_processor_cron purge_queuer_coretags purge_tokens`.
 
 Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder if you enabled this module before Varnish/Purge modules.
 
