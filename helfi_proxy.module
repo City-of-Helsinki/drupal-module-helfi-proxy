@@ -63,10 +63,12 @@ function helfi_proxy_js_settings_alter(
     return;
   }
   foreach (['designSelect', 'paragraphSelect'] as $type) {
-    if (!isset($settings[$type]['pathToImages'])) {
+    if (!isset($settings[$type]['images'])) {
       continue;
     }
-    $settings[$type]['pathToImages'] = helfi_proxy_absolute_url($settings[$type]['pathToImages']);
+    foreach ($settings[$type]['images'] as $field => $image) {
+      $settings[$type]['images'][$field] = helfi_proxy_absolute_url($image);
+    }
   }
 
   foreach (['hdbtSubthemeIconsPath', 'iconsPath'] as $key) {
