@@ -39,12 +39,6 @@ services:
     tags:
       - { name: cache.context }
 
-  helfi_proxy.tunnistamo_redirect_subscriber:
-    class: Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber
-    arguments: ['@helfi_proxy.proxy_manager']
-    tags:
-      - { name: event_subscriber }
-
   helfi_proxy.proxy_manager:
     class: Drupal\helfi_proxy\ProxyManager
     arguments: ['@config.factory']

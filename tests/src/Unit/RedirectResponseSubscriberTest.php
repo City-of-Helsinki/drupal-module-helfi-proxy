@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * Tests asset middleware.
+ * Tests redirect response subscriber.
  *
  * @coversDefaultClass \Drupal\helfi_proxy\EventSubscriber\RedirectResponseSubscriber
  * @group helfi_proxy
