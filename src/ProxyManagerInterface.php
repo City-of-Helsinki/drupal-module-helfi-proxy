@@ -18,13 +18,6 @@ interface ProxyManagerInterface {
   public const DEFAULT_PROXY_DOMAIN = 'default_proxy_domain';
   public const SESSION_SUFFIX = 'session_suffix';
   public const ROBOTS_HEADER_ENABLED = 'robots_header_enabled';
-
-  /**
-   * The tunnistamo return url config name.
-   *
-   * @phpcs:ignore
-   * @deprecated in helfi_proxy:2.1.2 and is removed from helfi_proxy:3.0.0.
-   */
   public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
 
   /**
