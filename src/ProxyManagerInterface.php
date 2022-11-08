@@ -21,36 +21,6 @@ interface ProxyManagerInterface {
   public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
 
   /**
-   * Manipulates the given attributes to have correct values.
-   *
-   * @param string $html
-   *   The html to manipulate.
-   * @param null|\Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   * @param array $selectors
-   *   The selectors.
-   *
-   * @return \Symfony\Component\HttpFoundation\Response
-   *   The manipulated response.
-   */
-  public function processHtml(string $html, Request $request = NULL, array $selectors = []) : string;
-
-  /**
-   * Processes a string value.
-   *
-   * @param string $value
-   *   The value.
-   * @param null|\Symfony\Component\HttpFoundation\Request $request
-   *   The request.
-   * @param array $selectors
-   *   The selectors.
-   *
-   * @return string
-   *   The processed value.
-   */
-  public function processValue(string $value, Request $request = NULL, array $selectors = []) : string;
-
-  /**
    * Whether the proxy is configured or not.
    *
    * @param string $key
@@ -73,5 +43,16 @@ interface ProxyManagerInterface {
    *   The data.
    */
   public function getConfig(string $key, mixed $defaultValue = NULL) : mixed;
+
+  /**
+   * Prefixes the given value with /{asset-path}.
+   *
+   * @param string $value
+   *   The value.
+   *
+   * @return string|null
+   *   The path.
+   */
+  public function processPath(string $value) : ? string;
 
 }

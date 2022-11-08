@@ -7,49 +7,14 @@
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\editor\Entity\Editor;
-use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
- * Converts uri to absolute.
- *
- * @param string $uri
- *   The uri to convert.
- *
- * @return string
- *   The absolute url.
+ * Implements hook_file_url_alter().
  */
-function helfi_proxy_absolute_url(string $uri) : string {
-  static $relative_path = '';
-
-  if (!$relative_path) {
-    /** @var \Drupal\helfi_proxy\ProxyManagerInterface $service */
-    $service = \Drupal::service('helfi_proxy.proxy_manager');
-    $relative_path = $service
-      ->getConfig(ProxyManagerInterface::ASSET_PATH);
-  }
-  /** @var \Drupal\Core\File\FileUrlGenerator $fileGenerator */
-  $fileGenerator = \Drupal::service('file_url_generator');
-  return '/' . $relative_path . $fileGenerator->transformRelative(
-      $fileGenerator->generateAbsoluteString($uri)
-    );
-}
-
-/**
- * Checks if proxy is configured.
- *
- * @return bool
- *   TRUE if proxy should be used.
- */
-function helfi_proxy_is_configured() : bool {
-  static $isConfigured = NULL;
-
-  if ($isConfigured === NULL) {
-    /** @var \Drupal\helfi_proxy\ProxyManagerInterface $service */
-    $service = \Drupal::service('helfi_proxy.proxy_manager');
-    $isConfigured = $service->isConfigured(ProxyManagerInterface::ASSET_PATH);
-  }
-  return $isConfigured;
+function helfi_proxy_file_url_alter(&$uri) : void {
+  /** @var \Drupal\helfi_proxy\ProxyManagerInterface $service */
+  $service = \Drupal::service('helfi_proxy.proxy_manager');
+  $uri = $service->processPath($uri);
 }
 
 /**
@@ -59,24 +24,6 @@ function helfi_proxy_js_settings_alter(
   array &$settings,
   AttachedAssetsInterface $assets
 ) {
-  if (!helfi_proxy_is_configured()) {
-    return;
-  }
-  foreach (['designSelect', 'paragraphSelect'] as $type) {
-    if (!isset($settings[$type]['images'])) {
-      continue;
-    }
-    foreach ($settings[$type]['images'] as $field => $image) {
-      $settings[$type]['images'][$field] = helfi_proxy_absolute_url($image);
-    }
-  }
-
-  foreach (['hdbtSubthemeIconsPath', 'iconsPath'] as $key) {
-    if (!isset($settings[$key])) {
-      continue;
-    }
-    $settings[$key] = helfi_proxy_absolute_url($settings[$key]);
-  }
   if (isset($settings['radioactivity'])) {
     /** @var \Drupal\helfi_proxy\ActiveSitePrefix $service */
     $service = \Drupal::service('helfi_proxy.active_prefix');
@@ -88,28 +35,6 @@ function helfi_proxy_js_settings_alter(
     }
     $settings['radioactivity']['endpoint'] = sprintf('%s/radioactivity/emit', $prefix);
   }
-}
-
-/**
- * Implements hook_editor_js_settings_alter().
- */
-function helfi_proxy_editor_js_settings_alter(array &$settings) {
-  if (!\Drupal::moduleHandler()->moduleExists('ckeditor') || !helfi_proxy_is_configured()) {
-    return;
-  }
-  $ckeditor_plugin_manager = \Drupal::service('plugin.manager.ckeditor.plugin');
-
-  foreach ($settings['editor']['formats'] as $format => &$format_settings) {
-    if ($format_settings['editor'] === 'ckeditor') {
-      $editor = Editor::load($format);
-      // @see \Drupal\ckeditor\Plugin\Editor\CKEditor::getJSSettings()
-      $external_plugin_files = $ckeditor_plugin_manager->getEnabledPluginFiles($editor);
-      // Convert editor css and plugin js to use absolute asset path.
-      $format_settings['editorSettings']['drupalExternalPlugins'] = array_map('helfi_proxy_absolute_url', $external_plugin_files);
-      $format_settings['editorSettings']['contentsCss'] = array_map('helfi_proxy_absolute_url', $format_settings['editorSettings']['contentsCss'] ?? []);
-    }
-  }
-
 }
 
 /**

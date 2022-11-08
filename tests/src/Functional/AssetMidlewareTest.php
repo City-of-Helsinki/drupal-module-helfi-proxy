@@ -7,7 +7,6 @@ namespace Drupal\Tests\helfi_proxy\Functional;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Url;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\helfi_proxy\HttpMiddleware\AssetHttpMiddleware;
 use Drupal\helfi_proxy\ProxyTrait;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 use Symfony\Component\HttpFoundation\Request;
