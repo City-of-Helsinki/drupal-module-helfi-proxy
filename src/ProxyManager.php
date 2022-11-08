@@ -85,7 +85,7 @@ final class ProxyManager implements ProxyManagerInterface {
     }
     // Serve element from same domain via relative asset URL. Like:
     // /assets/sites/default/files/js/{sha256}.js.
-    return sprintf('/%s/%s', $this->getConfig(self::ASSET_PATH), ltrim($path, '/'));
+    return sprintf('/%s/%s', $assetPath, ltrim($path, '/'));
   }
 
 }
