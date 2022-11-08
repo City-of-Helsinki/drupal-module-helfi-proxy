@@ -4,8 +4,6 @@ declare(strict_types = 1);
 
 namespace Drupal\helfi_proxy;
 
-use Symfony\Component\HttpFoundation\Request;
-
 /**
  * Proxy manager interface.
  */

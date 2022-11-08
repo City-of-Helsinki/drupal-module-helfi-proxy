@@ -54,12 +54,7 @@ final class ProxyManager implements ProxyManagerInterface {
    *   TRUE if asset is local.
    */
   private function isLocalAsset(string $value) : bool {
-    foreach (['sites/', 'core/', 'themes/', 'modules/'] as $path) {
-      if (str_starts_with($value, $path)) {
-        return TRUE;
-      }
-    }
-    return FALSE;
+    return (bool) preg_match('/^(sites|core|themes|modules)\/\w/', $value);
   }
 
   /**
@@ -68,18 +63,21 @@ final class ProxyManager implements ProxyManagerInterface {
   public function processPath(string $value) : ? string {
     $assetPath = $this->getConfig(self::ASSET_PATH);
 
-    if (str_starts_with($value, $assetPath)) {
+    if (!$assetPath || str_starts_with($value, $assetPath)) {
       return $value;
     }
     $wrapper = $this->streamWrapperManager->getViaScheme(
       $this->streamWrapperManager::getScheme($value)
     );
 
-    $path = $value;
+    $path = ltrim($value, '/');
 
     // Convert public:// paths to relative.
     if ($wrapper instanceof LocalStream) {
       $path = $wrapper->getDirectoryPath() . '/' . $this->streamWrapperManager::getTarget($value);
+      // KernelTests will convert public://file to vfs://root/simpletest/file.
+      // Remove vfs part to make testing possible.
+      $path = str_replace('vfs://root/', '', $path);
     }
 
     if (!$this->isLocalAsset($path)) {
