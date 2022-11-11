@@ -8,10 +8,10 @@ use Drupal\Core\Session\SessionConfiguration as CoreSessionConfiguration;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Overrides the default session configuration.
+ * Overrides the default session configuration service.
  *
- * Appends the server hostname to session name. We serve multiple Drupal
- * instances from one domain and every site needs a unique session.
+ * Append a unique suffix to every session cookie, so we can differentiate
+ * session cookies on different Drupal instances using same domain.
  */
 final class SessionConfiguration extends CoreSessionConfiguration {
 
@@ -28,6 +28,7 @@ final class SessionConfiguration extends CoreSessionConfiguration {
   public function __construct(
     private ProxyManagerInterface $proxyManager,
     array $options = []) {
+
     parent::__construct($options);
   }
 
@@ -52,10 +53,8 @@ final class SessionConfiguration extends CoreSessionConfiguration {
   /**
    * {@inheritdoc}
    */
-  protected function getName(Request $request) {
-    $name = parent::getName($request);
-
-    return $name . $this->getSuffix();
+  protected function getName(Request $request) : string {
+    return parent::getName($request) . $this->getSuffix();
   }
 
 }

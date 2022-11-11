@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Adds a X-Robots-Tag to response headers.
+ * Adds an X-Robots-Tag to response headers.
  */
 final class RobotsResponseSubscriber implements EventSubscriberInterface {
 
@@ -78,7 +78,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Adds a X-Robots-Tag response header.
+   * Adds an X-Robots-Tag response header.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to respond to.
