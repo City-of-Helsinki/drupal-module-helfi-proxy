@@ -11,11 +11,9 @@ Provides various fixes to allow multiple Drupal instances to be served from one 
 
 ## Features
 
-All these features are made to ensure that the instance can be served from `<proxy url>/<project prefix>`.
-
 ### Default proxy domain
 
-Allows multiple domains to be redirected to one domain. See [src/EventSubscriber/RedirectResponseSubscriber.php](/src/EventSubscriber/RedirectResponseSubscriber.php).
+Redirects all requests to configured proxy domain. See [src/EventSubscriber/RedirectResponseSubscriber.php](/src/EventSubscriber/RedirectResponseSubscriber.php).
 
 Populate `helfi_proxy.settings.default_proxy_domain` settings:
 
@@ -46,13 +44,26 @@ $config['helfi_proxy.settings']['prefixes'] = [
 ```
 ### Cookie name suffix
 
-Cookie name will be suffixed with the value configured in (`helfi_proxy.settings`) `session_suffix` setting. The value will default to site's hostname if not configured. For example `SSID{sha256}helfi-docker-so`.
+Cookie name will be suffixed with the value configured in `session_suffix` setting. The value will default to site's hostname if not configured. For example `SSID{sha256}helfi-docker-so`.
 
 ### Serve assets from asset path
 
-All assets (`script[src]`, `source[srcset]`, `img[src]` etc.) are served from the path configured in (`helfi_proxy.settings`) `asset-path` setting. For example `liikenne-assets`.
+All assets are served from the path configured in `asset-path` setting. For example `liikenne-assets`.
 
-This ensures that all local assets are served directly from the asset path (`<proxy url>/<asset path>/<path to asset>`) instead of `<proxy url>/<path to asset>`.
+This ensures that all local assets are served directly from the asset path. For example `/sites/default/files/styles/xxx/style.jpg` will be served from `/liikenne-assets/sites/default/files/styles/xxx/style.jpg` instead.
+
+Your project's web server must be able to serve files from that path. If you are using the default Docker images from [City-of-Helsinki/drupal-docker-images](https://github.com/City-of-Helsinki/drupal-docker-images) then you don't have to worry about this. Otherwise, add:
+```
+location ~ ^/(?:.*)-assets/(.*)$ {
+  proxy_redirect off;
+  proxy_set_header Host $host;
+  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:8080/$1$is_args$args;
+}
+```
+or something equivalent to your web server configuration.
 
 ### Disallow search engines/robots from indexing the site
 
