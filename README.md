@@ -133,6 +133,10 @@ if ($varnish_purge_key = getenv('VARNISH_PURGE_KEY')) {
 }
 ```
 
+## Testing reverse proxy on local
+
+See [https://github.com/City-of-Helsinki/drupal-helfi-local-proxy](City-of-Helsinki/drupal-helfi-local-proxy) for more information.
+
 ## Contact
 
 Slack: #helfi-drupal (http://helsinkicity.slack.com/)
