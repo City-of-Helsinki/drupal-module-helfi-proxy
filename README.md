@@ -19,6 +19,8 @@ Populate `helfi_proxy.settings.default_proxy_domain` settings:
 
 `$config['helfi_proxy.settings']['default_proxy_domain'] = 'helfi-proxy.docker.so';`
 
+_NOTE_: **Using this feature should be your last resort and not recommended by default.**
+
 ### Site prefix
 
 A "prefix" will be added to all URLs. This prefix should be same as the `<project prefix>` in `<proxy url>/<project prefix>`.
