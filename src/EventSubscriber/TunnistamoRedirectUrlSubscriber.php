@@ -47,8 +47,9 @@ final class TunnistamoRedirectUrlSubscriber implements EventSubscriberInterface 
     // defined.
     if (!$returnUrl && $activePrefix = $this->prefix->getPrefix('fi')) {
       $uriOptions['language'] = $this->languageManager->getLanguage('fi');
+
       // Tunnistamo return URL is always configured to use /fi prefix.
-      $returnUrl = sprintf('/fi/%s/openid-connect/%s', $activePrefix, $event->getClient()->getPluginId());
+      $returnUrl = sprintf('/fi/%s/openid-connect/%s', $activePrefix, $event->getClient()->getParentEntityId());
     }
 
     if (!$returnUrl) {
