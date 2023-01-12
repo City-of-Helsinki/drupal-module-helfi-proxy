@@ -67,6 +67,16 @@ location ~ ^/(?:.*)-assets/(.*)$ {
 ```
 or something equivalent to your web server configuration.
 
+Custom "assets" must be run through `file_url_generator` service. For example:
+
+```php
+ /** @var \Drupal\Core\File\FileUrlGeneratorInterface $service */
+$service = \Drupal::service('file_url_generator');
+$default_image = $service->generate("{$theme->getPath()}/src/images/og-global.png")
+  ->toString(TRUE)
+  ->getGeneratedUrl();
+```
+
 ### Disallow search engines/robots from indexing the site
 
 Set `helfi_proxy.settings.robots_header_enabled` configuration to `TRUE`.
