@@ -9,6 +9,21 @@ use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function helfi_proxy_module_implements_alter(&$implementations, $hook) : void {
+  // Move helfi_proxy_file_url_alter() implementation to the top of the
+  // list, so this is always run first before any other alter hooks, more
+  // specifically before 'crop_file_url_alter()' which seems to convert certain
+  // responsive image styles to an external URL that will break our
+  // implementation. @see UHF-7946.
+  if ($hook === 'file_url_alter') {
+    $group = $implementations['helfi_proxy'];
+    $implementations = ['helfi_proxy' => $group] + $implementations;
+  }
+}
+
+/**
  * Implements hook_file_url_alter().
  */
 function helfi_proxy_file_url_alter(&$uri) : void {
