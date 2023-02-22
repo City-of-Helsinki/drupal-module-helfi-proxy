@@ -6,6 +6,7 @@ namespace Drupal\helfi_proxy;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
+use Drupal\helfi_proxy\Config\SitemapPathOverride;
 use Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -29,6 +30,14 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
         ->addArgument(new Reference('helfi_proxy.proxy_manager'))
         ->addArgument(new Reference('helfi_proxy.active_prefix'));
     }
+
+    if (isset($modules['simple_sitemap'])) {
+      $container->register('helfi_proxy.sitemap_path_override', SitemapPathOverride::class)
+        ->addTag('config.factory.override')
+        ->addArgument(new Reference('helfi_proxy.proxy_manager'))
+        ->addArgument(new Reference('helfi_proxy.active_prefix'));
+    }
+
   }
 
 }
