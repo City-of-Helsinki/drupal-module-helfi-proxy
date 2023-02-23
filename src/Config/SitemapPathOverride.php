@@ -7,6 +7,7 @@ namespace Drupal\helfi_proxy\Config;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryOverrideInterface;
 use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\Http\RequestStack;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\helfi_proxy\ActiveSitePrefix;
 use Drupal\helfi_proxy\ProxyManagerInterface;
@@ -27,6 +28,7 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
   public function __construct(
     private ActiveSitePrefix $prefix,
     private LanguageManagerInterface $languageManager,
+    private RequestStack $requestStack,
   ) {
   }
 
@@ -35,9 +37,13 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
   */
   public function loadOverrides($names): array {
     $overrides = [];
+    $url = $this->requestStack->getCurrentRequest()?->getSchemeAndHttpHost();
+
+    if (!$url) {
+      return $overrides;
+    }
 
     if (in_array('simple_sitemap.settings', $names)) {
-      $url = \Drupal::request()->getSchemeAndHttpHost();
       $langcode = $this->languageManager->getCurrentLanguage()->getId();
       $prefix = $this->prefix->getPrefix($langcode);
       $baseUrl = sprintf('%s/%s/%s', $url, $langcode, $prefix);

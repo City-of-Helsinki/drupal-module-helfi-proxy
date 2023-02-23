@@ -35,7 +35,8 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
       $container->register('helfi_proxy.sitemap_path_override', SitemapPathOverride::class)
         ->addTag('config.factory.override')
         ->addArgument(new Reference('helfi_proxy.active_prefix'))
-        ->addArgument(new Reference('language_manager'));
+        ->addArgument(new Reference('language_manager'))
+        ->addArgument(new Reference('request_stack'));
     }
 
   }

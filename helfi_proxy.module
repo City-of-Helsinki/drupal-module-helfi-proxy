@@ -27,7 +27,6 @@ function helfi_proxy_module_implements_alter(&$implementations, $hook) : void {
  * Implements hook_file_url_alter().
  */
 function helfi_proxy_file_url_alter(&$uri) : void {
-  $conf = \Drupal::configFactory()->getEditable('simple_sitemap.settings');
   /** @var \Drupal\helfi_proxy\ProxyManagerInterface $service */
   $service = \Drupal::service('helfi_proxy.proxy_manager');
   $uri = $service->processPath($uri);
