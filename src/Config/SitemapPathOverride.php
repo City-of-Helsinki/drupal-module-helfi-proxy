@@ -10,11 +10,10 @@ use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Http\RequestStack;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\helfi_proxy\ActiveSitePrefix;
-use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
-* Override sitemap path dynamically.
-*/
+ * Override sitemap path dynamically.
+ */
 class SitemapPathOverride implements ConfigFactoryOverrideInterface {
 
   /**
@@ -24,6 +23,8 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
    *   The active site prefix service.
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager.
+   * @param \Drupal\Core\Http\RequestStack $requestStack
+   *   The request stack.
    */
   public function __construct(
     private ActiveSitePrefix $prefix,
@@ -33,8 +34,8 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
   }
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   public function loadOverrides($names): array {
     $overrides = [];
     $url = $this->requestStack->getCurrentRequest()?->getSchemeAndHttpHost();
@@ -54,22 +55,22 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
   }
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   public function getCacheSuffix() {
     return 'SitemapPathOverride';
   }
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   public function getCacheableMetadata($name) {
     return new CacheableMetadata();
   }
 
   /**
-  * {@inheritdoc}
-  */
+   * {@inheritdoc}
+   */
   public function createConfigObject($name, $collection = StorageInterface::DEFAULT_COLLECTION) {
     return NULL;
   }
