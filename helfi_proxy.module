@@ -100,7 +100,7 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
       $url = &$link['url'];
       $link['url'] = preg_replace($pattern, '/', $url, 1);
       $alternateUrls = &$link['alternate_urls'];
-      foreach($alternateUrls as $alternateurl_key => &$alternateUrl) {
+      foreach ($alternateUrls as $alternateurl_key => $alternateUrl) {
         $link['alternate_urls'][$alternateurl_key] = preg_replace($pattern, '/', $alternateUrl, 1);
       }
       $links[$key] = $link;
@@ -108,4 +108,3 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
   }
 
 }
-
