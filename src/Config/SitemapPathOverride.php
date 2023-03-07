@@ -8,7 +8,6 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryOverrideInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Http\RequestStack;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\helfi_proxy\ActiveSitePrefix;
 
 /**
@@ -21,14 +20,11 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
    *
    * @param \Drupal\helfi_proxy\ActiveSitePrefix $prefix
    *   The active site prefix service.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
-   *   The language manager.
    * @param \Drupal\Core\Http\RequestStack $requestStack
    *   The request stack.
    */
   public function __construct(
     private ActiveSitePrefix $prefix,
-    private LanguageManagerInterface $languageManager,
     private RequestStack $requestStack,
   ) {
   }
@@ -45,7 +41,7 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
     }
 
     if (in_array('simple_sitemap.settings', $names)) {
-      $langcode = $this->languageManager->getCurrentLanguage()->getId();
+      $langcode = $this->prefix->languageManager->getCurrentLanguage()->getId();
       $prefix = $this->prefix->getPrefix($langcode);
       $baseUrl = sprintf('%s/%s/%s', $url, $langcode, $prefix);
       $overrides['simple_sitemap.settings']['base_url'] = $baseUrl;
