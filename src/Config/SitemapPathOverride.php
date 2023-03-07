@@ -8,7 +8,6 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryOverrideInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Http\RequestStack;
-use Drupal\helfi_proxy\ActiveSitePrefix;
 
 /**
  * Override sitemap path dynamically.
@@ -18,13 +17,10 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
   /**
    * Constructs a new instance.
    *
-   * @param \Drupal\helfi_proxy\ActiveSitePrefix $prefix
-   *   The active site prefix service.
    * @param \Drupal\Core\Http\RequestStack $requestStack
    *   The request stack.
    */
   public function __construct(
-    private ActiveSitePrefix $prefix,
     private RequestStack $requestStack,
   ) {
   }
@@ -41,8 +37,15 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
     }
 
     if (in_array('simple_sitemap.settings', $names)) {
-      $langcode = $this->prefix->languageManager->getCurrentLanguage()->getId();
-      $prefix = $this->prefix->getPrefix($langcode);
+      // Use languageManager as static service as it will create circular
+      // reference via the config.factory.override service.
+      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+
+      // Load the helfi_proxy.active_prefix on demand as using it as an argument
+      // for the constructor will trigger the ServiceCircularReferenceException.
+      /** @var \Drupal\helfi_proxy\ActiveSitePrefix $active_prefix */
+      $active_prefix = \Drupal::service('helfi_proxy.active_prefix');
+      $prefix = $active_prefix->getPrefix($langcode);
       $baseUrl = sprintf('%s/%s/%s', $url, $langcode, $prefix);
       $overrides['simple_sitemap.settings']['base_url'] = $baseUrl;
     }
