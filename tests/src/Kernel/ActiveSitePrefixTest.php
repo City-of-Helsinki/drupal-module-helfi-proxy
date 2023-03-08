@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\helfi_proxy\ActiveSitePrefix;
 use Drupal\KernelTests\KernelTestBase;
 
@@ -57,6 +58,7 @@ class ActiveSitePrefixTest extends KernelTestBase {
       'sv' => 'prefix-sv',
       'en' => 'prefix-en',
       'fi' => 'prefix-fi',
+      LanguageInterface::LANGCODE_NOT_APPLICABLE => 'prefix-en',
     ];
     $this->config('helfi_proxy.settings')
       ->set('prefixes', $prefixes)
