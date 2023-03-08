@@ -82,29 +82,3 @@ function helfi_proxy_page_attachments_alter(array &$attachments) {
     $attachments['#attached']['html_head'][] = [$helfi_content_type, $tag_name];
   }
 }
-
-/**
- * Implements hook_page_attachments_alter().
- */
-function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant) {
-  if ($sitemap_variant->getOriginalId() != 'default') {
-    return;
-  }
-
-  $userPreferredAdminLangcode = \drupal::currentUser()->getPreferredAdminLangcode(FALSE) ?: 'fi';
-
-  $config = \Drupal::configFactory()->get('simple_sitemap.settings')?->get('base_url');
-  if ($config) {
-    $pattern = "/\/$userPreferredAdminLangcode\/.*?\//";
-    foreach ($links as $key => &$link) {
-      $url = &$link['url'];
-      $link['url'] = preg_replace($pattern, '/', $url, 1);
-      $alternateUrls = &$link['alternate_urls'];
-      foreach ($alternateUrls as $alternateurl_key => $alternateUrl) {
-        $link['alternate_urls'][$alternateurl_key] = preg_replace($pattern, '/', $alternateUrl, 1);
-      }
-      $links[$key] = $link;
-    }
-  }
-
-}

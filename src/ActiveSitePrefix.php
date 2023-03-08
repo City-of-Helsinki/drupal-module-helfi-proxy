@@ -51,6 +51,10 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
     if (!$prefixes = $this->config->get(ProxyManagerInterface::PREFIXES)) {
       return [];
     }
+
+    if (!isset($prefixes[LanguageInterface::LANGCODE_NOT_APPLICABLE])) {
+      $prefixes[LanguageInterface::LANGCODE_NOT_APPLICABLE] = $prefixes['en'];
+    }
     return $prefixes;
   }
 

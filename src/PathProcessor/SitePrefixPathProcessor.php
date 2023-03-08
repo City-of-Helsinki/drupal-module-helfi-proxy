@@ -63,6 +63,12 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     // since it might be different from content language.
     $prefix = $this->sitePrefix->getPrefix($language);
 
+    // Fallback to english prefix if langcode is not applicable and project
+    // defines no prefix.
+    if (!$prefix && $language === LanguageInterface::LANGCODE_NOT_APPLICABLE) {
+      $prefix = $this->sitePrefix->getPrefix('en');
+    }
+
     $bubbleable_metadata?->addCacheContexts(['site_prefix:' . $prefix])
       ->addCacheableDependency($this->sitePrefix);
 
