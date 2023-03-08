@@ -19,7 +19,7 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
    */
   public function alter(ContainerBuilder $container) : void {
     // Simple sitemap inbound path processor has the same weight as
-    //
+    // language prefix, but our path processor must be run between the two.
     if ($container->hasDefinition('simple_sitemap.path_processor')) {
       $definition = $container->getDefinition('simple_sitemap.path_processor');
       $tags = $definition->getTags();
