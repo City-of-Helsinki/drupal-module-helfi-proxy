@@ -30,6 +30,10 @@ class SitePrefixPathProcessorTest extends SitePrefixTestBase {
     foreach ($map as $langcode => $langPrefix) {
       $language = \Drupal::languageManager()->getLanguage($langcode);
 
+      // LANGCODE_NOT_APPLICABLE fallbacks to english langcode.
+      if ($langcode === LanguageInterface::LANGCODE_NOT_APPLICABLE) {
+        $langcode = 'en';
+      }
       $this->drupalGet($this->node->toUrl('canonical', ['language' => $language]));
       $this->assertSession()->addressEquals("/{$langPrefix}prefix-$langcode/node/" . $this->node->id());
       $this->assertSession()->statusCodeEquals(200);
