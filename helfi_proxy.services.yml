@@ -17,8 +17,9 @@ services:
     arguments: ['@helfi_proxy.active_prefix']
     tags:
       # Must be run before PathProcessorFront (200 weight) and
-      # SitemapPathProcessor (300 weight).
-      - { name: path_processor_inbound, priority: 301 }
+      # before PathProcessorLanguage (300 weight), but after
+      # SimpleSitemap
+      - { name: path_processor_inbound, priority: 201 }
       # Must be run after LanguageProcessorLanguage (100 weight).
       - { name: path_processor_outbound, priority: 99 }
 

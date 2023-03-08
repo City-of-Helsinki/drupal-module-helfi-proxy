@@ -17,7 +17,21 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function alter(ContainerBuilder $container) : void {
+    // Simple sitemap inbound path processor has the same weight as
+    //
+    if ($container->hasDefinition('simple_sitemap.path_processor')) {
+      $definition = $container->getDefinition('simple_sitemap.path_processor');
+      $tags = $definition->getTags();
+      $tags['path_processor_inbound'][0]['priority'] = 200;
+      $definition->setTags($tags);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function register(ContainerBuilder $container) : void {
     // We cannot use the module handler as the container is not yet compiled.
     // @see \Drupal\Core\DrupalKernel::compileContainer()
     $modules = $container->getParameter('container.modules');

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Functional;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
 
 /**
@@ -19,8 +20,14 @@ class SitePrefixPathProcessorTest extends SitePrefixTestBase {
    * Tests that language prefixes are set properly.
    */
   public function testPathProcessor() : void {
+    $map = [
+      'en' => '',
+      'fi' => 'fi/',
+      'sv' => 'sv/',
+      LanguageInterface::LANGCODE_NOT_APPLICABLE => '',
+    ];
     // EN has no language prefix by default.
-    foreach (['en' => '', 'fi' => 'fi/', 'sv' => 'sv/'] as $langcode => $langPrefix) {
+    foreach ($map as $langcode => $langPrefix) {
       $language = \Drupal::languageManager()->getLanguage($langcode);
 
       $this->drupalGet($this->node->toUrl('canonical', ['language' => $language]));
@@ -32,7 +39,7 @@ class SitePrefixPathProcessorTest extends SitePrefixTestBase {
       $this->assertSession()->addressEquals("/{$langPrefix}prefix-$langcode/admin/content");
       $this->assertSession()->statusCodeEquals(200);
 
-      // Admin page should have currrently active and en cache contexts.
+      // Admin page should have currently active and en cache contexts.
       foreach ([$langcode, 'en'] as $context) {
         $this->assertCacheContext('site_prefix:prefix-' . $context);
       }
