@@ -18,8 +18,9 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
    * {@inheritdoc}
    */
   public function alter(ContainerBuilder $container) : void {
-    // Simple sitemap inbound path processor has the same weight as
-    // language prefix, but our path processor must be run between the two.
+    // PathProcessorLanguage and SitemapPathProcessor have same
+    // priority. Alter SitemapPathProcessor's priority so
+    // SitePrefixPathProcessor can be run in between the two.
     if ($container->hasDefinition('simple_sitemap.path_processor')) {
       $definition = $container->getDefinition('simple_sitemap.path_processor');
       $tags = $definition->getTags();
@@ -36,6 +37,8 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
     // @see \Drupal\Core\DrupalKernel::compileContainer()
     $modules = $container->getParameter('container.modules');
 
+    // @todo This can be removed once all projects have been changed to use
+    // non-linguistic return url.
     if (isset($modules['helfi_tunnistamo'])) {
       $container->register('helfi_proxy.tunnistamo_redirect_subscriber', TunnistamoRedirectUrlSubscriber::class)
         ->addTag('event_subscriber')

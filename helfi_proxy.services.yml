@@ -20,7 +20,7 @@ services:
       # before PathProcessorLanguage (300 weight), but after
       # SimpleSitemap
       - { name: path_processor_inbound, priority: 201 }
-      # Must be run after LanguageProcessorLanguage (100 weight).
+      # Must be run after PathProcessorLanguage (100 weight).
       - { name: path_processor_outbound, priority: 99 }
 
   helfi_proxy.redirect_subscriber:
