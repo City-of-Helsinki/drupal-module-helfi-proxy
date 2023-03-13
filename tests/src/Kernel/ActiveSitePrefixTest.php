@@ -58,13 +58,21 @@ class ActiveSitePrefixTest extends KernelTestBase {
       'sv' => 'prefix-sv',
       'en' => 'prefix-en',
       'fi' => 'prefix-fi',
-      LanguageInterface::LANGCODE_NOT_APPLICABLE => 'prefix-en',
     ];
     $this->config('helfi_proxy.settings')
       ->set('prefixes', $prefixes)
       ->save();
 
     $this->assertEquals('prefix-en', $this->getSut()->getPrefix());
+    // Make sure langcode not applicable links fallbacks to english prefix.
+    $this->assertEquals('prefix-en', $this->getSut()->getPrefix(LanguageInterface::LANGCODE_NOT_APPLICABLE));
+
+    // Make sure we can override langcode not applicable path.
+    $prefixes[LanguageInterface::LANGCODE_NOT_APPLICABLE] = 'overridden-prefix';
+    $this->config('helfi_proxy.settings')
+      ->set('prefixes', $prefixes)
+      ->save();
+
     // Make sure we can override active language by providing langcode
     // as an argument.
     $this->assertEquals('prefix-fi', $this->getSut()->getPrefix('fi'));
