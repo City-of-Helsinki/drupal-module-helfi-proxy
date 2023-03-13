@@ -32,7 +32,7 @@ prefixes:
   en: maps-and-transport
   fi: kartat-ja-liikenne
   sv: kartor-och-trafik
-  ru: maps
+  zxx: maps-and-transport
 ```
 or by adding them to your settings.php:
 
@@ -41,9 +41,11 @@ $config['helfi_proxy.settings']['prefixes'] = [
   'en' => 'test-maps-and-transport',
   'fi' => 'test-kartat-ja-liikenne',
   'sv' => 'test-kartor-och-trafik',
-  'ru' => 'test-maps',
 ];
 ```
+
+Non-linguistic URLs, aka URLs without language code (`LANGCODE_NOT_APPLICABLE`  / `zxx`) will always default to english path if not explicitly defined.
+
 ### Cookie name suffix
 
 Cookie name will be suffixed with the value configured in `session_suffix` setting. The value will default to site's hostname if not configured. For example `SSID{sha256}helfi-docker-so`.
