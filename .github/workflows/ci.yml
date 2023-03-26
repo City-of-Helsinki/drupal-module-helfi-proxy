@@ -50,7 +50,8 @@ jobs:
         working-directory: ${{ env.DRUPAL_ROOT }}
         run: |
           composer config repositories.5 path $GITHUB_WORKSPACE
-          composer require --dev drupal/$MODULE_NAME -W
+          composer require drupal/$MODULE_NAME -W
+          composer require drupal/redirect drupal/helfi_tunnistamo -W
 
       - name: Install Drupal
         working-directory: ${{ env.DRUPAL_ROOT }}
