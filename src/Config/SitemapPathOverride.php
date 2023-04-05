@@ -8,6 +8,7 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryOverrideInterface;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Http\RequestStack;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Override sitemap path dynamically.
@@ -39,7 +40,7 @@ class SitemapPathOverride implements ConfigFactoryOverrideInterface {
     if (in_array('simple_sitemap.settings', $names)) {
       // Use languageManager as static service as it will create circular
       // reference via the config.factory.override service.
-      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+      $langcode = \Drupal::languageManager()->getCurrentLanguage(LanguageInterface::TYPE_INTERFACE)->getId();
 
       // Load the helfi_proxy.active_prefix on demand as using it as an argument
       // for the constructor will trigger the ServiceCircularReferenceException.
