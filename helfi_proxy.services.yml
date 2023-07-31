@@ -50,8 +50,9 @@ services:
     tags:
       - { name: event_subscriber }
 
-  helfi_proxy.asset.css.optimizer:
-    public: false
-    class: Drupal\helfi_proxy\Asset\CssOptimizer
-    decorates: asset.css.optimizer
-    arguments: ['@config.factory', '@file_url_generator']
+# Set optimized files from flysystem azure.
+#  helfi_proxy.asset.css.optimizer:
+#    public: false
+#    class: Drupal\helfi_proxy\Asset\CssOptimizer
+#    decorates: asset.css.optimizer
+#    arguments: ['@config.factory', '@file_url_generator']
