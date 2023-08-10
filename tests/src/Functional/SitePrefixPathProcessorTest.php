@@ -24,17 +24,20 @@ class SitePrefixPathProcessorTest extends SitePrefixTestBase {
       'en' => '',
       'fi' => 'fi/',
       'sv' => 'sv/',
-      LanguageInterface::LANGCODE_NOT_APPLICABLE => '',
+      'zxx' => '',
     ];
     // EN has no language prefix by default.
     foreach ($map as $langcode => $langPrefix) {
       $language = \Drupal::languageManager()->getLanguage($langcode);
 
-      // LANGCODE_NOT_APPLICABLE fallbacks to english langcode.
+      $nodeUrl = $this->node->toUrl('canonical', ['language' => $language]);
+      $this->assertEquals("/{$langPrefix}prefix-$langcode/node/" . $this->node->id(), $nodeUrl->toString());
+      $this->drupalGet($nodeUrl);
+
+      // Langcode not applicable is redirected to english version.
       if ($langcode === LanguageInterface::LANGCODE_NOT_APPLICABLE) {
         $langcode = 'en';
       }
-      $this->drupalGet($this->node->toUrl('canonical', ['language' => $language]));
       $this->assertSession()->addressEquals("/{$langPrefix}prefix-$langcode/node/" . $this->node->id());
       $this->assertSession()->statusCodeEquals(200);
       $this->assertCacheContext('site_prefix:prefix-' . $langcode);

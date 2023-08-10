@@ -41,16 +41,17 @@ $config['helfi_proxy.settings']['prefixes'] = [
   'en' => 'test-maps-and-transport',
   'fi' => 'test-kartat-ja-liikenne',
   'sv' => 'test-kartor-och-trafik',
+  'zxx' => 'test-maps-and-transport',
 ];
 ```
 
-Non-linguistic URLs, aka URLs without language code (`LANGCODE_NOT_APPLICABLE`  / `zxx`) will always default to english path if not explicitly defined.
+Certain routes explicitly emit the language code, like `/sitemap.xml` and `/openid-connect/{provider}` provided by `simple_sitemap` and `openid_connect` modules. To support these, you can configure a non-linguistic prefix (`LANGCODE_NOT_APPLICABLE`  / `zxx`) by adding a prefix for `zxx` language code.
 
 ### Cookie name suffix
 
 Cookie name will be suffixed with the value configured in `session_suffix` setting. The value will default to site's hostname if not configured. For example `SSID{sha256}helfi-docker-so`.
 
-### Serve assets from asset path
+### Serve assets from the asset path
 
 All assets are served from the path configured in `asset-path` setting. For example `liikenne-assets`.
 
