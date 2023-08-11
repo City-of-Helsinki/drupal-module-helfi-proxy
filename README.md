@@ -119,9 +119,9 @@ if ($varnish_port = getenv('DRUPAL_VARNISH_PORT')) {
   $config['varnish_purger.settings.varnish_purge_all']['port'] = $varnish_port;
 }
 
-// Configuration doesn't know about existing config yet so we can't
+// Configuration doesn't know about existing config yet, so we can't
 // just append new headers to an already existing headers array here.
-// If you have configured any extra headers in your purge settings
+// If you have configured any extra headers in your purge settings,
 // you must add them here as well.
 $config['varnish_purger.settings.default']['headers'] = [
   [

@@ -59,7 +59,7 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     if ($options['language'] instanceof LanguageInterface) {
       $language = $options['language']->getId();
     }
-    // Use already resolved language to figure out active prefix
+    // Use an already resolved language to figure out active prefix
     // since it might be different from content language.
     $prefix = $this->sitePrefix->getPrefix($language);
 

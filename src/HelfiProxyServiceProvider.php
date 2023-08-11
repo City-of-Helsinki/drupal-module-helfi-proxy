@@ -18,9 +18,11 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
    * {@inheritdoc}
    */
   public function alter(ContainerBuilder $container) : void {
-    // PathProcessorLanguage and SitemapPathProcessor have same
-    // priority. Alter SitemapPathProcessor's priority so
-    // SitePrefixPathProcessor can be run in between the two.
+    // PathProcessorLanguage and SitemapPathProcessor have the same
+    // priority. Alter SitemapPathProcessor's priority, so
+    // SitePrefixPathProcessor can be run in between the two. Otherwise,
+    // the routes provided by 'simple_sitemap' path won't be recognized
+    // via the proxy path.
     if ($container->hasDefinition('simple_sitemap.path_processor')) {
       $definition = $container->getDefinition('simple_sitemap.path_processor');
       $tags = $definition->getTags();
