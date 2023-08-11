@@ -44,6 +44,7 @@ abstract class SitePrefixTestBase extends BrowserTestBase {
         'sv' => 'prefix-sv',
         'en' => 'prefix-en',
         'fi' => 'prefix-fi',
+        'zxx' => 'prefix-zxx',
       ])
       ->save();
 

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\helfi_proxy\ActiveSitePrefix;
 use Drupal\KernelTests\KernelTestBase;
 
@@ -63,6 +64,14 @@ class ActiveSitePrefixTest extends KernelTestBase {
       ->save();
 
     $this->assertEquals('prefix-en', $this->getSut()->getPrefix());
+    $this->assertNull($this->getSut()->getPrefix(LanguageInterface::LANGCODE_NOT_APPLICABLE));
+
+    // Make sure we can set langcode not applicable path.
+    $prefixes[LanguageInterface::LANGCODE_NOT_APPLICABLE] = 'overridden-prefix';
+    $this->config('helfi_proxy.settings')
+      ->set('prefixes', $prefixes)
+      ->save();
+
     // Make sure we can override active language by providing langcode
     // as an argument.
     $this->assertEquals('prefix-fi', $this->getSut()->getPrefix('fi'));
