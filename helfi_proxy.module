@@ -98,7 +98,8 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
   try {
     /** @var \Drupal\helfi_api_base\Environment\Environment $environment */
     $environment = \Drupal::service('helfi_api_base.environment_resolver')->getActiveEnvironment();
-  } catch (\InvalidArgumentException) {
+  }
+  catch (\InvalidArgumentException) {
     return;
   }
 
@@ -110,7 +111,8 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
   foreach ($links as $key => $link) {
     try {
       $baseUrl = $environment->getUrl($link['langcode']);
-    } catch (\InvalidArgumentException) {
+    }
+    catch (\InvalidArgumentException) {
       // Base url not found for given langcode.
       continue;
     }
