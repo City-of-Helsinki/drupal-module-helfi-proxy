@@ -95,8 +95,12 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
     return;
   }
 
-  /** @var \Drupal\helfi_api_base\Environment\Environment $environment */
-  $environment = \Drupal::service('helfi_api_base.environment_resolver')->getActiveEnvironment();
+  try {
+    /** @var \Drupal\helfi_api_base\Environment\Environment $environment */
+    $environment = \Drupal::service('helfi_api_base.environment_resolver')->getActiveEnvironment();
+  } catch (\InvalidArgumentException) {
+    return;
+  }
 
   /** @var \Drupal\Core\Path\PathMatcherInterface $pathMatcher */
   $pathMatcher = \Drupal::service('path.matcher');
@@ -104,7 +108,13 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
   // helfi_proxy module sets "X-Robots-Tag: noindex" header for configured
   // paths. These url should not be included in the sitemap.xml file.
   foreach ($links as $key => $link) {
-    $baseUrl = $environment->getUrl($link['langcode']);
+    try {
+      $baseUrl = $environment->getUrl($link['langcode']);
+    } catch (\InvalidArgumentException) {
+      // Base url not found for given langcode.
+      continue;
+    }
+
     $url = $link['url'];
 
     if (str_starts_with($url, $baseUrl)) {
