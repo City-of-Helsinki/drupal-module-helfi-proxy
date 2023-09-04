@@ -7,6 +7,7 @@
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
  * Implements hook_module_implements_alter().
@@ -81,4 +82,51 @@ function helfi_proxy_page_attachments_alter(array &$attachments) {
     ];
     $attachments['#attached']['html_head'][] = [$helfi_content_type, $tag_name];
   }
+}
+
+/**
+ * Implements hook_simple_sitemap_links_alter().
+ */
+function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant) {
+  /** @var \Drupal\Core\Config\ImmutableConfig $config */
+  $config = \Drupal::service('config.factory')->get('helfi_proxy.settings');
+
+  if (!$paths = implode("\n", $config->get(ProxyManagerInterface::ROBOTS_PATHS) ?? [])) {
+    return;
+  }
+
+  try {
+    /** @var \Drupal\helfi_api_base\Environment\Environment $environment */
+    $environment = \Drupal::service('helfi_api_base.environment_resolver')->getActiveEnvironment();
+  }
+  catch (\InvalidArgumentException) {
+    return;
+  }
+
+  /** @var \Drupal\Core\Path\PathMatcherInterface $pathMatcher */
+  $pathMatcher = \Drupal::service('path.matcher');
+
+  // helfi_proxy module sets "X-Robots-Tag: noindex" header for configured
+  // paths. These url should not be included in the sitemap.xml file.
+  foreach ($links as $key => $link) {
+    try {
+      $baseUrl = $environment->getUrl($link['langcode']);
+    }
+    catch (\InvalidArgumentException) {
+      // Base url not found for given langcode.
+      continue;
+    }
+
+    $url = $link['url'];
+
+    if (str_starts_with($url, $baseUrl)) {
+      $path = substr($url, strlen($baseUrl));
+
+      // Remove matched paths from sitemap.xml file.
+      if ($pathMatcher->matchPath($path, $paths)) {
+        unset($links[$key]);
+      }
+    }
+  }
+
 }
