@@ -155,5 +155,3 @@ See [City-of-Helsinki/drupal-helfi-local-proxy](https://github.com/City-of-Helsi
 ## Contact
 
 Slack: #helfi-drupal (http://helsinkicity.slack.com/)
-
-Mail: `drupal@hel.fi`
