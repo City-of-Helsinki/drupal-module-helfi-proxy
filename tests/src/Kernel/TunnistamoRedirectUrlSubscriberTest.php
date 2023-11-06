@@ -9,7 +9,10 @@ use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\openid_connect\Entity\OpenIDConnectClientEntity;
+use Drupal\openid_connect\OpenIDConnectAutoDiscover;
 use Drupal\user\Entity\User;
+use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * Tests Tunnistamo redirect url subscriber.
@@ -18,6 +21,8 @@ use Drupal\user\Entity\User;
  * @group helfi_proxy
  */
 class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
+
+  use ProphecyTrait;
 
   /**
    * {@inheritdoc}
@@ -48,6 +53,25 @@ class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
     $container->getDefinition('path_alias.path_processor')
       ->addTag('path_processor_inbound')
       ->addTag('path_processor_outbound');
+
+    $this->mockOpenIdAutodiscovery();
+  }
+
+  /**
+   * Override OpenID Autodiscovery service so that no http requests are made.
+   */
+  private function mockOpenIdAutodiscovery() : void {
+    $openIdAutoDiscover = $this->prophesize(OpenIDConnectAutoDiscover::class);
+    $openIdAutoDiscover
+      ->fetch(Argument::any(), Argument::any())
+      ->willReturn([
+        'authorization_endpoint' => 'https://example.com/authorization',
+        'token_endpoint' => 'https://example.com/token',
+        'userinfo_endpoint' => 'https://example.com/userinfo',
+        'end_session_endpoint' => 'https://example.com/end-session',
+      ]);
+
+    $this->container->set('openid_connect.autodiscover', $openIdAutoDiscover->reveal());
   }
 
   /**
@@ -67,6 +91,9 @@ class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
     foreach (['fi', 'sv'] as $langcode) {
       ConfigurableLanguage::createFromLangcode($langcode)->save();
     }
+
+    $this->configureTunnistamoClient();
+
     $this->config('helfi_proxy.settings')
       ->set('prefixes', [
         'sv' => 'prefix-sv',
@@ -80,6 +107,22 @@ class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
       ->save();
 
     \Drupal::service('kernel')->rebuildContainer();
+  }
+
+  /**
+   * Configure tunnistamo openid client.
+   */
+  private function configureTunnistamoClient(): void {
+    $this->config('openid_connect.client.tunnistamo')
+      ->set('settings', array_merge(
+        // Settings from $this->installConfig([..., 'helfi_tunnistamo', ...]);.
+        $this->config('openid_connect.client.tunnistamo')->get('settings'),
+        // Overrides:
+        [
+          'environment_url' => 'https://example.com',
+        ],
+      ))
+      ->save();
   }
 
   /**
