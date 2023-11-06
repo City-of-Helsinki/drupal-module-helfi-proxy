@@ -11,8 +11,6 @@ helfi_proxy.settings:
       type: sequence
       sequence:
         type: string
-    default_proxy_domain:
-      type: string
     session_suffix:
       type: string
     robots_header_enabled:
