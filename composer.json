@@ -18,7 +18,7 @@
     "extra": {
         "patches": {
             "drupal/core": {
-                "[#3385550] Language negotiation breaks updating Drupal 9 to 10": "./patches/338550.patch"
+                "[#3385550] Language negotiation breaks updating Drupal 9 to 10": "patches/338550.patch"
             }
         }
     },
