@@ -13,7 +13,8 @@
         "ext-dom": "*"
     },
     "conflict": {
-        "drupal/helfi_tunnistamo": "<=2.2.1"
+        "drupal/helfi_tunnistamo": "<=2.2.1",
+        "drupal/core": "<10.1"
     },
     "extra": {
         "patches": {
