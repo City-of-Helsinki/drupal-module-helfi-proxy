@@ -11,16 +11,6 @@ Provides various fixes to allow multiple Drupal instances to be served from one 
 
 ## Features
 
-### Default proxy domain
-
-Redirects all requests to configured proxy domain. See [src/EventSubscriber/RedirectResponseSubscriber.php](/src/EventSubscriber/RedirectResponseSubscriber.php).
-
-Populate `helfi_proxy.settings.default_proxy_domain` settings:
-
-`$config['helfi_proxy.settings']['default_proxy_domain'] = 'helfi-proxy.docker.so';`
-
-_NOTE_: **Using this feature should be your last resort and not recommended by default.**
-
 ### Site prefix
 
 A "prefix" will be added to all URLs. This prefix should be same as the `<project prefix>` in `<proxy url>/<project prefix>`.

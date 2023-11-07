@@ -15,6 +15,13 @@ use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
 class CustomMetatagTest extends BrowserTestBase {
 
   /**
+   * Drupal node.
+   *
+   * @var \Drupal\node\NodeInterface
+   */
+  private $node;
+
+  /**
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';

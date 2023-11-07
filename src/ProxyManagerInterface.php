@@ -13,7 +13,6 @@ interface ProxyManagerInterface {
   public const ASSET_PATH = 'asset_path';
   public const ROBOTS_PATHS = 'robots_paths';
   public const FRONT_PAGE_TITLE = 'front_page_title';
-  public const DEFAULT_PROXY_DOMAIN = 'default_proxy_domain';
   public const SESSION_SUFFIX = 'session_suffix';
   public const ROBOTS_HEADER_ENABLED = 'robots_header_enabled';
   public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
