@@ -15,7 +15,6 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 /**
  * Tests robots response headers.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber
  * @group helfi_proxy
  */
 class RobotsResponseSubscriberTest extends KernelTestBase {
@@ -86,11 +85,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
 
   /**
    * Tests that robots header is present when configuration is set.
-   *
-   * @covers ::robotsHeaderEnabled
-   * @covers ::onResponse
-   * @covers ::__construct
-   * @covers ::addRobotHeader
    */
   public function testConfig() : void {
     $this->config('helfi_proxy.settings')
@@ -111,10 +105,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
 
   /**
    * Tests that robots header is not present when no env variable is set.
-   *
-   * @covers ::robotsHeaderEnabled
-   * @covers ::onResponse
-   * @covers ::__construct
    */
   public function testNoEnvVariable() : void {
     $event = $this->getResponseEvent();
@@ -133,11 +123,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
 
   /**
    * Tests that robots header is added when env variable is present.
-   *
-   * @covers ::robotsHeaderEnabled
-   * @covers ::onResponse
-   * @covers ::__construct
-   * @covers ::addRobotHeader
    */
   public function testEnvVariable() : void {
     putenv(RobotsResponseSubscriber::X_ROBOTS_TAG_HEADER_NAME . '=1');
@@ -148,11 +133,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
 
   /**
    * Tests robots path handler.
-   *
-   * @covers ::robotsHeaderEnabled
-   * @covers ::onResponse
-   * @covers ::__construct
-   * @covers ::addRobotHeader
    */
   public function testRobotsPaths() : void {
     $this->config('helfi_proxy.settings')

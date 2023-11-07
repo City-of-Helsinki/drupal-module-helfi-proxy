@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Tests session configuration.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\SessionConfiguration
  * @group helfi_proxy
  */
 class SessionConfigurationTest extends KernelTestBase {
@@ -51,11 +50,6 @@ class SessionConfigurationTest extends KernelTestBase {
 
   /**
    * Tests session suffix from configuration.
-   *
-   * @covers ::getOptions
-   * @covers ::getName
-   * @covers ::getSuffix
-   * @covers ::__construct
    */
   public function testSessionNameConfig() : void {
     $this->config('helfi_proxy.settings')
@@ -68,11 +62,6 @@ class SessionConfigurationTest extends KernelTestBase {
 
   /**
    * Tests session suffix from DRUPAL_SESSION_SUFFIX env variable.
-   *
-   * @covers ::getOptions
-   * @covers ::getName
-   * @covers ::getSuffix
-   * @covers ::__construct
    */
   public function testSessionNameEnvVariable() : void {
     putenv('DRUPAL_SESSION_SUFFIX=testlocal');
@@ -83,12 +72,6 @@ class SessionConfigurationTest extends KernelTestBase {
 
   /**
    * Tests session suffix fallback.
-   *
-   * @covers ::getCleanHostname
-   * @covers ::getOptions
-   * @covers ::getName
-   * @covers ::getSuffix
-   * @covers ::__construct
    */
   public function testSessionNameFallback() : void {
     $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
