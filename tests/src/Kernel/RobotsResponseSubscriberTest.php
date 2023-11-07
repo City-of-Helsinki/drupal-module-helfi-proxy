@@ -23,7 +23,17 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['helfi_proxy', 'path_alias'];
+  protected static $modules = ['system', 'helfi_proxy', 'path_alias'];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() : void {
+    parent::setUp();
+
+    // system.site is required by path matcher service.
+    $this->installConfig(['system']);
+  }
 
   /**
    * Gets the response subscriber service.
@@ -48,6 +58,7 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
     return new ResponseEvent(
       $this->container->get('http_kernel'),
       $request,
+      // @todo Rename this once Core requires 7.0 symfony.
       HttpKernelInterface::MASTER_REQUEST,
       new HtmlResponse()
     );
