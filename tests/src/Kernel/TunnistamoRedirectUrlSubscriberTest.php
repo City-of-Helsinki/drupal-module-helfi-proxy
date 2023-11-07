@@ -17,7 +17,6 @@ use Prophecy\PhpUnit\ProphecyTrait;
 /**
  * Tests Tunnistamo redirect url subscriber.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\EventSubscriber\TunnistamoRedirectUrlSubscriber
  * @group helfi_proxy
  */
 class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {

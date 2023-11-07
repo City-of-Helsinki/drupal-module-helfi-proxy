@@ -11,7 +11,6 @@ use Drupal\KernelTests\KernelTestBase;
 /**
  * Tests Proxy manager.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\ProxyManager
  * @group helfi_proxy
  */
 class ProxyManagerTest extends KernelTestBase {
@@ -37,10 +36,6 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests instance prefixes.
-   *
-   * @covers ::getConfig
-   * @covers ::isConfigured
-   * @covers ::__construct
    */
   public function testPrefixes() : void {
     $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::PREFIXES));
@@ -75,10 +70,6 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests tunnistamo return url.
-   *
-   * @covers ::getConfig
-   * @covers ::isConfigured
-   * @covers ::__construct
    */
   public function testTunnistamoReturnUrl() : void {
     $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
@@ -94,10 +85,6 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests asset path.
-   *
-   * @covers ::getConfig
-   * @covers ::isConfigured
-   * @covers ::__construct
    */
   public function testAssetPath() : void {
     $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::ASSET_PATH));
@@ -109,10 +96,6 @@ class ProxyManagerTest extends KernelTestBase {
 
   /**
    * Tests process path.
-   *
-   * @covers ::isLocalAsset
-   * @covers ::getConfig
-   * @covers ::processPath
    */
   public function testProcessPath() : void {
     // Make sure nothing is done if asset path is not configured.

@@ -11,7 +11,6 @@ use Drupal\KernelTests\KernelTestBase;
 /**
  * Tests Active site prefix service.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\ActiveSitePrefix
  * @group helfi_proxy
  */
 class ActiveSitePrefixTest extends KernelTestBase {
@@ -38,9 +37,6 @@ class ActiveSitePrefixTest extends KernelTestBase {
 
   /**
    * Tests ::getPrefix() without proxy paths.
-   *
-   * @covers ::getPrefix
-   * @covers ::getPrefixes
    */
   public function testEmptyPrefix() : void {
     $this->assertEquals(NULL, $this->getSut()->getPrefix());
@@ -49,9 +45,6 @@ class ActiveSitePrefixTest extends KernelTestBase {
 
   /**
    * Tests ::getPrefix with proxy paths.
-   *
-   * @covers ::getPrefix
-   * @covers ::getPrefixes
    */
   public function testPrefix() : void {
     $prefixes = [

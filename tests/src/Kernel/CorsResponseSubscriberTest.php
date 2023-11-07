@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Tests CORS response subscriber.
  *
- * @coversDefaultClass \Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber
  * @group helfi_proxy
  */
 class CorsResponseSubscriberTest extends KernelTestBase {
