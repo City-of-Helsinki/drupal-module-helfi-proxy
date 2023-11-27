@@ -132,7 +132,9 @@ class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
    */
   private function getRedirectUri() : string {
     $client = OpenIDConnectClientEntity::load('tunnistamo')->getPlugin();
-    $url = $client->authorize()->getTargetUrl();
+    /** @var \Symfony\Component\HttpFoundation\RedirectResponse $response */
+    $response = $client->authorize();
+    $url = $response->getTargetUrl();
     parse_str(parse_url($url, PHP_URL_QUERY), $query);
 
     return $query['redirect_uri'];

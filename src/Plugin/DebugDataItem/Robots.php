@@ -17,7 +17,7 @@ use Psr\Container\ContainerInterface;
  *   description = @Translation("Robots data")
  * )
  */
-class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginInterface {
+final class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginInterface {
 
   /**
    * Robots header enabled settings value.
@@ -29,8 +29,8 @@ class Robots extends DebugDataItemPluginBase implements ContainerFactoryPluginIn
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = new static($configuration, $plugin_id, $plugin_definition);
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) : self {
+    $instance = new self($configuration, $plugin_id, $plugin_definition);
 
     $instance->robotsHeader = (bool) $container->get('config.factory')
       ->get('helfi_proxy.settings')
