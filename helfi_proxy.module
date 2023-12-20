@@ -71,16 +71,22 @@ function helfi_proxy_page_attachments_alter(array &$attachments) {
 
   $entity = !empty($entities) ? reset($entities) : NULL;
   if ($entity) {
-    $tag_name = 'helfi_content_type';
-
-    $helfi_content_type = [
-      '#tag' => 'meta',
-      '#attributes' => [
-        'name' => $tag_name,
-        'content' => $entity->bundle(),
-      ],
+    $tags = [
+      'helfi_content_type' => $entity->bundle(),
+      'helfi_content_id' => $entity->id(),
     ];
-    $attachments['#attached']['html_head'][] = [$helfi_content_type, $tag_name];
+
+    foreach ($tags as $tag_name => $content) {
+      $tag = [
+        '#tag' => 'meta',
+        '#attributes' => [
+          'name' => $tag_name,
+          'content' => $content,
+        ],
+      ];
+
+      $attachments['#attached']['html_head'][] = [$tag, $tag_name];
+    }
   }
 }
 

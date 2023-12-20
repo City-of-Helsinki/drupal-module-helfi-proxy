@@ -50,12 +50,15 @@ class CustomMetatagTest extends BrowserTestBase {
   }
 
   /**
-   * Test that custom header metatag is set on page correctly.
+   * Test that custom header metatags are set correctly.
    */
   public function testMetatag() : void {
     $this->drupalGet($this->node->toUrl('canonical'));
     $this->assertSession()
       ->elementAttributeContains('css', 'meta[name="helfi_content_type"]', 'content', 'page');
+
+    $this->assertSession()
+      ->elementAttributeContains('css', 'meta[name="helfi_content_id"]', 'content', (string) $this->node->id());
 
     $this->drupalGet('<front>');
     $this->assertSession()
@@ -63,6 +66,8 @@ class CustomMetatagTest extends BrowserTestBase {
 
     $this->assertSession()
       ->elementNotExists('css', 'meta[name="helfi_content_type"]');
+    $this->assertSession()
+      ->elementNotExists('css', 'meta[name="helfi_content_id"]');
   }
 
 }
