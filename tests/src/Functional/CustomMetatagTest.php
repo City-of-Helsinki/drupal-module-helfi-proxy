@@ -50,24 +50,32 @@ class CustomMetatagTest extends BrowserTestBase {
   }
 
   /**
+   * Assert element attributes.
+   */
+  private function assertAttributes(string $selector, array $attributes): void {
+    foreach ($attributes as $attribute => $content) {
+      $this->assertSession()->elementAttributeContains('css', $selector, $attribute, $content);
+    }
+  }
+
+  /**
    * Test that custom header metatags are set correctly.
    */
   public function testMetatag() : void {
     $this->drupalGet($this->node->toUrl('canonical'));
-    $this->assertSession()
-      ->elementAttributeContains('css', 'meta[name="helfi_content_type"]', 'content', 'page');
-
-    $this->assertSession()
-      ->elementAttributeContains('css', 'meta[name="helfi_content_id"]', 'content', (string) $this->node->id());
+    $this->assertAttributes('meta[name="helfi_content_type"]', [
+      'content' => 'page',
+      'class' => 'elastic',
+    ]);
+    $this->assertAttributes('meta[name="helfi_content_id"]', [
+      'content' => (string) $this->node->id(),
+      'class' => 'elastic',
+    ]);
 
     $this->drupalGet('<front>');
-    $this->assertSession()
-      ->statusCodeEquals(200);
-
-    $this->assertSession()
-      ->elementNotExists('css', 'meta[name="helfi_content_type"]');
-    $this->assertSession()
-      ->elementNotExists('css', 'meta[name="helfi_content_id"]');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->elementNotExists('css', 'meta[name="helfi_content_type"]');
+    $this->assertSession()->elementNotExists('css', 'meta[name="helfi_content_id"]');
   }
 
 }

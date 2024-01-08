@@ -82,6 +82,7 @@ function helfi_proxy_page_attachments_alter(array &$attachments) {
         '#attributes' => [
           'name' => $tag_name,
           'content' => $content,
+          'class' => 'elastic',
         ],
       ];
 
