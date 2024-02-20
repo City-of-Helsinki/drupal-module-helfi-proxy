@@ -25,3 +25,15 @@ function helfi_proxy_install() {
 function helfi_proxy_update_9001() : void {
   helfi_proxy_install();
 }
+
+/**
+ * Enable asset purge configuration.
+ */
+function helfi_proxy_update_9002() : void {
+  if (!\Drupal::moduleHandler()->moduleExists('varnish_purger')) {
+    return;
+  }
+  /** @var \Drupal\Core\Config\ConfigInstallerInterface $configInstaller */
+  $configInstaller = \Drupal::service('config.installer');
+  $configInstaller->installDefaultConfig('module', 'helfi_proxy');
+}
