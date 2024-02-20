@@ -1,12 +1,16 @@
 purgers:
   -
-    order_index: 2
     instance_id: default
     plugin_id: varnish
+    order_index: 2
   -
-    order_index: 3
     instance_id: varnish_purge_all
     plugin_id: varnish
+    order_index: 3
+  -
+    instance_id: assets
+    plugin_id: varnish
+    order_index: 4
 processors:
   -
     plugin_id: drush_purge_queue_work
@@ -14,6 +18,12 @@ processors:
   -
     plugin_id: cron
     status: true
+  -
+    plugin_id: drush_purge_invalidate
+    status: true
+  -
+    plugin_id: purge_ui_block_processor
+    status: false
 queuers:
   -
     plugin_id: purge_ui_block_queuer
