@@ -37,8 +37,8 @@ function helfi_proxy_update_9002() : void {
   $configInstaller = \Drupal::service('config.installer');
   $configInstaller->installDefaultConfig('module', 'helfi_proxy');
 
-  // Re-installing the default configuration does not install purge configuration
-  // for some reason.
+  // Re-installing the default configuration does not install purge
+  // configuration for some reason.
   $plugins = \Drupal::configFactory()->getEditable('purge.plugins');
   $purgers = $plugins->get('purgers');
 
