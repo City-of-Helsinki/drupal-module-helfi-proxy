@@ -5,7 +5,7 @@
  * Contains helfi_proxy installation procedure.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /**
  * Implements hook_install().
@@ -24,4 +24,42 @@ function helfi_proxy_install() {
  */
 function helfi_proxy_update_9001() : void {
   helfi_proxy_install();
+}
+
+/**
+ * Enable asset purge configuration.
+ */
+function helfi_proxy_update_9002() : void {
+  if (!\Drupal::moduleHandler()->moduleExists('varnish_purger')) {
+    return;
+  }
+  /** @var \Drupal\Core\Config\ConfigInstallerInterface $configInstaller */
+  $configInstaller = \Drupal::service('config.installer');
+  $configInstaller->installDefaultConfig('module', 'helfi_proxy');
+
+  // Re-installing the default configuration does not install purge
+  // configuration for some reason.
+  $plugins = \Drupal::configFactory()->getEditable('purge.plugins');
+  $purgers = $plugins->get('purgers');
+
+  if (!array_filter($purgers, fn (array $item) => $item['instance_id'] === 'assets')) {
+    $purgers[] = [
+      'instance_id' => 'assets',
+      'plugin_id' => 'varnish',
+      'order_index' => 4,
+    ];
+    $plugins->set('purgers', $purgers)
+      ->save();
+  }
+  $loggers = \Drupal::configFactory()->getEditable('purge.logger_channels');
+  $channels = $loggers->get('channels');
+
+  if (!array_filter($channels, fn (array $item) => $item['id'] === 'purger_varnish_assets')) {
+    $channels[] = [
+      'id' => 'purger_varnish_assets',
+      'grants' => [0, 2, 3],
+    ];
+  }
+  $loggers->set('channels', $channels)
+    ->save();
 }

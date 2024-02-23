@@ -7,6 +7,7 @@ name: CI
 env:
   SYMFONY_DEPRECATIONS_HELPER: disabled
   BROWSERTEST_OUTPUT_DIRECTORY: 'public/sites/simpletest'
+  COMPOSER_DEPENDENCIES: drupal/redirect drupal/helfi_tunnistamo drupal/simple_sitemap drupal/varnish_purger
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -56,7 +57,7 @@ jobs:
           # phpunit. Copy .git folder manually so codecov can generate line by
           # line coverage.
           cp -r $GITHUB_WORKSPACE/.git $MODULE_FOLDER/
-          composer require drupal/redirect drupal/helfi_tunnistamo drupal/simple_sitemap -W
+          composer require $COMPOSER_DEPENDENCIES -W
 
       - name: Install Drupal
         working-directory: ${{ env.DRUPAL_ROOT }}
