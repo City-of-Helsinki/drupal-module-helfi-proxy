@@ -35,21 +35,21 @@ final class SitePrefixCacheContext implements CalculatedCacheContextInterface {
   /**
    * {@inheritdoc}
    */
-  public function getContext($prefix = NULL) : string {
+  public function getContext($parameter = NULL) : string {
     $prefixes = $this->sitePrefix->getPrefixes();
 
-    if ($prefix === NULL) {
+    if ($parameter === NULL) {
       return implode(',', $prefixes);
     }
 
-    return isset($prefixes[$prefix]) ? '1' : '0';
+    return isset($prefixes[$parameter]) ? '1' : '0';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getCacheableMetadata($prefix = NULL) : CacheableMetadata {
-    return (new CacheableMetadata())->setCacheTags(['site_prefix:' . $prefix]);
+  public function getCacheableMetadata($parameter = NULL) : CacheableMetadata {
+    return (new CacheableMetadata())->setCacheTags(['site_prefix:' . $parameter]);
   }
 
 }
