@@ -14,14 +14,7 @@
     },
     "conflict": {
         "drupal/helfi_tunnistamo": "<=2.2.1",
-        "drupal/core": "<10.1"
-    },
-    "extra": {
-        "patches": {
-            "drupal/core": {
-                "[#3385550] Language negotiation breaks updating Drupal 9 to 10": "https://raw.githubusercontent.com/City-of-Helsinki/drupal-module-helfi-proxy/ffbde3654e0011e237a17ea1cb3a7291685e0c30/patches/3385550.patch"
-            }
-        }
+        "drupal/core": "<10.3"
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
