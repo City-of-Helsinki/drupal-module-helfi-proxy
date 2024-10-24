@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Functional;
 
-use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Custom metatag test class.

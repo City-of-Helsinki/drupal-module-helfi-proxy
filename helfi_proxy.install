@@ -63,3 +63,12 @@ function helfi_proxy_update_9002() : void {
   $loggers->set('channels', $channels)
     ->save();
 }
+
+/**
+ * Remove unused 'robots_header_enabled' config.
+ */
+function helfi_proxy_update_9003() : void {
+  \Drupal::configFactory()->getEditable('helfi_proxy.settings')
+    ->clear('robots_header_enabled')
+    ->save();
+}

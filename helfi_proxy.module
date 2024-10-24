@@ -38,7 +38,7 @@ function helfi_proxy_file_url_alter(&$uri) : void {
  */
 function helfi_proxy_js_settings_alter(
   array &$settings,
-  AttachedAssetsInterface $assets
+  AttachedAssetsInterface $assets,
 ) {
   if (isset($settings['radioactivity'])) {
     /** @var \Drupal\helfi_proxy\ActiveSitePrefix $service */

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\openid_connect\Entity\OpenIDConnectClientEntity;
 use Drupal\openid_connect\OpenIDConnectAutoDiscover;

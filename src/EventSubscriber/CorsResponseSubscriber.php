@@ -20,7 +20,7 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
    *   An array of domains.
    */
   public function __construct(
-    private array $validOriginDomains
+    private array $validOriginDomains,
   ) {
   }
 

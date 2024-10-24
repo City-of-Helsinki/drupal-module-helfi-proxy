@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyManagerInterface;
-use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests Proxy manager.

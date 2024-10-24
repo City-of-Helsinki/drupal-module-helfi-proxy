@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\Render\HtmlResponse;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber;
 use Drupal\helfi_proxy\ProxyManagerInterface;
-use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -50,7 +50,7 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
    * @return \Symfony\Component\HttpKernel\Event\ResponseEvent
    *   The response event.
    */
-  private function getResponseEvent(Request $request = NULL) : ResponseEvent {
+  private function getResponseEvent(?Request $request = NULL) : ResponseEvent {
     if (!$request) {
       $request = Request::createFromGlobals();
     }
@@ -82,54 +82,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
    */
   private function assertResponseEventNoHeader(ResponseEvent $event) : void {
     $this->assertNotContains('X-Robots-Tag', $event->getResponse()->headers);
-  }
-
-  /**
-   * Tests that robots header is present when configuration is set.
-   */
-  public function testConfig() : void {
-    $this->config('helfi_proxy.settings')
-      ->set(ProxyManagerInterface::ROBOTS_HEADER_ENABLED, FALSE)
-      ->save();
-    // Make sure setting config to false does not enable the feature.
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventNoHeader($event);
-
-    $this->config('helfi_proxy.settings')
-      ->set(ProxyManagerInterface::ROBOTS_HEADER_ENABLED, TRUE)
-      ->save();
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventHasHeader($event);
-  }
-
-  /**
-   * Tests that robots header is not present when no env variable is set.
-   */
-  public function testNoEnvVariable() : void {
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventNoHeader($event);
-
-    // Make sure setting null values to robots env variable does not
-    // enable the feature.
-    foreach ([0, NULL, ''] as $value) {
-      putenv(RobotsResponseSubscriber::X_ROBOTS_TAG_HEADER_NAME . '=' . $value);
-      $event = $this->getResponseEvent();
-      $this->getSut()->onResponse($event);
-      $this->assertResponseEventNoHeader($event);
-    }
-  }
-
-  /**
-   * Tests that robots header is added when env variable is present.
-   */
-  public function testEnvVariable() : void {
-    putenv(RobotsResponseSubscriber::X_ROBOTS_TAG_HEADER_NAME . '=1');
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventHasHeader($event);
   }
 
   /**
