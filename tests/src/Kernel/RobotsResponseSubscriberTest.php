@@ -85,54 +85,6 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
   }
 
   /**
-   * Tests that robots header is present when configuration is set.
-   */
-  public function testConfig() : void {
-    $this->config('helfi_proxy.settings')
-      ->set(ProxyManagerInterface::ROBOTS_HEADER_ENABLED, FALSE)
-      ->save();
-    // Make sure setting config to false does not enable the feature.
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventNoHeader($event);
-
-    $this->config('helfi_proxy.settings')
-      ->set(ProxyManagerInterface::ROBOTS_HEADER_ENABLED, TRUE)
-      ->save();
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventHasHeader($event);
-  }
-
-  /**
-   * Tests that robots header is not present when no env variable is set.
-   */
-  public function testNoEnvVariable() : void {
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventNoHeader($event);
-
-    // Make sure setting null values to robots env variable does not
-    // enable the feature.
-    foreach ([0, NULL, ''] as $value) {
-      putenv(RobotsResponseSubscriber::X_ROBOTS_TAG_HEADER_NAME . '=' . $value);
-      $event = $this->getResponseEvent();
-      $this->getSut()->onResponse($event);
-      $this->assertResponseEventNoHeader($event);
-    }
-  }
-
-  /**
-   * Tests that robots header is added when env variable is present.
-   */
-  public function testEnvVariable() : void {
-    putenv(RobotsResponseSubscriber::X_ROBOTS_TAG_HEADER_NAME . '=1');
-    $event = $this->getResponseEvent();
-    $this->getSut()->onResponse($event);
-    $this->assertResponseEventHasHeader($event);
-  }
-
-  /**
    * Tests robots path handler.
    */
   public function testRobotsPaths() : void {

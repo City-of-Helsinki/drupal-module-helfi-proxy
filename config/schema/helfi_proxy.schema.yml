@@ -13,8 +13,6 @@ helfi_proxy.settings:
         type: string
     session_suffix:
       type: string
-    robots_header_enabled:
-      type: boolean
     prefixes:
       type: sequence
       sequence:

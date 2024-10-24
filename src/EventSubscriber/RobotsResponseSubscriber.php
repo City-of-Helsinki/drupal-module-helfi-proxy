@@ -6,13 +6,11 @@ namespace Drupal\helfi_proxy\EventSubscriber;
 
 use Drupal\Core\Cache\CacheableResponseInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\path_alias\AliasManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -20,15 +18,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * Adds an X-Robots-Tag to response headers.
  */
 final class RobotsResponseSubscriber implements EventSubscriberInterface {
-
-  public const X_ROBOTS_TAG_HEADER_NAME = 'DRUPAL_X_ROBOTS_TAG_HEADER';
-
-  /**
-   * The config.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  private ImmutableConfig $config;
 
   /**
    * Constructs a new instance.
@@ -43,38 +32,11 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
    *   The path matcher.
    */
   public function __construct(
-    ConfigFactoryInterface $configFactory,
+    private ConfigFactoryInterface $configFactory,
     private CurrentPathStack $pathStack,
     private AliasManagerInterface $aliasManager,
     private PathMatcherInterface $pathMatcher
   ) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
-  }
-
-  /**
-   * Adds the robots response header.
-   *
-   * @param \Symfony\Component\HttpFoundation\Response $response
-   *   The response.
-   */
-  private function addRobotHeader(Response $response) : void {
-    $response->headers->add(['X-Robots-Tag' => 'noindex, nofollow']);
-  }
-
-  /**
-   * Checks whether robots header should be present.
-   *
-   * @return bool
-   *   TRUE if robots header is enabled for all pages.
-   */
-  private function robotsHeaderEnabled() : bool {
-    $value = $this->config->get(ProxyManagerInterface::ROBOTS_HEADER_ENABLED);
-
-    if ($value !== NULL) {
-      return (bool) $value;
-    }
-    // @todo Remove this in 3.0.0 release.
-    return (bool) getenv(self::X_ROBOTS_TAG_HEADER_NAME);
   }
 
   /**
@@ -85,26 +47,20 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
    */
   public function onResponse(ResponseEvent $event) : void {
     $response = $event->getResponse();
+    $config = $this->configFactory->get('helfi_proxy.settings');
 
-    if ($response instanceof CacheableResponseInterface) {
-      $response->addCacheableDependency($this->config);
-    }
-
-    if ($this->robotsHeaderEnabled()) {
-      $this->addRobotHeader($response);
-      // No need to check individual paths if robots header should be
-      // added for every page.
-      return;
-    }
-
-    if (!$paths = implode("\n", $this->config->get(ProxyManagerInterface::ROBOTS_PATHS) ?? [])) {
+    if (!$paths = implode("\n", $config->get(ProxyManagerInterface::ROBOTS_PATHS) ?? [])) {
       return;
     }
     $alias = $this->aliasManager
       ->getAliasByPath($this->pathStack->getPath($event->getRequest()));
 
     if ($this->pathMatcher->matchPath($alias, $paths)) {
-      $this->addRobotHeader($response);
+      $response->headers->add(['X-Robots-Tag' => 'noindex, nofollow']);
+
+      if ($response instanceof CacheableResponseInterface) {
+        $response->addCacheableDependency($config);
+      }
     }
   }
 

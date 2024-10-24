@@ -14,7 +14,6 @@ interface ProxyManagerInterface {
   public const ROBOTS_PATHS = 'robots_paths';
   public const FRONT_PAGE_TITLE = 'front_page_title';
   public const SESSION_SUFFIX = 'session_suffix';
-  public const ROBOTS_HEADER_ENABLED = 'robots_header_enabled';
   public const TUNNISTAMO_RETURN_URL = 'tunnistamo_return_url';
 
   /**
