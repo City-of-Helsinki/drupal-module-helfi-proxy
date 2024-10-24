@@ -51,6 +51,7 @@ class SitePrefixPathProcessorTest extends KernelTestBase {
     parent::setUp();
 
     $this->setupLanguages();
+    $this->installEntitySchema('path_alias');
     $this->installEntitySchema('remote_entity_test');
     $this->config('helfi_proxy.settings')
       ->set('prefixes', $this->prefixes)
