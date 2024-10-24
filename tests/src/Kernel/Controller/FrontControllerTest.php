@@ -27,6 +27,15 @@ class FrontControllerTest extends KernelTestBase {
   ];
 
   /**
+   * {@inheritdoc}
+   */
+  protected function setUp() : void {
+    parent::setUp();
+
+    $this->installEntitySchema('path_alias');
+  }
+
+  /**
    * Tests access.
    */
   public function testControllerAccess() : void {
