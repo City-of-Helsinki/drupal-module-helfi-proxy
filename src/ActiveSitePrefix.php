@@ -35,7 +35,7 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
    */
   public function __construct(
     private LanguageManagerInterface $languageManager,
-    ConfigFactoryInterface $configFactory
+    ConfigFactoryInterface $configFactory,
   ) {
     $this->config = $configFactory->get('helfi_proxy.settings');
     $this->addCacheableDependency($this->config);

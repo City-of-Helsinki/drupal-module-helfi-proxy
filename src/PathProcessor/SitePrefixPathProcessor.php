@@ -48,7 +48,7 @@ final class SitePrefixPathProcessor implements OutboundPathProcessorInterface, I
     $path,
     &$options = [],
     Request $request = NULL,
-    BubbleableMetadata $bubbleable_metadata = NULL
+    BubbleableMetadata $bubbleable_metadata = NULL,
   ) : string {
 
     if (!isset($options['language'])) {

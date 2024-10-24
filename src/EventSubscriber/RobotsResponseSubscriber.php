@@ -35,7 +35,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
     private ConfigFactoryInterface $configFactory,
     private CurrentPathStack $pathStack,
     private AliasManagerInterface $aliasManager,
-    private PathMatcherInterface $pathMatcher
+    private PathMatcherInterface $pathMatcher,
   ) {
   }
 
