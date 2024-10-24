@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\Render\HtmlResponse;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber;
 use Drupal\helfi_proxy\ProxyManagerInterface;
-use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -50,7 +50,7 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
    * @return \Symfony\Component\HttpKernel\Event\ResponseEvent
    *   The response event.
    */
-  private function getResponseEvent(Request $request = NULL) : ResponseEvent {
+  private function getResponseEvent(?Request $request = NULL) : ResponseEvent {
     if (!$request) {
       $request = Request::createFromGlobals();
     }

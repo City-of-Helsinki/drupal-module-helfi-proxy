@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
-use Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext;
 
 /**
  * Tests Site prefix cache context.

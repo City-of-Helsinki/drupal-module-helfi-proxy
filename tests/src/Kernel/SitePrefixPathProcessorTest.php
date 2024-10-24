@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\remote_entity_test\Entity\RemoteEntityTest;
 use Drupal\Tests\helfi_api_base\Traits\LanguageManagerTrait;
+use Drupal\remote_entity_test\Entity\RemoteEntityTest;
 
 /**
  * Tests Active site prefix service.

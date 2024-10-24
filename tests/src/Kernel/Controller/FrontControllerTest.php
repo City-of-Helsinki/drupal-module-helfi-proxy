@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel\Controller;
 
-use Drupal\helfi_proxy\Controller\FrontController;
-use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
+use Drupal\helfi_proxy\Controller\FrontController;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
  * Tests Front controller.

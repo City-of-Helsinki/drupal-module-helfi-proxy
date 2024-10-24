@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\helfi_proxy\ActiveSitePrefix;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\helfi_proxy\ActiveSitePrefix;
 
 /**
  * Tests Active site prefix service.

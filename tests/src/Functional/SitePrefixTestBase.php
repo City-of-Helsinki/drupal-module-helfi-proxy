@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Functional;
 
-use Drupal\node\NodeInterface;
 use Drupal\Tests\helfi_api_base\Functional\BrowserTestBase;
+use Drupal\node\NodeInterface;
 
 /**
  * Test base for site prefix tests.
