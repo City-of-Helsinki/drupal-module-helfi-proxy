@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\Session\SessionConfigurationInterface;
+use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
-use Drupal\KernelTests\KernelTestBase;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**

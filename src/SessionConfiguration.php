@@ -27,7 +27,8 @@ final class SessionConfiguration extends CoreSessionConfiguration {
    */
   public function __construct(
     private ProxyManagerInterface $proxyManager,
-    array $options = []) {
+    array $options = [],
+  ) {
 
     parent::__construct($options);
   }

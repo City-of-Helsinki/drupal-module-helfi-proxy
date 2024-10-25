@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
-use Drupal\helfi_api_base\Event\PostDeployEvent;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\helfi_api_base\Event\PostDeployEvent;
 use Drupal\purge\Plugin\Purge\Invalidation\RegularExpressionInvalidation;
 
 /**

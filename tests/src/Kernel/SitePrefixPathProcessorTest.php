@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\remote_entity_test\Entity\RemoteEntityTest;
 use Drupal\Tests\helfi_api_base\Traits\LanguageManagerTrait;
+use Drupal\remote_entity_test\Entity\RemoteEntityTest;
 
 /**
  * Tests Active site prefix service.
@@ -51,6 +51,7 @@ class SitePrefixPathProcessorTest extends KernelTestBase {
     parent::setUp();
 
     $this->setupLanguages();
+    $this->installEntitySchema('path_alias');
     $this->installEntitySchema('remote_entity_test');
     $this->config('helfi_proxy.settings')
       ->set('prefixes', $this->prefixes)

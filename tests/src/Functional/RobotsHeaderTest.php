@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Functional;
 
 use Drupal\Core\Cache\Cache;
-use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
  * Tests X-Robots-tag header.
