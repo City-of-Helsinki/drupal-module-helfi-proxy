@@ -14,4 +14,4 @@ jobs:
       php_version: ${{ matrix.php-versions }}
       composer_dev_dependencies: 'drupal/redirect drupal/helfi_tunnistamo drupal/simple_sitemap drupal/varnish_purger'
     secrets:
-      codecov_token: ${{ secrets.CODECOV_TOKEN }}
+      sonarcloud_token: ${{ secrets.SONAR_TOKEN }}

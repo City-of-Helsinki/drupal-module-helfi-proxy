@@ -1,7 +1,7 @@
 # Proxy module
 
 ![CI](https://github.com/City-of-Helsinki/drupal-module-helfi-proxy/workflows/CI/badge.svg)
-[![codecov](https://codecov.io/gh/City-of-Helsinki/drupal-module-helfi-proxy/branch/main/graph/badge.svg?token=K3S899VYYB)](https://codecov.io/gh/City-of-Helsinki/drupal-module-helfi-proxy)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=City-of-Helsinki_drupal-module-helfi-proxy&metric=coverage)](https://sonarcloud.io/summary/new_code?id=City-of-Helsinki_drupal-module-helfi-proxy)
 
 Provides various fixes to allow multiple Drupal instances to be served from one domain.
 
