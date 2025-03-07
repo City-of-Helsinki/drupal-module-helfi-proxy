@@ -19,7 +19,15 @@ class CssOptimizerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['path_alias', 'helfi_proxy'];
+  protected static $modules = [
+    'path_alias',
+    'helfi_proxy',
+    'purge',
+    'purge_tokens',
+    'purge_processor_cron',
+    'purge_queuer_coretags',
+    'purge_drush',
+  ];
 
   /**
    * Asserts the optimized css path.
