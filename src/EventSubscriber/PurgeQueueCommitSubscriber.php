@@ -12,8 +12,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
 
-  public const PURGE_QUEUE_COMMIT_EVENT_NAME = 'helfi_proxy.purge_queue_commit';
-
   /**
    * Constructs a PurgeQueueCommitSubscriber object.
    */
@@ -30,7 +28,6 @@ final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
       // before invoking it.
       throw new \LogicException('QueueServiceInterface::commit() does not exist anymore.');
     }
-
     $this->purgeQueue->commit();
   }
 
@@ -38,8 +35,9 @@ final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
+    // @todo Replace with a EVENT_NAME constant from helfi_api_base event.
     return [
-      self::PURGE_QUEUE_COMMIT_EVENT_NAME => ['onPurgeQueueCommit'],
+      'helfi_cache_tag_invalidate' => ['onPurgeQueueCommit'],
     ];
   }
 
