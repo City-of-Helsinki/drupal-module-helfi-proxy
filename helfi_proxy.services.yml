@@ -46,3 +46,9 @@ services:
       - '%helfi_proxy.valid_origin_domains%'
     tags:
       - { name: event_subscriber }
+
+  helfi_proxy.purge_queue_commit_subscriber:
+    class: Drupal\helfi_proxy\EventSubscriber\PurgeQueueCommitSubscriber
+    arguments: ['@purge.queue']
+    tags:
+      - { name: event_subscriber }
