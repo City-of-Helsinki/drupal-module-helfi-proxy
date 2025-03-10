@@ -4,6 +4,10 @@ parameters:
     - hel.fi
     - docker.so
 services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
   helfi_proxy.active_prefix:
     class: Drupal\helfi_proxy\ActiveSitePrefix
     arguments: ['@language_manager', '@config.factory']
@@ -46,3 +50,5 @@ services:
       - '%helfi_proxy.valid_origin_domains%'
     tags:
       - { name: event_subscriber }
+
+  Drupal\helfi_proxy\EventSubscriber\PurgeQueueCommitSubscriber: ~

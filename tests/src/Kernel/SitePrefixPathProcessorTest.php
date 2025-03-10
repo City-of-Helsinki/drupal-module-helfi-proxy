@@ -30,6 +30,11 @@ class SitePrefixPathProcessorTest extends KernelTestBase {
     'helfi_language_negotiator_test',
     'remote_entity_test',
     'helfi_proxy',
+    'purge',
+    'purge_tokens',
+    'purge_processor_cron',
+    'purge_queuer_coretags',
+    'purge_drush',
   ];
 
   /**

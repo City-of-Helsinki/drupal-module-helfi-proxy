@@ -37,6 +37,11 @@ class TunnistamoRedirectUrlSubscriberTest extends KernelTestBase {
     'path_alias',
     'helfi_tunnistamo',
     'helfi_proxy',
+    'purge',
+    'purge_tokens',
+    'purge_processor_cron',
+    'purge_queuer_coretags',
+    'purge_drush',
   ];
 
   /**

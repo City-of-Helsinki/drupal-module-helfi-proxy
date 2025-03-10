@@ -22,7 +22,16 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['system', 'helfi_proxy', 'path_alias'];
+  protected static $modules = [
+    'system',
+    'helfi_proxy',
+    'path_alias',
+    'purge',
+    'purge_tokens',
+    'purge_processor_cron',
+    'purge_queuer_coretags',
+    'purge_drush',
+  ];
 
   /**
    * {@inheritdoc}
