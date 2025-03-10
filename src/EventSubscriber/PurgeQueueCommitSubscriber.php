@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\helfi_proxy\EventSubscriber;
 
 use Drupal\purge\Plugin\Purge\Queue\QueueServiceInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -16,7 +17,7 @@ final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
    * Constructs a PurgeQueueCommitSubscriber object.
    */
   public function __construct(
-    private readonly QueueServiceInterface $purgeQueue,
+    #[Autowire('@purge.queue')] private readonly QueueServiceInterface $purgeQueue,
   ) {}
 
   /**
