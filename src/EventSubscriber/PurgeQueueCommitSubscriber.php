@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\helfi_proxy\EventSubscriber;
 
+use Drupal\helfi_api_base\Event\CacheTagInvalidateEvent;
 use Drupal\purge\Plugin\Purge\Queue\QueueServiceInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -36,9 +37,8 @@ final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
-    // @todo Replace with a EVENT_NAME constant from helfi_api_base event.
     return [
-      'helfi_cache_tag_invalidate' => ['onPurgeQueueCommit'],
+      CacheTagInvalidateEvent::class => ['onPurgeQueueCommit'],
     ];
   }
 
