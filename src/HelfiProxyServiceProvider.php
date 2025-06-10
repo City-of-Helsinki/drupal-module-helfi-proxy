@@ -48,8 +48,6 @@ class HelfiProxyServiceProvider extends ServiceProviderBase {
         ->addArgument(new Reference('helfi_proxy.proxy_manager'))
         ->addArgument(new Reference('helfi_proxy.active_prefix'));
     }
-
-
   }
 
 }
