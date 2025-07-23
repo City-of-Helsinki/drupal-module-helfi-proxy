@@ -20,13 +20,6 @@ class SessionConfigurationTest extends KernelTestBase {
   use ProxyTrait;
 
   /**
-   * The session configuration service.
-   *
-   * @var \Drupal\Core\Session\SessionConfigurationInterface|null
-   */
-  protected ?SessionConfigurationInterface $configuration;
-
-  /**
    * The request stack service.
    *
    * @var \Symfony\Component\HttpFoundation\RequestStack|null
@@ -55,6 +48,12 @@ class SessionConfigurationTest extends KernelTestBase {
     $this->requestStack = $this->container->get('request_stack');
   }
 
+  /**
+   * Gets the SUT.
+   *
+   * @return \Drupal\Core\Session\SessionConfigurationInterface
+   *   The SUT.
+   */
   private function getSut() : SessionConfigurationInterface {
     return $this->container->get('session_configuration');
   }
