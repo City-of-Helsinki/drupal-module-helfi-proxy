@@ -52,8 +52,11 @@ class SessionConfigurationTest extends KernelTestBase {
   public function setUp() : void {
     parent::setUp();
 
-    $this->configuration = $this->container->get('session_configuration');
     $this->requestStack = $this->container->get('request_stack');
+  }
+
+  private function getSut() : SessionConfigurationInterface {
+    return $this->container->get('session_configuration');
   }
 
   /**
@@ -63,9 +66,9 @@ class SessionConfigurationTest extends KernelTestBase {
     $this->config('helfi_proxy.settings')
       ->set(ProxyManagerInterface::SESSION_SUFFIX, 'testdev')
       ->save();
-    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
+    $options = $this->getSut()->getOptions($this->requestStack->getCurrentRequest());
 
-    $this->assertTrue(str_ends_with($options['name'], 'testdev'));
+    $this->assertEquals('testdev', $options['name_suffix']);
   }
 
   /**
@@ -73,19 +76,19 @@ class SessionConfigurationTest extends KernelTestBase {
    */
   public function testSessionNameEnvVariable() : void {
     putenv('DRUPAL_SESSION_SUFFIX=testlocal');
-    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
+    $options = $this->getSut()->getOptions($this->requestStack->getCurrentRequest());
 
-    $this->assertTrue(str_ends_with($options['name'], 'testlocal'));
+    $this->assertEquals('testlocal', $options['name_suffix']);
   }
 
   /**
    * Tests session suffix fallback.
    */
   public function testSessionNameFallback() : void {
-    $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
+    $options = $this->getSut()->getOptions($this->requestStack->getCurrentRequest());
 
     $this->assertNotEmpty($this->getCleanHostname());
-    $this->assertTrue(str_ends_with($options['name'], $this->getCleanHostname()));
+    $this->assertEquals($this->getCleanHostname(), $options['name_suffix']);
   }
 
 }
