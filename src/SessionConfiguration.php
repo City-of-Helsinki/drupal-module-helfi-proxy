@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace Drupal\helfi_proxy;
 
 use Drupal\Core\Session\SessionConfiguration as CoreSessionConfiguration;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
- * Overrides the default session configuration service.
+ * Decorates the default session configuration service.
  *
  * Append a unique suffix to every session cookie, so we can differentiate
  * session cookies on different Drupal instances using same domain.
  */
+#[AsDecorator(decorates: 'session_configuration')]
 final class SessionConfiguration extends CoreSessionConfiguration {
 
   use ProxyTrait;
@@ -27,8 +29,9 @@ final class SessionConfiguration extends CoreSessionConfiguration {
    */
   public function __construct(
     private ProxyManagerInterface $proxyManager,
-    array $options = [],
+    #[Autowire('%session.storage.options%')] array $options,
   ) {
+    $options['name_suffix'] = $this->getSuffix();
 
     parent::__construct($options);
   }
@@ -49,13 +52,6 @@ final class SessionConfiguration extends CoreSessionConfiguration {
       return $this->getCleanHostname();
     }
     return $suffix;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getName(Request $request) : string {
-    return parent::getName($request) . $this->getSuffix();
   }
 
 }

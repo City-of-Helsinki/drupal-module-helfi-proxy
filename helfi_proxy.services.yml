@@ -12,11 +12,7 @@ services:
     class: Drupal\helfi_proxy\ActiveSitePrefix
     arguments: ['@language_manager', '@config.factory']
 
-  helfi_proxy.session_configuration:
-    class: Drupal\helfi_proxy\SessionConfiguration
-    decorates: session_configuration
-    arguments: ['@helfi_proxy.proxy_manager', '%session.storage.options%']
-
+  Drupal\helfi_proxy\SessionConfiguration: ~
   helfi_proxy.path_processor:
     class: Drupal\helfi_proxy\PathProcessor\SitePrefixPathProcessor
     arguments: ['@helfi_proxy.active_prefix']
@@ -34,6 +30,8 @@ services:
     tags:
       - { name: cache.context }
 
+  Drupal\helfi_proxy\ProxyManager: '@helfi_proxy.proxy_manager'
+  Drupal\helfi_proxy\ProxyManagerInterface: '@helfi_proxy.proxy_manager'
   helfi_proxy.proxy_manager:
     class: Drupal\helfi_proxy\ProxyManager
     arguments: ['@config.factory', '@stream_wrapper_manager']
