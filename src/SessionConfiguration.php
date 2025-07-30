@@ -7,6 +7,7 @@ namespace Drupal\helfi_proxy;
 use Drupal\Core\Session\SessionConfiguration as CoreSessionConfiguration;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Decorates the default session configuration service.
@@ -31,9 +32,14 @@ final class SessionConfiguration extends CoreSessionConfiguration {
     private ProxyManagerInterface $proxyManager,
     #[Autowire('%session.storage.options%')] array $options,
   ) {
-    $options['name_suffix'] = $this->getSuffix();
-
     parent::__construct($options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getName(Request $request) : string {
+    return parent::getName($request) . $this->getSuffix();
   }
 
   /**
