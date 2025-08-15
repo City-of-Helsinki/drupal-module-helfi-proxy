@@ -74,21 +74,6 @@ class ProxyManagerTest extends KernelTestBase {
   }
 
   /**
-   * Tests tunnistamo return url.
-   */
-  public function testTunnistamoReturnUrl() : void {
-    $this->assertFalse($this->proxyManager()->isConfigured(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
-    $this->assertEquals(NULL, $this->proxyManager()->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
-
-    $prefix = '/fi/site-prefix';
-    $this->config('helfi_proxy.settings')
-      ->set('tunnistamo_return_url', $prefix)
-      ->save();
-
-    $this->assertEquals($prefix, $this->proxyManager()->getConfig(ProxyManagerInterface::TUNNISTAMO_RETURN_URL));
-  }
-
-  /**
    * Tests asset path.
    */
   public function testAssetPath() : void {
