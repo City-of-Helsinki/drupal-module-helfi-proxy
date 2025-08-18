@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\Core\Session\SessionConfigurationInterface;
+use Drupal\helfi_proxy\SessionConfiguration;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
@@ -76,6 +77,7 @@ class SessionConfigurationTest extends KernelTestBase {
 
     $options = $this->configuration->getOptions($this->requestStack->getCurrentRequest());
     $this->assertTrue(str_ends_with($options['name'], 'testdev'));
+    $this->assertEquals(SessionConfiguration::COOKIE_LIFETIME, $options['cookie_lifetime']);
   }
 
   /**

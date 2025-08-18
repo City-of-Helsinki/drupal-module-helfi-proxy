@@ -21,6 +21,11 @@ final class SessionConfiguration extends CoreSessionConfiguration {
   use ProxyTrait;
 
   /**
+   * Default cookie lifetime (36 hours).
+   */
+  public const COOKIE_LIFETIME = 129600;
+
+  /**
    * Constructs a new instance.
    *
    * @param \Drupal\helfi_proxy\ProxyManagerInterface $proxyManager
@@ -32,6 +37,8 @@ final class SessionConfiguration extends CoreSessionConfiguration {
     private ProxyManagerInterface $proxyManager,
     #[Autowire('%session.storage.options%')] array $options,
   ) {
+    $options['cookie_lifetime'] = self::COOKIE_LIFETIME;
+
     parent::__construct($options);
   }
 
