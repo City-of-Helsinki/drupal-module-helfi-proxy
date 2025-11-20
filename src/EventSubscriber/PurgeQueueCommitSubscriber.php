@@ -14,9 +14,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 final class PurgeQueueCommitSubscriber implements EventSubscriberInterface {
 
-  /**
-   * Constructs a PurgeQueueCommitSubscriber object.
-   */
   public function __construct(
     #[Autowire('@purge.queue')] private readonly QueueService $purgeQueue,
   ) {}
