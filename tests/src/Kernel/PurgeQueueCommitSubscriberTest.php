@@ -10,7 +10,7 @@ use Drupal\purge\Plugin\Purge\Queue\TxBuffer;
 use Drupal\Tests\purge\Traits\TestTrait;
 
 /**
- * Tests purge queue commit event subscriber..
+ * Tests purge queue commit event subscriber.
  *
  * @group helfi_proxy
  */
