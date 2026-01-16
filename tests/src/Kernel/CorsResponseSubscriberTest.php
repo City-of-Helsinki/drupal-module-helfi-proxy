@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -29,9 +30,8 @@ class CorsResponseSubscriberTest extends KernelTestBase {
 
   /**
    * Make sure cors headers are set properly.
-   *
-   * @dataProvider corsTestData
    */
+  #[DataProvider(methodName: 'corsTestData')]
   public function testCors(mixed $domain, bool $expected) : void {
     $request = Request::create('/', server: [
       'HTTP_HOST' => 'localhost:8888',
@@ -49,7 +49,7 @@ class CorsResponseSubscriberTest extends KernelTestBase {
    * @return array[]
    *   The data.
    */
-  public function corsTestData() : array {
+  public static function corsTestData() : array {
     return [
       ['www.hel.fi', TRUE],
       ['hel.fi', TRUE],
