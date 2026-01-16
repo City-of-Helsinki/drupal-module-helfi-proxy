@@ -57,10 +57,14 @@ class FrontControllerTest extends BrowserTestBase {
       'en' => 'Front',
     ]);
 
+    $this->config('helfi_proxy.settings')
+      ->set('front_page_title', 'Front en')
+      ->save();
+
     /** @var \Drupal\language\ConfigurableLanguageManagerInterface $languageManager */
     $languageManager = $this->container->get('language_manager');
 
-    foreach (['fi', 'en', 'sv'] as $langcode) {
+    foreach (['fi', 'sv'] as $langcode) {
       $config = $languageManager->getLanguageConfigOverride($langcode, 'helfi_proxy.settings');
       $config->set('front_page_title', "Front $langcode")
         ->save();
