@@ -7,6 +7,5 @@ parameters:
     - ./
   excludePaths:
     - vendor
-  level: 3
-  checkMissingIterableValueType: false
+  level: 7
   treatPhpDocTypesAsCertain: false
