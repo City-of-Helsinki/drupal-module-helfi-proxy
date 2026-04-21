@@ -96,11 +96,6 @@ parameters:
 			path: tests/src/Kernel/Assets/CssOptimizerTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\CorsResponseSubscriberTest\\:\\:corsTestData\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: tests/src/Kernel/CorsResponseSubscriberTest.php
-
-		-
 			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\PurgeQueueCommitSubscriberTest\\:\\:getPurgeQueueCommitSubscriber\\(\\) is unused\\.$#"
 			count: 1
 			path: tests/src/Kernel/PurgeQueueCommitSubscriberTest.php
