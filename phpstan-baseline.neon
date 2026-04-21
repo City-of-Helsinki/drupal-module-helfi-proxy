@@ -1,17 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Function helfi_proxy_install\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: helfi_proxy.install
-
-		-
 			message: "#^Function helfi_proxy_file_url_alter\\(\\) has parameter \\$uri with no type specified\\.$#"
-			count: 1
-			path: helfi_proxy.module
-
-		-
-			message: "#^Function helfi_proxy_js_settings_alter\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: helfi_proxy.module
 
@@ -31,17 +21,7 @@ parameters:
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_page_attachments_alter\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: helfi_proxy.module
-
-		-
 			message: "#^Function helfi_proxy_page_attachments_alter\\(\\) has parameter \\$attachments with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: helfi_proxy.module
-
-		-
-			message: "#^Function helfi_proxy_simple_sitemap_links_alter\\(\\) has no return type specified\\.$#"
 			count: 1
 			path: helfi_proxy.module
 
@@ -54,11 +34,6 @@ parameters:
 			message: "#^Function helfi_proxy_simple_sitemap_links_alter\\(\\) has parameter \\$sitemap_variant with no type specified\\.$#"
 			count: 1
 			path: helfi_proxy.module
-
-		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\ActiveSitePrefix\\:\\:getPrefixes\\(\\) return type has no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/ActiveSitePrefix.php
 
 		-
 			message: "#^Method Drupal\\\\helfi_proxy\\\\Controller\\\\FrontController\\:\\:index\\(\\) return type has no value type specified in iterable type array\\.$#"

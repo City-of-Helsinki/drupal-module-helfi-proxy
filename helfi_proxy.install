@@ -10,7 +10,7 @@ declare(strict_types=1);
 /**
  * Implements hook_install().
  */
-function helfi_proxy_install() {
+function helfi_proxy_install(): void {
   \Drupal::service('module_installer')->install(['redirect']);
   \Drupal::configFactory()
     ->getEditable('redirect.settings')
