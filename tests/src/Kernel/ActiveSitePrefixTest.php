@@ -7,12 +7,14 @@ namespace Drupal\Tests\helfi_proxy\Kernel;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ActiveSitePrefix;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Active site prefix service.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class ActiveSitePrefixTest extends KernelTestBase {
 
   /**
@@ -37,7 +39,7 @@ class ActiveSitePrefixTest extends KernelTestBase {
    */
   private function getSut() : ActiveSitePrefix {
     $this->container->get('kernel')->rebuildContainer();
-    return $this->container->get('helfi_proxy.active_prefix');
+    return $this->container->get(ActiveSitePrefix::class);
   }
 
   /**

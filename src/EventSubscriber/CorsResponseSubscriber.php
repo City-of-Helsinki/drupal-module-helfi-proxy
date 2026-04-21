@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\helfi_proxy\EventSubscriber;
 
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -16,11 +17,11 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
   /**
    * Constructs a new instance.
    *
-   * @param array $validOriginDomains
+   * @param array<string> $validOriginDomains
    *   An array of domains.
    */
   public function __construct(
-    private array $validOriginDomains,
+    #[Autowire(param: 'helfi_proxy.valid_origin_domains')] private readonly array $validOriginDomains,
   ) {
   }
 

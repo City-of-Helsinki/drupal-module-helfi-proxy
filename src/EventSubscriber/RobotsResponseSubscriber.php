@@ -10,6 +10,7 @@ use Drupal\Core\Path\CurrentPathStack;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\path_alias\AliasManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -17,22 +18,10 @@ use Symfony\Component\HttpKernel\KernelEvents;
 /**
  * Adds an X-Robots-Tag to response headers.
  */
-final class RobotsResponseSubscriber implements EventSubscriberInterface {
+final readonly class RobotsResponseSubscriber implements EventSubscriberInterface {
 
-  /**
-   * Constructs a new instance.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
-   * @param \Drupal\Core\Path\CurrentPathStack $pathStack
-   *   The path stack.
-   * @param \Drupal\path_alias\AliasManagerInterface $aliasManager
-   *   The path alias manager.
-   * @param \Drupal\Core\Path\PathMatcherInterface $pathMatcher
-   *   The path matcher.
-   */
   public function __construct(
-    private ConfigFactoryInterface $configFactory,
+    #[AutowireServiceClosure(ConfigFactoryInterface::class)] private \Closure $configFactoryClosure,
     private CurrentPathStack $pathStack,
     private AliasManagerInterface $aliasManager,
     private PathMatcherInterface $pathMatcher,
@@ -47,7 +36,7 @@ final class RobotsResponseSubscriber implements EventSubscriberInterface {
    */
   public function onResponse(ResponseEvent $event) : void {
     $response = $event->getResponse();
-    $config = $this->configFactory->get('helfi_proxy.settings');
+    $config = ($this->configFactoryClosure)()->get('helfi_proxy.settings');
 
     if (!$paths = implode("\n", $config->get(ProxyManagerInterface::ROBOTS_PATHS) ?? [])) {
       return;

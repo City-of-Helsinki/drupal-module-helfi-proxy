@@ -7,9 +7,9 @@ namespace Drupal\helfi_proxy;
 use Drupal\Core\Cache\RefinableCacheableDependencyInterface;
 use Drupal\Core\Cache\RefinableCacheableDependencyTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 
 /**
  * A service to figure out currently active site prefix.
@@ -19,36 +19,30 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
   use RefinableCacheableDependencyTrait;
 
   /**
-   * The configuration.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  private ImmutableConfig $config;
-
-  /**
    * Constructs a new instance.
    *
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager service.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
+   * @param \Closure $configFactoryClosure
+   *   The config factory closure.
    */
   public function __construct(
-    private LanguageManagerInterface $languageManager,
-    ConfigFactoryInterface $configFactory,
+    private readonly LanguageManagerInterface $languageManager,
+    #[AutowireServiceClosure(ConfigFactoryInterface::class)] private readonly \Closure $configFactoryClosure,
   ) {
-    $this->config = $configFactory->get('helfi_proxy.settings');
-    $this->addCacheableDependency($this->config);
   }
 
   /**
    * Gets the site prefixes.
    *
-   * @return array
+   * @return array{}|array{string, string}
    *   The prefixes.
    */
-  public function getPrefixes() : array {
-    if (!$prefixes = $this->config->get(ProxyManagerInterface::PREFIXES)) {
+  public function getPrefixes(): ?array {
+    $config = ($this->configFactoryClosure)()->get('helfi_proxy.settings');
+    $this->addCacheableDependency($config);
+
+    if (!$prefixes = $config->get(ProxyManagerInterface::PREFIXES)) {
       return [];
     }
     return $prefixes;
@@ -60,7 +54,7 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
    * @return string|null
    *   The active prefix.
    */
-  public function getPrefix(?string $langcode = NULL) : ? string {
+  public function getPrefix(?string $langcode = NULL) : ?string {
     $prefixes = $this->getPrefixes();
     $langcode = $langcode ?: $this->languageManager
       ->getCurrentLanguage(LanguageInterface::TYPE_URL)

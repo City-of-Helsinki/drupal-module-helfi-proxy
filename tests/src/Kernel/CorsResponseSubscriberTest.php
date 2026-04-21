@@ -6,13 +6,15 @@ namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Tests CORS response subscriber.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class CorsResponseSubscriberTest extends KernelTestBase {
 
   /**
@@ -46,7 +48,7 @@ class CorsResponseSubscriberTest extends KernelTestBase {
   /**
    * Data provider for testCors().
    *
-   * @return array[]
+   * @return array<mixed>
    *   The data.
    */
   public static function corsTestData() : array {
