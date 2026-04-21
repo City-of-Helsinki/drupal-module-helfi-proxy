@@ -8,6 +8,8 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber;
 use Drupal\helfi_proxy\ProxyManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -17,6 +19,8 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
  *
  * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class RobotsResponseSubscriberTest extends KernelTestBase {
 
   /**
