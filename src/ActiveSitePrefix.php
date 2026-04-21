@@ -33,23 +33,13 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
   }
 
   /**
-   * Gets the config factory instance from closure.
-   *
-   * @return \Drupal\Core\Config\ConfigFactoryInterface
-   *   The config factory.
-   */
-  private function getConfigFactory(): ConfigFactoryInterface {
-    return ($this->configFactoryClosure)();
-  }
-
-  /**
    * Gets the site prefixes.
    *
    * @return null|array{string, string}
    *   The prefixes.
    */
   public function getPrefixes(): ?array {
-    $config = $this->getConfigFactory()->get('helfi_proxy.settings');
+    $config = ($this->configFactoryClosure)()->get('helfi_proxy.settings');
     $this->addCacheableDependency($config);
 
     if (!$prefixes = $config->get(ProxyManagerInterface::PREFIXES)) {

@@ -66,11 +66,6 @@ parameters:
 			path: src/PathProcessor/SitePrefixPathProcessor.php
 
 		-
-			message: "#^Parameter \\#1 \\$scheme of method Drupal\\\\Core\\\\StreamWrapper\\\\StreamWrapperManagerInterface\\:\\:getViaScheme\\(\\) expects string, string\\|false given\\.$#"
-			count: 1
-			path: src/ProxyManager.php
-
-		-
 			message: "#^Method Drupal\\\\helfi_proxy\\\\SessionConfiguration\\:\\:__construct\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/SessionConfiguration.php

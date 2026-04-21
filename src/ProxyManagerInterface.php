@@ -9,11 +9,11 @@ namespace Drupal\helfi_proxy;
  */
 interface ProxyManagerInterface {
 
-  public const PREFIXES = 'prefixes';
-  public const ASSET_PATH = 'asset_path';
-  public const ROBOTS_PATHS = 'robots_paths';
-  public const FRONT_PAGE_TITLE = 'front_page_title';
-  public const SESSION_SUFFIX = 'session_suffix';
+  public const string PREFIXES = 'prefixes';
+  public const string ASSET_PATH = 'asset_path';
+  public const string ROBOTS_PATHS = 'robots_paths';
+  public const string FRONT_PAGE_TITLE = 'front_page_title';
+  public const string SESSION_SUFFIX = 'session_suffix';
 
   /**
    * Whether the proxy is configured or not.

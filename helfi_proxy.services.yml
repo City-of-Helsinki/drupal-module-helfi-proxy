@@ -35,11 +35,11 @@ services:
   Drupal\helfi_proxy\ProxyManagerInterface: '@helfi_proxy.proxy_manager'
   helfi_proxy.proxy_manager:
     class: Drupal\helfi_proxy\ProxyManager
-    arguments: ['@config.factory', '@stream_wrapper_manager']
+    arguments: [!service_closure '@config.factory', '@stream_wrapper_manager']
 
   helfi_proxy.robots_response_subscriber:
     class: Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber
-    arguments: ['@config.factory', '@path.current', '@path_alias.manager', '@path.matcher']
+    arguments: [!service_closure '@config.factory', '@path.current', '@path_alias.manager', '@path.matcher']
     tags:
       - { name: event_subscriber }
 

@@ -7,23 +7,16 @@ namespace Drupal\helfi_proxy;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\StreamWrapper\LocalStream;
 use Drupal\Core\StreamWrapper\StreamWrapperManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireServiceClosure;
 
 /**
  * A class to determine sites hostname.
  */
 final class ProxyManager implements ProxyManagerInterface {
 
-  /**
-   * Constructs a new instance.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
-   *   The config factory.
-   * @param \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface $streamWrapperManager
-   *   The stream wrapper manager.
-   */
   public function __construct(
-    private ConfigFactoryInterface $configFactory,
-    private StreamWrapperManagerInterface $streamWrapperManager,
+    #[AutowireServiceClosure(ConfigFactoryInterface::class)] private readonly \Closure $configFactoryClosure,
+    private readonly StreamWrapperManagerInterface $streamWrapperManager,
   ) {
   }
 
@@ -38,7 +31,7 @@ final class ProxyManager implements ProxyManagerInterface {
    * {@inheritdoc}
    */
   public function getConfig(string $key, mixed $defaultValue = NULL) : mixed {
-    $config = $this->configFactory->get('helfi_proxy.settings')
+    $config = ($this->configFactoryClosure)()->get('helfi_proxy.settings')
       ->get($key);
 
     return $config ?? $defaultValue;
@@ -67,7 +60,7 @@ final class ProxyManager implements ProxyManagerInterface {
       return $value;
     }
     $wrapper = $this->streamWrapperManager->getViaScheme(
-      $this->streamWrapperManager::getScheme($value)
+      (string) $this->streamWrapperManager::getScheme($value)
     );
 
     $path = ltrim($value, '/');
