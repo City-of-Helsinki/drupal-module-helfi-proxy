@@ -41,11 +41,6 @@ parameters:
 			path: src/Controller/FrontController.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\EventSubscriber\\\\CorsResponseSubscriber\\:\\:__construct\\(\\) has parameter \\$validOriginDomains with no value type specified in iterable type array\\.$#"
-			count: 1
-			path: src/EventSubscriber/CorsResponseSubscriber.php
-
-		-
 			message: "#^Method Drupal\\\\helfi_proxy\\\\Form\\\\PurgeForm\\:\\:buildForm\\(\\) has parameter \\$form with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: src/Form/PurgeForm.php

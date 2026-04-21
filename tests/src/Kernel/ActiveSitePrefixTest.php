@@ -47,7 +47,7 @@ class ActiveSitePrefixTest extends KernelTestBase {
    */
   public function testEmptyPrefix() : void {
     $this->assertEquals(NULL, $this->getSut()->getPrefix());
-    $this->assertEquals(NULL, $this->getSut()->getPrefixes());
+    $this->assertEquals([], $this->getSut()->getPrefixes());
   }
 
   /**

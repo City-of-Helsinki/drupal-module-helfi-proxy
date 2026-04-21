@@ -46,7 +46,7 @@ class CorsResponseSubscriberTest extends KernelTestBase {
   /**
    * Data provider for testCors().
    *
-   * @return array[]
+   * @return array<mixed>
    *   The data.
    */
   public static function corsTestData() : array {

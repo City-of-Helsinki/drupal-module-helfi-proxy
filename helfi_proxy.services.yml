@@ -37,17 +37,6 @@ services:
     class: Drupal\helfi_proxy\ProxyManager
     arguments: [!service_closure '@config.factory', '@stream_wrapper_manager']
 
-  helfi_proxy.robots_response_subscriber:
-    class: Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber
-    arguments: [!service_closure '@config.factory', '@path.current', '@path_alias.manager', '@path.matcher']
-    tags:
-      - { name: event_subscriber }
-
-  helfi_proxy.cors_subscriber:
-    class: Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber
-    arguments:
-      - '%helfi_proxy.valid_origin_domains%'
-    tags:
-      - { name: event_subscriber }
-
+  Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber: ~
+  Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber: ~
   Drupal\helfi_proxy\EventSubscriber\PurgeQueueCommitSubscriber: ~

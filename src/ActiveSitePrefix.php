@@ -35,7 +35,7 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
   /**
    * Gets the site prefixes.
    *
-   * @return null|array{string, string}
+   * @return array{}|array{string, string}
    *   The prefixes.
    */
   public function getPrefixes(): ?array {
@@ -43,7 +43,7 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
     $this->addCacheableDependency($config);
 
     if (!$prefixes = $config->get(ProxyManagerInterface::PREFIXES)) {
-      return NULL;
+      return [];
     }
     return $prefixes;
   }
