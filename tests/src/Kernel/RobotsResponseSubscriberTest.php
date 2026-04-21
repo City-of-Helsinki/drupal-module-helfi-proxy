@@ -50,7 +50,9 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
    *   The response subscriber.
    */
   private function getSut() : RobotsResponseSubscriber {
-    return $this->container->get('helfi_proxy.robots_response_subscriber');
+    $sut = $this->container->get(RobotsResponseSubscriber::class);
+    assert($sut instanceof RobotsResponseSubscriber);
+    return $sut;
   }
 
   /**
@@ -77,7 +79,7 @@ class RobotsResponseSubscriberTest extends KernelTestBase {
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event.
    */
-  private function assertResponseEventHasHeader(ResponseEvent $event) {
+  private function assertResponseEventHasHeader(ResponseEvent $event): void {
     $this->assertEquals('noindex, nofollow', $event->getResponse()->headers->get('X-Robots-Tag'));
   }
 

@@ -111,11 +111,6 @@ parameters:
 			path: tests/src/Kernel/PurgeQueueCommitSubscriberTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\RobotsResponseSubscriberTest\\:\\:assertResponseEventHasHeader\\(\\) has no return type specified\\.$#"
-			count: 1
-			path: tests/src/Kernel/RobotsResponseSubscriberTest.php
-
-		-
 			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\SessionConfigurationTest\\:\\:getHostname\\(\\) should return string but returns string\\|false\\.$#"
 			count: 1
 			path: tests/src/Kernel/SessionConfigurationTest.php
