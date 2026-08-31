@@ -1,131 +1,181 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Function helfi_proxy_file_url_alter\\(\\) has parameter \\$uri with no type specified\\.$#"
+			message: '#^Function helfi_proxy_file_url_alter\(\) has parameter \$uri with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_js_settings_alter\\(\\) has parameter \\$settings with no value type specified in iterable type array\\.$#"
+			message: '#^Function helfi_proxy_js_settings_alter\(\) has parameter \$settings with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_module_implements_alter\\(\\) has parameter \\$hook with no type specified\\.$#"
+			message: '#^Function helfi_proxy_module_implements_alter\(\) has parameter \$hook with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_module_implements_alter\\(\\) has parameter \\$implementations with no type specified\\.$#"
+			message: '#^Function helfi_proxy_module_implements_alter\(\) has parameter \$implementations with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_page_attachments_alter\\(\\) has parameter \\$attachments with no value type specified in iterable type array\\.$#"
+			message: '#^Function helfi_proxy_page_attachments_alter\(\) has parameter \$attachments with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_simple_sitemap_links_alter\\(\\) has parameter \\$links with no value type specified in iterable type array\\.$#"
+			message: '#^Function helfi_proxy_simple_sitemap_links_alter\(\) has parameter \$links with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Function helfi_proxy_simple_sitemap_links_alter\\(\\) has parameter \\$sitemap_variant with no type specified\\.$#"
+			message: '#^Function helfi_proxy_simple_sitemap_links_alter\(\) has parameter \$sitemap_variant with no type specified\.$#'
+			identifier: missingType.parameter
 			count: 1
 			path: helfi_proxy.module
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\Controller\\\\FrontController\\:\\:index\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\helfi_proxy\\ActiveSitePrefix\:\:getPrefixes\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/ActiveSitePrefix.php
+
+		-
+			message: '#^Method Drupal\\helfi_proxy\\Controller\\FrontController\:\:index\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Controller/FrontController.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\Form\\\\PurgeForm\\:\\:buildForm\\(\\) has parameter \\$form with no value type specified in iterable type array\\.$#"
+			message: '#^Drupal\\Core\\DependencyInjection\\DependencySerializationTrait does not support private properties\.$#'
+			identifier: dependencySerializationTraitProperty.unsupportedPrivateProperty
+			count: 3
+			path: src/Form/PurgeForm.php
+
+		-
+			message: '#^Method Drupal\\helfi_proxy\\Form\\PurgeForm\:\:buildForm\(\) has parameter \$form with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Form/PurgeForm.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\Form\\\\PurgeForm\\:\\:buildForm\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\helfi_proxy\\Form\\PurgeForm\:\:buildForm\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Form/PurgeForm.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\Form\\\\PurgeForm\\:\\:submitForm\\(\\) has parameter \\$form with no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\helfi_proxy\\Form\\PurgeForm\:\:submitForm\(\) has parameter \$form with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Form/PurgeForm.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\PathProcessor\\\\SitePrefixPathProcessor\\:\\:processOutbound\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
+			message: '#^Property Drupal\\helfi_proxy\\Form\\PurgeForm\:\:\$queuer \(Drupal\\purge\\Plugin\\Purge\\Queuer\\QueuerInterface\) does not accept Drupal\\purge\\Plugin\\Purge\\Queuer\\QueuerInterface\|false\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: src/Form/PurgeForm.php
+
+		-
+			message: '#^Method Drupal\\helfi_proxy\\PathProcessor\\SitePrefixPathProcessor\:\:processOutbound\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/PathProcessor/SitePrefixPathProcessor.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\SessionConfiguration\\:\\:__construct\\(\\) has parameter \\$options with no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\helfi_proxy\\ProxyManager\:\:processPath\(\) never returns null so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/ProxyManager.php
+
+		-
+			message: '#^Method Drupal\\helfi_proxy\\SessionConfiguration\:\:__construct\(\) has parameter \$options with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/SessionConfiguration.php
 
 		-
-			message: "#^Method Drupal\\\\helfi_proxy\\\\SessionConfiguration\\:\\:getHostname\\(\\) should return string but returns string\\|false\\.$#"
+			message: '#^Method Drupal\\helfi_proxy\\SessionConfiguration\:\:getHostname\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
 			count: 1
 			path: src/SessionConfiguration.php
 
 		-
-			message: "#^Parameter \\#1 \\$hostname of method Drupal\\\\helfi_proxy\\\\SessionConfiguration\\:\\:parseHostName\\(\\) expects string, string\\|false given\\.$#"
+			message: '#^Parameter \#1 \$hostname of method Drupal\\helfi_proxy\\SessionConfiguration\:\:parseHostName\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/SessionConfiguration.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Functional\\\\CustomMetatagTest\\:\\:assertAttributes\\(\\) has parameter \\$attributes with no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Functional\\CustomMetatagTest\:\:assertAttributes\(\) has parameter \$attributes with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: tests/src/Functional/CustomMetatagTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Functional\\\\FrontControllerTest\\:\\:assertPageTitle\\(\\) has parameter \\$expected with no value type specified in iterable type array\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Functional\\FrontControllerTest\:\:assertPageTitle\(\) has parameter \$expected with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: tests/src/Functional/FrontControllerTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$account of method Drupal\\\\Tests\\\\BrowserTestBase\\:\\:drupalLogin\\(\\) expects Drupal\\\\Core\\\\Session\\\\AccountInterface, Drupal\\\\user\\\\UserInterface\\|false given\\.$#"
-			count: 1
-			path: tests/src/Functional/PurgeTest.php
-
-		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\Assets\\\\CssOptimizerTest\\:\\:assertOptimizedPath\\(\\) has no return type specified\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Kernel\\Assets\\CssOptimizerTest\:\:assertOptimizedPath\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: tests/src/Kernel/Assets/CssOptimizerTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\PurgeQueueCommitSubscriberTest\\:\\:getPurgeQueueCommitSubscriber\\(\\) is unused\\.$#"
+			message: '#^Attribute class PHPUnit\\Framework\\Attributes\\DataProvider constructor invoked with named argument \$methodName, but it''s not allowed because of @no\-named\-arguments\.$#'
+			identifier: argument.named
+			count: 1
+			path: tests/src/Kernel/CorsResponseSubscriberTest.php
+
+		-
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Kernel\\PurgeQueueCommitSubscriberTest\:\:getPurgeQueueCommitSubscriber\(\) is unused\.$#'
+			identifier: method.unused
 			count: 1
 			path: tests/src/Kernel/PurgeQueueCommitSubscriberTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\PurgeQueueCommitSubscriberTest\\:\\:getPurgeQueueCommitSubscriber\\(\\) should return Drupal\\\\helfi_proxy\\\\EventSubscriber\\\\PurgeQueueCommitSubscriber but returns object\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Kernel\\PurgeQueueCommitSubscriberTest\:\:getPurgeQueueCommitSubscriber\(\) should return Drupal\\helfi_proxy\\EventSubscriber\\PurgeQueueCommitSubscriber but returns object\.$#'
+			identifier: return.type
 			count: 1
 			path: tests/src/Kernel/PurgeQueueCommitSubscriberTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$queuer of method Drupal\\\\purge\\\\Plugin\\\\Purge\\\\Queue\\\\QueueService\\:\\:add\\(\\) expects Drupal\\\\purge\\\\Plugin\\\\Purge\\\\Queuer\\\\QueuerInterface, Drupal\\\\purge\\\\Plugin\\\\Purge\\\\Queuer\\\\QueuerInterface\\|false given\\.$#"
+			message: '#^Parameter \#1 \$queuer of method Drupal\\purge\\Plugin\\Purge\\Queue\\QueueService\:\:add\(\) expects Drupal\\purge\\Plugin\\Purge\\Queuer\\QueuerInterface, Drupal\\purge\\Plugin\\Purge\\Queuer\\QueuerInterface\|false given\.$#'
+			identifier: argument.type
 			count: 1
 			path: tests/src/Kernel/PurgeQueueCommitSubscriberTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\SessionConfigurationTest\\:\\:getHostname\\(\\) should return string but returns string\\|false\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Kernel\\SessionConfigurationTest\:\:getHostname\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
 			count: 1
 			path: tests/src/Kernel/SessionConfigurationTest.php
 
 		-
-			message: "#^Method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\SessionConfigurationTest\\:\\:getSut\\(\\) is unused\\.$#"
+			message: '#^Method Drupal\\Tests\\helfi_proxy\\Kernel\\SessionConfigurationTest\:\:getSut\(\) is unused\.$#'
+			identifier: method.unused
 			count: 1
 			path: tests/src/Kernel/SessionConfigurationTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$hostname of method Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\SessionConfigurationTest\\:\\:parseHostName\\(\\) expects string, string\\|false given\\.$#"
+			message: '#^Parameter \#1 \$hostname of method Drupal\\Tests\\helfi_proxy\\Kernel\\SessionConfigurationTest\:\:parseHostName\(\) expects string, string\|false given\.$#'
+			identifier: argument.type
 			count: 1
 			path: tests/src/Kernel/SessionConfigurationTest.php
 
 		-
-			message: "#^Property Drupal\\\\Tests\\\\helfi_proxy\\\\Kernel\\\\SitePrefixPathProcessorTest\\:\\:\\$prefixes type has no value type specified in iterable type array\\.$#"
+			message: '#^Property Drupal\\Tests\\helfi_proxy\\Kernel\\SitePrefixPathProcessorTest\:\:\$prefixes type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: tests/src/Kernel/SitePrefixPathProcessorTest.php
