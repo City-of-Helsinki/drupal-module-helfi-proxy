@@ -32,6 +32,9 @@ class FileHooks {
    */
   #[Hook('file_url_alter', order: Order::First)]
   public function fileUrlAlter(string &$uri): void {
+    if (!$uri) {
+      return;
+    }
     $uri = $this->proxyManager->processPath($uri);
   }
 
