@@ -24,7 +24,7 @@ class FileHooks {
   /**
    * Implements hook_file_url_alter().
    *
-   * Runs first, before any other alter hooks, more specifically before
+   * This should be run before any other alter hooks, more specifically before
    * 'crop_file_url_alter()' which seems to convert certain responsive image
    * styles to an external URL that will break our implementation.
    *
