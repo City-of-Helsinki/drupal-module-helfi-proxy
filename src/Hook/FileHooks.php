@@ -28,7 +28,7 @@ class FileHooks {
    * 'crop_file_url_alter()' which seems to convert certain responsive image
    * styles to an external URL that will break our implementation.
    *
-   * @see UHF-7946.
+   * @see #UHF-7946
    */
   #[Hook('file_url_alter', order: Order::First)]
   public function fileUrlAlter(&$uri): void {
