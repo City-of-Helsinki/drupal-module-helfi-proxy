@@ -31,7 +31,7 @@ class FileHooks {
    * @see #UHF-7946
    */
   #[Hook('file_url_alter', order: Order::First)]
-  public function fileUrlAlter(&$uri): void {
+  public function fileUrlAlter(string &$uri): void {
     $uri = $this->proxyManager->processPath($uri);
   }
 
