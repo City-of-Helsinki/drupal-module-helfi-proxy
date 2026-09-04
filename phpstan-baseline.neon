@@ -1,26 +1,8 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Function helfi_proxy_file_url_alter\(\) has parameter \$uri with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: helfi_proxy.module
-
-		-
 			message: '#^Function helfi_proxy_js_settings_alter\(\) has parameter \$settings with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: helfi_proxy.module
-
-		-
-			message: '#^Function helfi_proxy_module_implements_alter\(\) has parameter \$hook with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: helfi_proxy.module
-
-		-
-			message: '#^Function helfi_proxy_module_implements_alter\(\) has parameter \$implementations with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: helfi_proxy.module
 
