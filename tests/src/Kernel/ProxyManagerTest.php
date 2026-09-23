@@ -7,12 +7,14 @@ namespace Drupal\Tests\helfi_proxy\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ProxyManager;
 use Drupal\helfi_proxy\ProxyManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Proxy manager.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class ProxyManagerTest extends KernelTestBase {
 
   /**
