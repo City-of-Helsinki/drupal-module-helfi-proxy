@@ -8,12 +8,14 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use Drupal\helfi_proxy\Controller\FrontController;
 use Drupal\helfi_proxy\ProxyManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Front controller.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class FrontControllerTest extends KernelTestBase {
 
   use ApiTestTrait;

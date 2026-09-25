@@ -38,7 +38,7 @@ final class ActiveSitePrefix implements RefinableCacheableDependencyInterface {
    * @return array{}|array{string, string}
    *   The prefixes.
    */
-  public function getPrefixes(): ?array {
+  public function getPrefixes(): array {
     $config = ($this->configFactoryClosure)()->get('helfi_proxy.settings');
     $this->addCacheableDependency($config);
 

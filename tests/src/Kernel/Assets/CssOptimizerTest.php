@@ -6,12 +6,14 @@ namespace Drupal\Tests\helfi_proxy\Kernel\Assets;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Css optimizer rewrites paths accordingly.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class CssOptimizerTest extends KernelTestBase {
 
   use ApiTestTrait;

@@ -9,13 +9,15 @@ use Drupal\helfi_proxy\SessionConfiguration;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 use Drupal\helfi_proxy\ProxyTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Tests session configuration.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class SessionConfigurationTest extends KernelTestBase {
 
   use ProxyTrait;

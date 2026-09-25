@@ -7,12 +7,14 @@ namespace Drupal\Tests\helfi_proxy\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\LanguageManagerTrait;
 use Drupal\remote_entity_test\Entity\RemoteEntityTest;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Active site prefix service.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class SitePrefixPathProcessorTest extends KernelTestBase {
 
   use LanguageManagerTrait;

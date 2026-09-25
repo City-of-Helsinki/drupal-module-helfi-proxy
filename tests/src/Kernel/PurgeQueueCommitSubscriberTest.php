@@ -8,12 +8,14 @@ use Drupal\helfi_proxy\EventSubscriber\PurgeQueueCommitSubscriber;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\purge\Plugin\Purge\Queue\TxBuffer;
 use Drupal\Tests\purge\Traits\TestTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests purge queue commit event subscriber.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class PurgeQueueCommitSubscriberTest extends KernelTestBase {
   use TestTrait;
 
@@ -61,7 +63,6 @@ class PurgeQueueCommitSubscriberTest extends KernelTestBase {
 
     $reflection = new \ReflectionClass($queuer);
     $property = $reflection->getProperty('buffer');
-    $property->setAccessible(TRUE);
     $buffer = $property->getValue($queuer);
 
     $sut = new PurgeQueueCommitSubscriber($queuer);

@@ -6,12 +6,14 @@ namespace Drupal\Tests\helfi_proxy\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\helfi_proxy\Cache\Context\SitePrefixCacheContext;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Site prefix cache context.
- *
- * @group helfi_proxy
  */
+#[RunTestsInSeparateProcesses]
+#[Group('helfi_proxy')]
 class SitePrefixCacheContextTest extends KernelTestBase {
 
   /**
