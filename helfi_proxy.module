@@ -7,6 +7,7 @@
 
 use Drupal\Core\Asset\AttachedAssetsInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\helfi_api_base\Environment\EnvironmentResolverException;
 use Drupal\helfi_proxy\ProxyManagerInterface;
 
 /**
@@ -82,7 +83,7 @@ function helfi_proxy_simple_sitemap_links_alter(array &$links, $sitemap_variant)
     /** @var \Drupal\helfi_api_base\Environment\Environment $environment */
     $environment = \Drupal::service('helfi_api_base.environment_resolver')->getActiveEnvironment();
   }
-  catch (\InvalidArgumentException) {
+  catch (EnvironmentResolverException) {
     return;
   }
 
