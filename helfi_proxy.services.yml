@@ -39,4 +39,5 @@ services:
 
   Drupal\helfi_proxy\EventSubscriber\RobotsResponseSubscriber: ~
   Drupal\helfi_proxy\EventSubscriber\CorsResponseSubscriber: ~
+  Drupal\helfi_proxy\EventSubscriber\AssetRedirectResponseSubscriber: ~
   Drupal\helfi_proxy\EventSubscriber\PurgeQueueCommitSubscriber: ~
