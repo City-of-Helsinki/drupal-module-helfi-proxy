@@ -26,36 +26,50 @@ final class CorsResponseSubscriber implements EventSubscriberInterface {
   }
 
   /**
+   * Checks whether the given origin is allowed.
+   *
+   * @param string $origin
+   *   The origin.
+   *
+   * @return bool
+   *   TRUE if the origin is allowed.
+   */
+  private function isValidOrigin(string $origin) : bool {
+    $host = parse_url($origin, PHP_URL_HOST);
+
+    if (!is_string($host)) {
+      return FALSE;
+    }
+    $host = strtolower($host);
+
+    foreach ($this->validOriginDomains as $domain) {
+      // Allow subdomains as well.
+      if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * Adds cors headers to a response.
    *
    * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   The event to respond to.
    */
   public function onResponse(ResponseEvent $event) : void {
-    $requestDomain = $event->getRequest()->headers->get('Origin');
+    $response = $event->getResponse();
+    // The response depends on the Origin header, so make sure reverse proxies
+    // don't serve a response generated for one origin to another.
+    $response->setVary('Origin', FALSE);
 
-    if (!$requestDomain) {
-      return;
-    }
-    $validHost = FALSE;
+    $origin = $event->getRequest()->headers->get('Origin');
 
-    foreach ($this->validOriginDomains as $domain) {
-      if ($requestDomain === $domain) {
-        $validHost = TRUE;
-      }
-
-      // Allow subdomains as well.
-      if (str_ends_with($requestDomain, '.' . $domain)) {
-        $validHost = TRUE;
-      }
-    }
-    if (!$validHost) {
+    if (!$origin || !$this->isValidOrigin($origin)) {
       return;
     }
 
-    $event->getResponse()->headers->add([
-      'Access-Control-Allow-Origin' => $requestDomain,
-    ]);
+    $response->headers->set('Access-Control-Allow-Origin', $origin);
   }
 
   /**
