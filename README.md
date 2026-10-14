@@ -49,7 +49,7 @@ This ensures that all local assets are served directly from the asset path. For 
 
 Your project's web server must be able to serve files from that path. If you are using the default Docker images from [City-of-Helsinki/drupal-docker-images](https://github.com/City-of-Helsinki/drupal-docker-images) then you don't have to worry about this. Otherwise, add:
 ```
-location ~ ^/(?:.*)-assets/(.*)$ {
+location ~ ^/[^/]+-assets/((?:core|modules|sites|themes)/.*)$ {
   proxy_redirect off;
   proxy_set_header Host $host;
   proxy_set_header X-Forwarded-Proto https;

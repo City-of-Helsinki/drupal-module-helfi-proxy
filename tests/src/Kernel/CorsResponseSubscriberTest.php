@@ -34,15 +34,21 @@ class CorsResponseSubscriberTest extends KernelTestBase {
    * Make sure cors headers are set properly.
    */
   #[DataProvider(methodName: 'corsTestData')]
-  public function testCors(mixed $domain, bool $expected) : void {
+  public function testCors(?string $origin, bool $expected) : void {
     $request = Request::create('/', server: [
       'HTTP_HOST' => 'localhost:8888',
     ]);
-    $request->headers->set('Origin', $domain);
+    $request->headers->set('Origin', $origin);
     $http_kernel = $this->container->get('http_kernel');
     /** @var \Symfony\Component\HttpFoundation\Response $response */
     $response = $http_kernel->handle($request);
     $this->assertEquals($expected, $response->headers->has('Access-Control-Allow-Origin'));
+
+    if ($expected) {
+      $this->assertEquals($origin, $response->headers->get('Access-Control-Allow-Origin'));
+    }
+    // Responses must vary by origin, even when the origin is not allowed.
+    $this->assertContains('Origin', $response->getVary());
   }
 
   /**
@@ -53,11 +59,19 @@ class CorsResponseSubscriberTest extends KernelTestBase {
    */
   public static function corsTestData() : array {
     return [
-      ['www.hel.fi', TRUE],
-      ['hel.fi', TRUE],
-      ['docker.so', TRUE],
-      ['helfi-kymp.docker.so', TRUE],
-      ['testdocker.so', FALSE],
+      ['https://www.hel.fi', TRUE],
+      ['https://hel.fi', TRUE],
+      ['https://WWW.HEL.FI', TRUE],
+      ['https://www.hel.fi:443', TRUE],
+      ['http://www.hel.fi', TRUE],
+      ['https://www.test.hel.ninja', TRUE],
+      ['https://docker.so', TRUE],
+      ['https://helfi-kymp.docker.so', TRUE],
+      ['https://testdocker.so', FALSE],
+      ['https://evilhel.fi', FALSE],
+      ['https://www.hel.fi.example.com', FALSE],
+      ['www.hel.fi', FALSE],
+      ['null', FALSE],
       [NULL, FALSE],
     ];
   }
