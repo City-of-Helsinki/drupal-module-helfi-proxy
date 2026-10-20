@@ -92,7 +92,7 @@ robots_paths:
 
 ### Varnish support
 
-Enable required modules: `drush en varnish_purger varnish_purge_tags purge_drush purge_processor_cron purge_queuer_coretags purge_tokens`.
+Enable required modules: `drush en varnish_purger varnish_purge_tags purge_drush purge_queuer_coretags purge_tokens`.
 
 Copy configuration from `helfi_proxy/config/optional` to your `conf/cmi` folder if you enabled this module before Varnish/Purge modules.
 
@@ -136,6 +136,32 @@ if ($varnish_purge_key = getenv('VARNISH_PURGE_KEY')) {
     'value' => $varnish_purge_key,
   ];
 }
+```
+
+Run this script to process purge queue (e.g. in a `CronJob`):
+
+```sh
+#!/bin/bash
+
+function has_items {
+  NUM_ITEMS=$(drush p:queue-stats --format=json | jq .number_of_items)
+
+  if [ "$NUM_ITEMS" -gt "0" ]; then
+    return 0
+  fi
+  return 1
+}
+
+if has_items; then
+  RESULT=$(drush p:queue-work --no-interaction --finish --format=json | jq --arg DATE "$(date +'%Y-%m-%dT%H:%M:%S%:z')" -c '.[] |= . + {"date" : $DATE}')
+  # RESULT is an array of json objects. Process each result and
+  # only output the failed items.
+  echo $RESULT | jq -c '.[]' | while read LINE; do
+    if [ $(echo "$LINE" | jq .failed) -gt "0" ]; then
+      echo $LINE
+    fi
+  done
+fi
 ```
 
 ## Testing reverse proxy on local

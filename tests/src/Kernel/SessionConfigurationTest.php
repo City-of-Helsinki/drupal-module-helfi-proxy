@@ -44,7 +44,6 @@ class SessionConfigurationTest extends KernelTestBase {
     'path_alias',
     'purge',
     'purge_tokens',
-    'purge_processor_cron',
     'purge_queuer_coretags',
     'purge_drush',
   ];

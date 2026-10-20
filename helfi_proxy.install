@@ -72,3 +72,22 @@ function helfi_proxy_update_9003() : void {
     ->clear('robots_header_enabled')
     ->save();
 }
+
+/**
+ * Uninstall 'purge_processor_cron' module.
+ *
+ * The purge queue is processed by the purge-queue.sh cron script.
+ */
+function helfi_proxy_update_9004() : void {
+  $plugins = \Drupal::configFactory()->getEditable('purge.plugins');
+
+  if ($processors = $plugins->get('processors')) {
+    $processors = array_filter($processors, fn (array $item) => $item['plugin_id'] !== 'cron');
+    $plugins->set('processors', array_values($processors))
+      ->save();
+  }
+
+  if (\Drupal::moduleHandler()->moduleExists('purge_processor_cron')) {
+    \Drupal::service('module_installer')->uninstall(['purge_processor_cron']);
+  }
+}
